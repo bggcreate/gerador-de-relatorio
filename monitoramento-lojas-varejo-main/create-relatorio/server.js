@@ -1,5 +1,5 @@
 // =================================================================
-// DEPENDÊNCIAS E CONFIGURAÇÕES INICIAIS
+// CONFIGURAÇÕES INICIAIS
 // =================================================================
 require('dotenv').config(); // Carrega as variáveis do arquivo .env
 const express = require('express');
@@ -95,9 +95,9 @@ app.get('/content/:page', requirePageLogin, (req, res) => {
 });
 
 
-// --- ROTAS DE API ---
+// --- ROTAS DE API --- :D
 
-// API DE PROCESSAMENTO DE PDF
+// API DE PROCESSAMENTO DE PDF - MUITA DOR DE CABEÇA ISSO SLC
 app.post('/api/process-pdf', requirePageLogin, upload.single('pdfFile'), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: "Nenhum arquivo PDF enviado." });
     try {
@@ -147,7 +147,7 @@ app.post('/api/process-pdf', requirePageLogin, upload.single('pdfFile'), async (
 });
 
 
-// APIs DE SESSÃO E USUÁRIOS
+// APIs DE SESSÃO E USUÁRIOS - CADASTRO 
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     try {

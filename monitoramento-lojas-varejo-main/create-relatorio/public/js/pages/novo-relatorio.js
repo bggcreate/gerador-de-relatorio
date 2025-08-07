@@ -308,7 +308,7 @@ export function initNovoRelatorioPage() {
         salvarRascunho();
     });
 
-    // ADICIONADO: Event listeners para os novos campos de pagamento
+    // Event listeners para os novos campos de pagamento
     vendasCartaoInput.addEventListener('input', calcularTotalVendasPagamento);
     vendasPixInput.addEventListener('input', calcularTotalVendasPagamento);
     vendasDinheiroInput.addEventListener('input', calcularTotalVendasPagamento);

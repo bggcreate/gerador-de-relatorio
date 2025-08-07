@@ -165,7 +165,7 @@ export function initConsultaPage() {
 
     formFiltros.addEventListener('submit', (e) => { e.preventDefault(); carregarRelatorios(true); }, { signal: eventController.signal });
     
-    // ADICIONADO: Resetar o filtro de ordem ao limpar
+    // Resetar o filtro de ordem ao limpar
     btnLimpar.addEventListener('click', () => { 
         formFiltros.reset(); 
         filtroOrdem.value = 'desc'; // Garante que o padrão seja selecionado

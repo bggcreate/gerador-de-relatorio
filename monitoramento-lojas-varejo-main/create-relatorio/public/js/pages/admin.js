@@ -1,6 +1,6 @@
 import { showToast } from '../utils.js';
 
-// --- Variáveis de Estado Globais no Módulo ---
+// --- Variáveis de Estado Globais  ---
 let dashboardLineChart = null;
 let lastRankingData = [];
 
