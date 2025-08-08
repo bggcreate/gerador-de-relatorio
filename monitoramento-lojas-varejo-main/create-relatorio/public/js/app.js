@@ -41,7 +41,6 @@ async function loadPage(path) {
         
         const initFunc = pageInitializers[activePage];
         if (typeof initFunc === 'function') {
-            // Adia a execução da função para garantir que o DOM esteja pronto.
             setTimeout(() => {
                 try {
                     initFunc(currentUser);
@@ -105,10 +104,41 @@ async function setupSessionAndUI() {
 async function main() {
     await setupSessionAndUI();
 
+    // --- INÍCIO: LÓGICA DE RESPONSIVIDADE DA SIDEBAR ---
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggle = document.querySelector('#sidebar-toggle');
+
+    if (sidebarToggle && sidebar) {
+        // Abre/Fecha a sidebar ao clicar no botão de menu (hambúrguer)
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Impede que o clique se propague para outros elementos
+            sidebar.classList.toggle('is-open');
+        });
+    }
+
+    // Fecha a sidebar se o usuário clicar fora dela (apenas em modo mobile)
+    document.addEventListener('click', (event) => {
+        // Verifica se a sidebar está aberta e se o botão de toggle está visível (indicando tela pequena)
+        if (sidebar && sidebar.classList.contains('is-open') && getComputedStyle(sidebarToggle).display !== 'none') {
+            // Verifica se o clique não foi na própria sidebar nem no botão que a abre
+            if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+                sidebar.classList.remove('is-open');
+            }
+        }
+    });
+    // --- FIM: LÓGICA DE RESPONSIVIDADE DA SIDEBAR ---
+
+
     document.body.addEventListener('click', e => {
         const navLink = e.target.closest('a.nav-link');
         if (navLink && navLink.closest('.sidebar-nav')) {
             e.preventDefault();
+
+            // Adicionado: Fecha a sidebar após clicar em um item de menu no modo mobile
+            if (sidebar.classList.contains('is-open')) {
+                sidebar.classList.remove('is-open');
+            }
+
             navigateTo(navLink.getAttribute('href'));
         }
     });

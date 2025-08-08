@@ -324,16 +324,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     height: 100%;
 }
 
-/* MODIFICAÇÃO AQUI */
 .vendedor-list-container {
-    /* Define uma altura máxima. Após ~5-6 vendedores, o scroll aparecerá. */
     max-height: 220px; 
-    overflow-y: auto; /* Mostra o scroll vertical apenas quando necessário. */
+    overflow-y: auto;
     padding: 0.5rem;
-    margin: -0.5rem; /* Compensa o padding para alinhar com as bordas do card-body. */
+    margin: -0.5rem;
 }
 
-/* Estilização da barra de rolagem discreta */
 .vendedor-list-container::-webkit-scrollbar {
     width: 8px;
 }
@@ -358,5 +355,184 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .text-danger {
-    color: #f87171 !important; /* Um vermelho claro para boa legibilidade */
+    color: #f87171 !important;
+}
+
+/* ============================================================
+   RESPONSIVIDADE (Telas menores, como tablets e celulares)
+============================================================ */
+
+/* Estilos para telas com 992px de largura ou menos (tablets e celulares) */
+@media (max-width: 992px) {
+    /* Esconde a sidebar para fora da tela */
+    aside.sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        z-index: 2000; /* Garante que a sidebar fique sobre o conteúdo */
+    }
+
+    /* Classe para exibir a sidebar quando o botão for clicado */
+    aside.sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    /* Faz o conteúdo principal ocupar toda a tela */
+    main.main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 1.5rem; /* Reduz o padding em telas menores */
+    }
+    
+    /* Faz com que os botões de filtro na consulta quebrem a linha */
+    #form-filtros-consulta {
+        flex-wrap: wrap; /* Permite que os itens quebrem para a próxima linha */
+        justify-content: flex-start;
+        width: 100%;
+        margin-top: 1rem; /* Adiciona espaço quando os filtros quebram a linha */
+    }
+    
+    .card-header.d-flex {
+        flex-wrap: wrap; /* Garante que o cabeçalho do card possa quebrar a linha */
+    }
+    
+    /* Empilha os botões de Salvar e Limpar no formulário */
+    #form-novo-relatorio .d-flex.gap-3 {
+       flex-direction: column;
+    }
+
+    .btn {
+        width: 100%; /* Faz os botões ocuparem a largura total quando empilhados */
+    }
+
+    /* Ajusta o contêiner do botão de PDF e os botões de Salvar */
+    .d-flex.justify-content-between.align-items-center,
+    .d-flex.gap-3.mt-4 {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+}
+
+
+/* Estilos para telas com 768px ou menos (celulares) */
+@media (max-width: 768px) {
+    /* Garante que todas as colunas do grid fiquem empilhadas (uma em cima da outra) */
+    .row > [class*="col-"] {
+        width: 100%;
+        margin-bottom: 1rem; /* Adiciona um espaço vertical entre as colunas */
+    }
+    
+    .row > [class*="col-"]:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Ajusta o rodapé do modal para empilhar os botões */
+    .modal-footer.justify-content-between {
+        flex-direction: column-reverse;
+        gap: 0.75rem;
+    }
+
+    .modal-footer.justify-content-between > div {
+        display: flex;
+        gap: 0.5rem;
+        width: 100%;
+    }
+    .modal-footer.justify-content-between > div > .btn {
+        flex-grow: 1;
+    }
+}/* ============================================================
+   RESPONSIVIDADE (NOVA VERSÃO - MAIS COMPACTA)
+============================================================ */
+
+/* === Telas de Tablet (e abaixo) - max-width: 992px === */
+@media (max-width: 992px) {
+    /* Esconde a sidebar para fora da tela, preparando para o modo "gaveta" */
+    aside.sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        z-index: 2000; /* Garante que a sidebar fique sobre todo o conteúdo */
+    }
+
+    /* Classe ".is-open" para exibir a sidebar quando o botão for clicado */
+    aside.sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    /* Faz o conteúdo principal ocupar toda a largura da tela */
+    main.main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    /* Permite que os filtros de consulta quebrem a linha de forma organizada */
+    #form-filtros-consulta {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        width: 100%;
+        margin-top: 1rem; /* Espaço quando quebra a linha abaixo do título */
+    }
+    
+    .card-header.d-flex {
+        flex-wrap: wrap; /* Garante que o cabeçalho do card possa quebrar a linha */
+    }
+}
+
+
+/* === Telas de Celular - max-width: 768px === */
+@media (max-width: 768px) {
+    /* Diminui o espaçamento geral para maximizar a área de conteúdo */
+    main.main-content {
+        padding: 1rem;
+    }
+
+    /* Ajusta os títulos para economizar espaço vertical */
+    h4.mb-3, .card-header h5 {
+        font-size: 1.1rem; /* Reduz o tamanho da fonte dos títulos */
+    }
+
+    /* Organiza o cabeçalho principal do formulário (Título + Botão PDF) */
+    .d-flex.justify-content-between.align-items-center {
+        flex-direction: column;
+        align-items: flex-start !important; /* Alinha tudo à esquerda */
+        gap: 1rem;
+    }
+    
+    /* Mantém 2 colunas em campos de input simples para compactar o formulário.
+       Isso funciona para "Clientes Monit." vs "Vendas Monit.", por exemplo. */
+    .row .col-6 {
+       flex: 0 0 50%;
+       max-width: 50%;
+    }
+
+    /* Empilha os botões principais de Ação no final do formulário */
+    .d-flex.gap-3.mt-4 {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    /* Faz com que APENAS os botões principais de ação ocupem 100% da largura */
+    .d-flex.gap-3.mt-4 .btn {
+        width: 100%;
+    }
+
+    /* Ajusta o rodapé do modal para empilhar os botões de forma limpa */
+    .modal-footer.justify-content-between {
+        flex-direction: column-reverse; /* Coloca o botão de cancelar acima */
+        gap: 0.75rem;
+    }
+
+    .modal-footer.justify-content-between > div {
+        display: flex;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    /* Faz os botões no rodapé do modal ocuparem o espaço igualmente */
+    .modal-footer.justify-content-between > div > .btn {
+        flex-grow: 1;
+    }
+
+    /* Garante que o container da tabela seja rolável horizontalmente */
+    .table-responsive {
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-small);
+    }
 }
