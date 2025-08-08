@@ -1,4 +1,4 @@
-import { showToast } from '../utils.js';
+import { showToast } from '../app.js';
 
 export function initNovoRelatorioPage() {
     const form = document.getElementById('form-novo-relatorio');
@@ -26,7 +26,6 @@ export function initNovoRelatorioPage() {
     const monitoramentoDonutCanvas = document.getElementById('monitoramento-donut-chart');
     const lojaDonutCanvas = document.getElementById('loja-donut-chart');
     
-    // ADICIONADO: Selecionar os novos inputs de pagamento
     const vendasCartaoInput = document.getElementById('vendas_cartao_input');
     const vendasPixInput = document.getElementById('vendas_pix_input');
     const vendasDinheiroInput = document.getElementById('vendas_dinheiro_input');
@@ -72,7 +71,7 @@ export function initNovoRelatorioPage() {
         updateVendedoresPlaceholder();
         handleSelecaoDeLoja();
         calcularEAtualizarGraficos();
-        calcularTotalVendasPagamento(); // Adicionado para atualizar o total ao carregar rascunho
+        calcularTotalVendasPagamento();
         showToast("Rascunho Carregado", "Seu relatório não salvo foi restaurado.", "info");
     }
 
@@ -87,7 +86,7 @@ export function initNovoRelatorioPage() {
         updateVendedoresPlaceholder();
         handleSelecaoDeLoja();
         calcularEAtualizarGraficos();
-        calcularTotalVendasPagamento(); // Adicionado para resetar o total ao limpar
+        calcularTotalVendasPagamento();
         showToast("Formulário Limpo", "Todos os campos foram resetados.", "success");
     }
 
@@ -115,7 +114,6 @@ export function initNovoRelatorioPage() {
         chartInstance.update();
     }
     
-    // ADICIONADO: Nova função para somar os totais de pagamento
     function calcularTotalVendasPagamento() {
         const cartao = Number(vendasCartaoInput.value) || 0;
         const pix = Number(vendasPixInput.value) || 0;
@@ -191,11 +189,21 @@ export function initNovoRelatorioPage() {
                 resultadosPdfContainer.style.display = 'block';
             }
             
-            const vendedores = JSON.parse(relatorio.vendedores||'[]');
-            for (const key in relatorio) { 
-                const input = form.querySelector(`[name="${key}"]`); 
-                if (input) input.value = relatorio[key]; 
+            for (const key in relatorio) {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    if (input.type === 'date' && relatorio[key]) {
+                        const d = new Date(relatorio[key]);
+                        const correctedDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+                        input.value = correctedDate.toISOString().split('T')[0];
+                    } else {
+                        input.value = relatorio[key];
+                    }
+                }
             }
+            
+            const vendedores = relatorio.vendedores || [];
+            
             containerVendedores.innerHTML = '';
             vendedores.forEach(vend => adicionarVendedor(vend));
             
@@ -203,8 +211,11 @@ export function initNovoRelatorioPage() {
             handleSelecaoDeLoja();
             btnSalvarTudo.textContent = 'SALVAR ALTERAÇÕES';
             calcularEAtualizarGraficos();
-            calcularTotalVendasPagamento(); // Adicionado para calcular o total ao carregar para edição
-        } catch(e) { showToast("Erro", "Não foi possível carregar os dados para edição.", "danger"); }
+            calcularTotalVendasPagamento();
+        } catch(e) {
+            showToast("Erro", "Não foi possível carregar os dados para edição.", "danger");
+            console.error("Erro ao carregar para edição:", e);
+        }
     }
     
     async function handleSalvarTudo() {
@@ -239,7 +250,7 @@ export function initNovoRelatorioPage() {
             showToast('Falha ao Salvar', e.message, 'danger');
         } finally {
             btnSalvarTudo.disabled = false;
-            btnSalvarTudo.textContent = reportId ? 'SALVAR ALTERAÇÕES' : 'SALVAR RELATÓRIO COMPLETO';
+            btnSalvarTudo.textContent = reportId ? 'SALVAR ALTERAÇÕES' : 'SALVAR RELATÓRIO';
         }
     }
     
@@ -261,7 +272,6 @@ export function initNovoRelatorioPage() {
             
             const { data: extractedData } = result;
             
-            // PREENCHIMENTO EXPLÍCITO CORRIGIDO
             if (extractedData.total_vendas_dinheiro) totalVendasDinheiroInput.value = extractedData.total_vendas_dinheiro;
             if (extractedData.ticket_medio) ticketMedioInput.value = extractedData.ticket_medio;
             if (extractedData.pa) paInput.value = extractedData.pa;
@@ -274,14 +284,9 @@ export function initNovoRelatorioPage() {
                     showToast("Atenção", `A loja "${extractedData.loja}" do PDF não foi encontrada no sistema.`, "danger");
                 }
             }
-            containerVendedores.innerHTML = '';
-            if (extractedData.vendedores && extractedData.vendedores.length > 0) {
-                extractedData.vendedores.forEach(vendedor => adicionarVendedor(vendedor));
-            }
             
             if(resultadosPdfContainer) resultadosPdfContainer.style.display = 'block';
             
-            // ATUALIZAÇÃO DA UI
             updateVendedoresPlaceholder();
             handleSelecaoDeLoja();
             calcularEAtualizarGraficos();
@@ -292,7 +297,7 @@ export function initNovoRelatorioPage() {
             showToast("Erro na Importação", error.message, "danger");
         } finally {
             btnImportarPdf.disabled = false;
-            btnImportarPdf.innerHTML = '<i class="bi bi-file-earmark-arrow-up-fill me-2"></i>Importar de PDF';
+            btnImportarPdf.innerHTML = '<i class="bi bi-file-earmark-arrow-up-fill me-2"></i>PDF';
             pdfFileInput.value = '';
         }
     });
@@ -308,7 +313,6 @@ export function initNovoRelatorioPage() {
         salvarRascunho();
     });
 
-    // Event listeners para os novos campos de pagamento
     vendasCartaoInput.addEventListener('input', calcularTotalVendasPagamento);
     vendasPixInput.addEventListener('input', calcularTotalVendasPagamento);
     vendasDinheiroInput.addEventListener('input', calcularTotalVendasPagamento);
@@ -326,9 +330,13 @@ export function initNovoRelatorioPage() {
     lojaDonutChart = renderDonutChart(lojaDonutCanvas, 0, getCssVar('--color-success'));
 
     if (reportId) {
-        document.querySelector('h4.mb-0').textContent = 'Editar Relatório Existente';
+        document.querySelector('h4.mb-0').textContent = 'Editar Relatório';
         carregarDadosParaEdicao();
     } else {
+        const hoje = new Date();
+        const offset = hoje.getTimezoneOffset();
+        dataInput.value = new Date(hoje.getTime() - (offset * 60 * 1000)).toISOString().split('T')[0];
+        
         carregarLojas();
         updateVendedoresPlaceholder();
         carregarRascunho();
