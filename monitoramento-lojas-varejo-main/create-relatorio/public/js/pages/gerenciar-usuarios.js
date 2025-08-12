@@ -6,7 +6,7 @@ export function initGerenciarUsuariosPage(currentUser) {
     initBackup();
 }
 
-// --- LÓGICA DE GERENCIAMENTO DE USUÁRIOS ---
+// --- LÓGICA DE GERENCIAMENTO DE USUÁRIOS (Sem alterações) ---
 function initUsuarios(currentUser) {
     const tableBody = document.getElementById('tabela-usuarios-corpo');
     const btnAdicionar = document.getElementById('btn-adicionar-usuario');
@@ -116,7 +116,7 @@ function initBackup() {
     const btnRestaurarBackup = document.getElementById('btn-restaurar-backup');
     const backupFileInput = document.getElementById('backup-file-input');
 
-    // Carrega o tamanho do DB ao entrar na aba //// DESATIVADO PORQ VAMOS USAR DB EXTERNO
+    // Carrega o tamanho do DB ao entrar na aba
     async function carregarInfoBackup() {
         try {
             const response = await fetch('/api/backup/info');

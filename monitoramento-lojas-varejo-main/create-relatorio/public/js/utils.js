@@ -2,7 +2,7 @@
  * Exibe uma notificação toast no canto da tela.
  * @param {string} title Título do toast.
  * @param {string} message Mensagem do corpo do toast.
- * @param {'success'|'danger'|'info'} type O tipo de notificação .
+ * @param {'success'|'danger'|'info'} type O tipo de notificação (muda a cor).
  */
 export function showToast(title, message, type = 'success') {
     const toastEl = document.getElementById('notificationToast');

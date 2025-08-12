@@ -1,51 +1,56 @@
 <div class="container-fluid" style="max-width: 1400px;">
-    <!-- CARD DE FILTROS-->
+    <!-- CARD DE FILTROS (LAYOUT COMPACTO E CORRIGIDO) -->
     <div class="card mb-4">
         <div class="card-body">
             <form id="form-filtros-dashboard">
+                <!-- A classe 'align-items-end' garante o alinhamento vertical perfeito na base -->
                 <div class="row gx-3 gy-3 align-items-end">
-                    <!-- Coluna 1: Loja e Período Rápido -->
-                    <div class="col-xl-5 col-lg-12">
-                        <div class="row">
-                            <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
-                                <label for="filtro-loja-dashboard" class="form-label">Loja</label>
-                                <select id="filtro-loja-dashboard" class="form-select">
-                                    <option value="todas" selected>Todas as Lojas</option>
-                                </select>
-                            </div>
-                            <div class="col-lg-6 col-md-12">
-                                <label class="form-label">Período Rápido</label>
-                                <div class="btn-group w-100" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="hoje">Hoje</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="7d">7 dias</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="mes-atual">Este Mês</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-period="mes-passado">Mês Passado</button>
-                                </div>
-                            </div>
+
+                    <!-- Coluna 1: Loja -->
+                    <div class="col-12 col-md-6 col-lg-2">
+                        <label for="filtro-loja-dashboard" class="form-label">Loja</label>
+                        <!-- MUDANÇA: Adicionada classe 'form-select-sm' -->
+                        <select id="filtro-loja-dashboard" class="form-select form-select-sm">
+                            <option value="todas" selected>Todas as Lojas</option>
+                        </select>
+                    </div>
+
+                    <!-- Coluna 2: Período Rápido -->
+                    <div class="col-12 col-lg-4">
+                        <label class="form-label">Período Rápido</label>
+                        <div class="btn-group w-100" role="group">
+                             <!-- MUDANÇA: Adicionada classe 'btn-sm' -->
+                            <button type="button" class="btn btn-sm" data-period="hoje">Hoje</button>
+                            <button type="button" class="btn btn-sm" data-period="7d">7 dias</button>
+                            <button type="button" class="btn btn-sm" data-period="mes-atual">Este Mês</button>
+                            <button type="button" class="btn btn-sm" data-period="mes-passado">Mês Passado</button>
                         </div>
                     </div>
 
-                    <!-- Coluna 2: Datas  -->
-                    <div class="col-xl-3 col-lg-6">
-                        <label class="form-label">Período Manual</label>
+                    <!-- Coluna 3: Período Manual -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label for="filtro-data-inicio-dashboard" class="form-label">Período Manual</label>
                         <div class="d-flex gap-2">
-                            <input type="date" class="form-control" id="filtro-data-inicio-dashboard" title="Data de Início">
-                            <input type="date" class="form-control" id="filtro-data-fim-dashboard" title="Data Final">
+                            <!-- MUDANÇA: Adicionada classe 'form-control-sm' -->
+                            <input type="date" class="form-control form-control-sm" id="filtro-data-inicio-dashboard" title="Data de Início">
+                            <input type="date" class="form-control form-control-sm" id="filtro-data-fim-dashboard" title="Data Final">
                         </div>
                     </div>
 
-                    <!-- Coluna 3: Comparação -->
-                    <div class="col-xl-2 col-lg-6">
+                    <!-- Coluna 4: Comparação -->
+                    <div class="col-12 col-md-6 col-lg-2">
                          <label for="comparison-type-select" class="form-label">Comparar com...</label>
-                         <select id="comparison-type-select" class="form-select">
+                         <!-- MUDANÇA: Adicionada classe 'form-select-sm' -->
+                         <select id="comparison-type-select" class="form-select form-select-sm">
                             <option value="periodo-anterior" selected>Período Anterior</option>
                             <option value="ano-anterior">Ano Anterior</option>
                          </select>
                     </div>
 
-                    <!-- Coluna 4: Botão Analisar -->
-                    <div class="col-xl-2 col-lg-12">
-                        <button type="submit" class="btn btn-primary w-100">Analisar</button>
+                    <!-- Coluna 5: Botão Analisar -->
+                    <div class="col-12 col-md-6 col-lg-1">
+                        <!-- MUDANÇA: Adicionada classe 'btn-sm' -->
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Analisar</button>
                     </div>
                 </div>
             </form>
@@ -54,24 +59,25 @@
 
     <h4 class="mb-3">Dashboard Geral</h4>
     
+    <!-- O RESTANTE DO ARQUIVO CONTINUA EXATAMENTE IGUAL -->
     <!-- CARDS DE MÉTRICAS -->
     <div class="row">
-        <div class="col-xl-6 mb-4">
+        <div class="col-12 col-xl-6 mb-4">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-display me-2"></i>Monitoramento</div>
                 <div class="card-body">
                     <div class="row align-items-center text-center">
-                        <div class="col-md-4 border-end">
+                        <div class="col-4 border-end">
                             <h3 class="mb-1" id="geral-clientes">0</h3>
                             <small id="geral-clientes-comp" class="fw-bold d-block"></small>
                             <small class="text-muted">CLIENTES</small>
                         </div>
-                        <div class="col-md-4 border-end">
+                        <div class="col-4 border-end">
                             <h3 class="mb-1" id="geral-vendas">0</h3>
                             <small id="geral-vendas-comp" class="fw-bold d-block"></small>
                             <small class="text-muted">VENDAS</small>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-4">
                             <h2 class="mb-1" id="geral-tx-conversao">0.00%</h2>
                             <small id="geral-tx-conversao-comp" class="fw-bold d-block"></small>
                             <small class="text-muted">TX. CONVERSÃO</small>
@@ -81,22 +87,22 @@
             </div>
         </div>
         
-        <div class="col-xl-6 mb-4">
+        <div class="col-12 col-xl-6 mb-4">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-shop me-2"></i>Loja (Bluve)</div>
                 <div class="card-body">
                     <div class="row align-items-center text-center">
-                        <div class="col-md-4 border-end">
+                        <div class="col-4 border-end">
                             <h3 class="mb-1" id="loja-clientes">0</h3>
                             <small id="loja-clientes-comp" class="fw-bold d-block"></small>
                             <small class="text-muted">CLIENTES</small>
                         </div>
-                        <div class="col-md-4 border-end">
+                        <div class="col-4 border-end">
                             <h3 class="mb-1" id="loja-vendas">0</h3>
                             <small id="loja-vendas-comp" class="fw-bold d-block"></small>
                             <small class="text-muted">VENDAS</small>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-4">
                             <h2 class="mb-1" id="loja-tx-conversao">0.00%</h2>
                             <small id="loja-tx-conversao-comp" class="fw-bold d-block"></small>
                             <small class="text-muted">TX. CONVERSÃO</small>
@@ -107,7 +113,7 @@
         </div>
     </div>
     
-    <!-- (GRÁFICO E RANKING) -->
+    <!-- GRÁFICO E RANKING -->
     <div class="row">
         <div class="col-12">
             <div class="card mb-4">

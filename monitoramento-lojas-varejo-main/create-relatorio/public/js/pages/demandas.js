@@ -5,9 +5,13 @@ export function initDemandasPage() {
     const containerHistorico = document.getElementById('demandas-historico-container');
     const abas = document.querySelectorAll('#demandasTab .nav-link');
     const modalDemandaEl = document.getElementById('modal-add-demanda');
-    const pageContent = document.getElementById('page-content');
+    
+    // ===== A MUDANÇA ESTÁ AQUI =====
+    // Trocamos 'page-content' pelo nosso novo wrapper específico da página.
+    const demandasWrapper = document.getElementById('demandas-page-wrapper');
+    // ===============================
 
-    if (!modalDemandaEl) return;
+    if (!modalDemandaEl || !demandasWrapper) return; // Adicionada verificação para o wrapper
 
     const modalDemanda = new bootstrap.Modal(modalDemandaEl);
     const formDemanda = document.getElementById('form-add-demanda');
@@ -43,9 +47,10 @@ export function initDemandasPage() {
             container.innerHTML = demandas.map(d => {
                 const tagCores = { 'Urgente': 'bg-danger', 'Alta': 'bg-warning text-dark', 'Normal': 'bg-info text-dark', 'Baixa': 'bg-secondary' };
                 let acoesHtml = '';
+                // A lógica para tipo 'concluidas' estava errada, corrigido para 'historico'
                 if (tipo === 'pendentes') {
                     acoesHtml = `<div class="d-flex justify-content-end mt-2"><button class="btn btn-sm btn-success me-2" data-action="concluir" data-id="${d.id}" title="Concluir"><i class="bi bi-check-lg"></i></button><button class="btn btn-sm btn-danger" data-action="excluir" data-id="${d.id}" title="Excluir"><i class="bi bi-trash"></i></button></div>`;
-                } else if (tipo === 'concluidas') {
+                } else if (tipo === 'historico') { // CORREÇÃO LÓGICA
                     acoesHtml = `<div class="d-flex justify-content-end mt-2"><button class="btn btn-sm btn-danger" data-action="excluir" data-id="${d.id}" title="Excluir do Histórico"><i class="bi bi-trash"></i></button></div>`;
                 }
                 const footerHtml = tipo === 'pendentes' ? `Criado por <strong>${d.criado_por_usuario}</strong> em ${new Date(d.criado_em).toLocaleDateString('pt-BR')}` : `Concluído por <strong>${d.concluido_por_usuario || 'N/A'}</strong> em ${new Date(d.concluido_em).toLocaleDateString('pt-BR')}`;
@@ -79,13 +84,17 @@ export function initDemandasPage() {
     abas.forEach(aba => {
         aba.addEventListener('shown.bs.tab', (event) => {
             const targetId = event.target.getAttribute('data-bs-target');
+            // A lógica para carregar o histórico estava errada, corrigido para 'historico'
             if (targetId === '#pendentes') carregarDemandas('pendentes');
-            else if (targetId === '#historico') carregarDemandas('concluidas');
+            else if (targetId === '#historico') carregarDemandas('historico'); // CORREÇÃO LÓGICA
         });
     });
 
-    pageContent.addEventListener('click', async (e) => {
+    // ===== A MUDANÇA ESTÁ AQUI =====
+    // O ouvinte agora está no nosso wrapper, isolado do resto do app.
+    demandasWrapper.addEventListener('click', async (e) => {
         const button = e.target.closest('button[data-action]');
+        // A verificação de containeres ainda é uma boa prática
         if (!button || !button.closest('#demandas-pendentes-container, #demandas-historico-container')) return;
 
         const id = button.dataset.id;
@@ -110,8 +119,9 @@ export function initDemandasPage() {
                 const response = await fetch(`/api/demandas/${id}`, { method: 'DELETE' });
                 if (!response.ok) throw new Error('Falha ao excluir demanda.');
                 showToast('Sucesso', 'Demanda excluída.', 'success');
+                // A lógica para recarregar o histórico estava errada, corrigido.
                 if (isPendente) carregarDemandas('pendentes');
-                else carregarDemandas('concluidas');
+                else carregarDemandas('historico'); // CORREÇÃO LÓGICA
             } catch (e) { showToast('Erro', 'Não foi possível excluir.', 'danger'); }
         }
     });

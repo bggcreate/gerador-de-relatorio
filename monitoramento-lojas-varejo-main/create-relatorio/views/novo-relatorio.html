@@ -1,3 +1,4 @@
+
 <form id="form-novo-relatorio">
     <div class="container-fluid" style="max-width: 1300px;">
         
@@ -53,7 +54,7 @@
                 <div class="card h-100">
                     <div class="card-header"><h5 class="mb-0">Métricas do Dia</h5></div>
                     <div class="card-body">
-                        <!-- Bloco de Monitoramento e Loja-->
+                        <!-- Bloco de Monitoramento e Loja (Entrada Manual) -->
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <h6><i class="bi bi-display me-2"></i>Monitoramento</h6>
@@ -85,32 +86,32 @@
                         
                         <hr>
                         
-                        
+                        <!-- ADICIONADO: Seção de vendas por pagamento -->
                         <div class="mb-4">
                             <h6><i class="bi bi-credit-card me-2"></i>Vendas por Pagamento</h6>
                             <div class="row g-2">
-                                <div class="col-6 col-md-3">
+                                <div class="col-md-3">
                                     <label class="form-label">Cartão</label>
                                     <input type="number" id="vendas_cartao_input" name="vendas_cartao" class="form-control" value="0" min="0">
                                 </div>
-                                <div class="col-6 col-md-3">
+                                <div class="col-md-3">
                                     <label class="form-label">Pix</label>
                                     <input type="number" id="vendas_pix_input" name="vendas_pix" class="form-control" value="0" min="0">
                                 </div>
-                                <div class="col-6 col-md-3">
+                                <div class="col-md-3">
                                     <label class="form-label">Dinheiro</label>
                                     <input type="number" id="vendas_dinheiro_input" name="vendas_dinheiro" class="form-control" value="0" min="0">
                                 </div>
-                                <div class="col-6 col-md-3">
+                                <div class="col-md-3">
                                     <label class="form-label fw-bold">Total</label>
                                     <input type="number" id="vendas_total_pagamento_input" class="form-control fw-bold" value="0" readonly title="Soma automática dos outros campos">
                                 </div>
                             </div>
                         </div>
-                    
+                        <!-- FIM DA SEÇÃO ADICIONADA -->
                     
                         <div id="resultados-pdf-container" style="display: none;">
-                            <h6><i class="bi bi-file-earmark-check-fill me-2"></i>Resultados PDF</h6>
+                            <h6><i class="bi bi-file-earmark-check-fill me-2"></i>Resultados (Importado do PDF)</h6>
                             <div class="row g-3">
                                 <div class="col-12 col-md-4"><label class="form-label">Total Vendas (R$)</label><input type="text" name="total_vendas_dinheiro" class="form-control" value="R$ 0,00" readonly></div>
                                 <div class="col-6 col-md-4"><label class="form-label">Ticket Médio (TM)</label><input type="text" name="ticket_medio" class="form-control" value="R$ 0,00" readonly></div>
@@ -119,7 +120,7 @@
                             <hr>
                         </div>
                     
-                        <h6><i class="bi bi-gear-fill me-2"></i> Outros </h6>
+                        <h6><i class="bi bi-gear-fill me-2"></i>Funções Especiais </h6>
                         <div class="row g-3">
                             <div class="col-6"><label class="form-label">Trocas</label><input type="number" name="quantidade_trocas" class="form-control" value="0" min="0"></div>
                             <div id="container-funcao-especial" class="col-6" style="display: none;">

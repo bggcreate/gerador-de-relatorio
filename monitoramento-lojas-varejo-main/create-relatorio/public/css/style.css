@@ -5,534 +5,186 @@
 ============================================================ */
 :root {
     --sidebar-width: 250px;
-    --main-bg: #111111;
-    --content-bg: #1C1C1C;
+    --main-bg: #1A1A1D;
+    --content-bg: rgba(28, 28, 28, 0.65);
     --hover-bg: #000000;
-    --border-color: #333333;
+    --border-color: #383838;
     --accent-color: #ff7b00;
-    --color-status-ativa: #22c55e;
+    --glow-color: rgba(255, 123, 0, 0.15);
     --color-success: #2ea043;
     --text-light: #ffffff;
     --text-muted: #b0b0b0;
     --text-input-color: #e5e7eb;
     --border-radius-large: 16px;
     --border-radius-small: 8px;
-    --shadow-main: 0px 4px 12px rgba(0, 0, 0, 0.4);
     --transition-speed: 0.2s;
-    --neon-glow-orange: 0 0 12px rgba(255, 123, 0, 0.6);
-    --neon-glow-green: 0 0 12px rgba(46, 160, 67, 0.6);
-    --neon-glow-grey: 0 0 12px rgba(108, 117, 125, 0.4);
 }
 
 /* ============================================================
-   GERAL
+   ESTRUTURA PRINCIPAL E ESTILOS GLOBAIS
 ============================================================ */
-body, body *, .card, .card *, .modal, .modal * {
-    color: var(--text-light) !important;
-}
-
-body {
-    background-color: var(--main-bg) !important;
-    font-family: 'Inter', sans-serif;
-    display: flex;
-}
-
-.page-wrapper {
-    display: flex;
-    width: 100%;
-}
-
-main.main-content {
-    margin-left: var(--sidebar-width);
-    width: calc(100% - var(--sidebar-width));
-    padding: 2.5rem;
-    height: 100vh;
-    overflow-y: auto;
-}
-
-#page-content {
-    max-width: 1400px;
-    margin: 0 auto;
-}
+body { background-color: var(--main-bg) !important; font-family: 'Inter', sans-serif; }
+.main-content { padding: 2.5rem; height: 100vh; overflow-y: auto; }
+#page-content { max-width: 1400px; margin: 0 auto; }
+body, body *, .card, .card *, .modal, .modal * { color: var(--text-light) !important; }
+small { color: var(--text-muted) !important; }
 
 h4.mb-3 {
-    font-weight: 700;
-    padding-bottom: 1rem;
-    margin-bottom: 2rem !important;
-    border-bottom: 1px solid var(--border-color);
+    font-weight: 700; padding-bottom: 1rem; position: relative;
+    border-bottom: 1px solid var(--border-color); margin-bottom: 2.5rem !important;
 }
-
-small {
-    color: var(--text-muted) !important;
+h4.mb-3::after {
+    content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 1px;
+    background-color: transparent; box-shadow: 0 0 15px -2px var(--glow-color);
 }
 
 /* ============================================================
-   SIDEBAR
+   SIDEBAR DESKTOP
 ============================================================ */
-aside.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: var(--sidebar-width);
-    height: 100vh;
-    background-color: var(--content-bg);
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid var(--border-color);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-main);
-    z-index: 1000;
+.sidebar-desktop {
+    position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh;
+    background-color: var(--content-bg); border-right: 1px solid var(--border-color);
+    padding: 1.5rem; z-index: 1000; display: flex; flex-direction: column;
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.sidebar-header { display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); }
+.sidebar-header i { color: var(--accent-color) !important; font-size: 1.8rem; }
+.sidebar-nav { list-style: none !important; padding: 0 !important; margin: 1.5rem 0; flex-grow: 1; }
+.sidebar-nav .nav-item { margin-bottom: 0.25rem !important; }
+.nav-link { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; border-radius: var(--border-radius-small); color: var(--text-muted) !important; text-decoration: none; transition: all var(--transition-speed); }
+.nav-link:hover { color: var(--text-light) !important; background-color: var(--hover-bg); }
+.nav-item.active .nav-link { color: var(--text-light) !important; background-color: var(--main-bg); font-weight: 600; }
+.nav-item.active .nav-link i { color: var(--accent-color) !important; }
+.sidebar-footer { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+#user-info-container { display: flex; flex-direction: column; gap: 1rem; }
+#user-info-container .user-info { font-weight: 600; }
+#user-info-container .user-actions { display: flex; gap: 0.5rem; }
+#user-info-container .btn { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-muted) !important; padding: 0.4rem 0.6rem; font-size: 1rem; }
+#user-info-container .btn:hover { background-color: var(--hover-bg) !important; color: var(--accent-color) !important; border-color: var(--accent-color) !important; }
+
+/* ============================================================
+   COMPONENTES GERAIS (Cards, Forms, Botões)
+============================================================ */
+.card, .alert, .list-group-item { background-color: var(--content-bg) !important; border-radius: var(--border-radius-large) !important; border: 1px solid var(--border-color) !important; margin-bottom: 1.5rem; }
+#page-content > .container-fluid > .card:first-of-type { box-shadow: 0 8px 32px -8px var(--glow-color); }
+.card-header { font-weight: 600; background-color: transparent !important; border-bottom: 1px solid var(--border-color) !important; padding: 1rem 1.5rem; }
+.card-body { padding: 1.5rem !important; }
+.form-control, .form-select { background-color: var(--main-bg) !important; border: 1px solid var(--border-color) !important; color: var(--text-input-color) !important; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; cursor: pointer; }
+.btn { transition: all var(--transition-speed) ease; font-weight: 600; border-radius: var(--border-radius-small); }
+.btn-primary { background-color: var(--accent-color) !important; color: var(--main-bg) !important; border: none !important; }
+
+/* ============================================================
+   LAYOUT RESPONSIVO
+============================================================ */
+@media (min-width: 992px) { .main-content { margin-left: var(--sidebar-width); } }
+@media (max-width: 991.98px) { .main-content { padding: 1.5rem; padding-top: 80px; } }
+
+/* ============================================================
+   HEADER E MENU MOBILE (MODAL)
+============================================================ */
+.mobile-header {
+    position: fixed; top: 0; left: 0; width: 100%; height: 60px; background-color: var(--content-bg);
+    border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 1rem;
+    z-index: 1030; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.mobile-header .btn { font-size: 1.5rem; color: var(--text-light) !important; }
+.mobile-header-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; font-weight: 700; margin-left: 1rem; }
+.mobile-header-title i { color: var(--accent-color) !important; }
+.modal-content.mobile-menu-content { background-color: #111111; border: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.mobile-menu-content .modal-header { border-bottom-color: var(--border-color); }
+.mobile-menu-content .modal-header .modal-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.2rem; }
+.mobile-menu-content .modal-header .modal-title i { color: var(--accent-color) !important; }
+.mobile-menu-content .modal-body { padding-top: 2rem; }
+.mobile-menu-content .nav-link { font-size: 1.2rem; padding: 1rem; }
+
+/* ============================================================
+   CORREÇÕES DE COMPONENTES (Tabelas, Modais, Abas)
+============================================================ */
+.card .table-responsive, .card .table { background-color: transparent; }
+.card .table { --bs-table-bg: transparent; --bs-table-striped-bg: rgba(0, 0, 0, 0.05); }
+.modal-content { background-color: var(--content-bg) !important; border-radius: var(--border-radius-large) !important; border: 1px solid var(--border-color) !important; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.modal-header { border-bottom-color: var(--border-color) !important; }
+.modal-footer { border-top-color: var(--border-color) !important; }
+.nav-tabs { border-bottom: 2px solid var(--border-color) !important; }
+.nav-tabs .nav-link { background: transparent !important; border: none !important; border-bottom: 3px solid transparent !important; color: var(--text-muted) !important; margin-bottom: -2px; }
+.nav-tabs .nav-link:hover { border-bottom-color: var(--border-color) !important; }
+.nav-tabs .nav-link.active { color: var(--text-light) !important; font-weight: 600; border-bottom-color: var(--accent-color) !important; }
+
+/* ============================================================
+   REFORMULAÇÃO DO FORMULÁRIO DE FILTROS DO DASHBOARD
+============================================================ */
+#form-filtros-dashboard .form-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem; /* Espaçamento consistente */
 }
 
-.sidebar-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 1.5rem;
-    font-weight: 700;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.sidebar-header i {
-    color: var(--accent-color) !important;
-    font-size: 1.8rem;
-}
-
-.sidebar-nav {
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0;
-    flex-grow: 1;
-    margin-top: 1.5rem;
-}
-
-.sidebar-nav .nav-item {
-    margin-bottom: 0.25rem !important;
-}
-
-.nav-link {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.8rem 1rem;
+/* Container do controle segmentado */
+#form-filtros-dashboard .btn-group {
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-small);
-    color: var(--text-muted) !important;
-    text-decoration: none;
-    transition: background-color var(--transition-speed), color var(--transition-speed);
-}
-
-.nav-link:hover {
-    color: var(--text-light) !important;
-    background-color: var(--hover-bg);
-}
-
-.nav-item.active .nav-link {
-    color: var(--text-light) !important;
+    padding: 3px;
     background-color: var(--main-bg);
-    font-weight: 600;
 }
 
-.nav-item.active .nav-link i {
-    color: var(--accent-color) !important;
-}
-
-.sidebar-footer {
-    margin-top: auto;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-}
-
-#user-info-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-#user-info-container .user-info {
-    font-weight: 600;
-}
-
-#user-info-container .user-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-#user-info-container .btn {
+/* Botões individuais dentro do controle */
+#form-filtros-dashboard .btn-group .btn {
     background-color: transparent !important;
-    border: 1px solid var(--border-color) !important;
+    border: none !important;
     color: var(--text-muted) !important;
-    padding: 0.4rem 0.6rem;
-    font-size: 1rem;
+    font-weight: 500;
+    box-shadow: none !important;
+    transition: all 0.2s ease-in-out;
+    border-radius: 6px !important; /* Bordas arredondadas para todos */
+    padding-top: 0.375rem; /* Ajuste para alinhamento vertical */
+    padding-bottom: 0.375rem;
 }
 
-#user-info-container .btn:hover {
-    background-color: var(--hover-bg) !important;
-    color: var(--accent-color) !important;
-    border-color: var(--accent-color) !important;
-}
-
-/* ============================================================
-   COMPONENTES GERAIS
-============================================================ */
-.card, .modal-content, .alert, .list-group-item {
-    background-color: var(--content-bg) !important;
-    border-radius: var(--border-radius-large) !important;
-    border: 1px solid var(--border-color) !important;
-    box-shadow: var(--shadow-main);
-    margin-bottom: 1.5rem;
-}
-
-.card-header {
-    font-weight: 600;
-    background-color: transparent !important;
-    border-bottom: 1px solid var(--border-color) !important;
-    padding: 1rem 1.5rem;
-}
-
-.card-body {
-    padding: 1.5rem !important;
-}
-
-/* ============================================================
-   FORMULÁRIOS
-============================================================ */
-.form-control,
-.form-select,
-.input-group-text {
-    background-color: var(--main-bg) !important;
-    border: 1px solid var(--border-color) !important;
-    color: var(--text-input-color) !important;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.7;
-    cursor: pointer;
-}
-
-/* ============================================================
-   BOTÕES
-============================================================ */
-.btn {
-    transition: all var(--transition-speed) ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    font-weight: 600;
-    border-radius: var(--border-radius-small);
-}
-
-.btn-primary {
-    background-color: var(--accent-color) !important;
-    color: var(--main-bg) !important;
-    border: none !important;
-}
-
-.btn-secondary,
-.btn-outline-secondary {
-    background-color: #333333 !important;
-    border: 1px solid #444 !important;
-    color: var(--text-input-color) !important;
-}
-
-.btn-success {
-    background-color: var(--color-success) !important;
+#form-filtros-dashboard .btn-group .btn:hover {
     color: var(--text-light) !important;
-    border: none !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Botão ATIVO no controle */
+#form-filtros-dashboard .btn-group .btn.active {
+    background-color: var(--hover-bg) !important;
+    color: var(--text-light) !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+}
+
+.input-group-text {
+    background-color: var(--border-color) !important; /* Um cinza um pouco mais escuro para destaque */
+    border-color: var(--border-color) !important;
+    color: var(--text-muted) !important;
+    font-weight: 600;
 }
 
 .btn:hover {
     transform: translateY(-2px);
-    opacity: 0.9;
+    opacity: 0.95;
 }
 
+/* Aplica o brilho laranja ao passar o mouse sobre botões primários */
 .btn-primary:hover {
-    box-shadow: var(--neon-glow-orange);
+    box-shadow: 0 0 12px var(--glow-color);
 }
 
+/* Aplica um brilho verde ao passar o mouse sobre botões de sucesso */
 .btn-success:hover {
-    box-shadow: var(--neon-glow-green);
+    box-shadow: 0 0 12px rgba(46, 160, 67, 0.6);
 }
 
-.btn-secondary:hover,
-.btn-outline-secondary:hover {
-    box-shadow: var(--neon-glow-grey);
+/* Aplica um brilho vermelho ao passar o mouse sobre botões de perigo */
+.btn-danger:hover, .btn-outline-danger:hover {
+    box-shadow: 0 0 12px rgba(248, 113, 113, 0.6);
 }
 
-/* ============================================================
-   TABELA
-============================================================ */
-.table {
-    background-color: transparent !important;
-}
-
-.table th,
-.table td {
-    background-color: transparent !important;
-    color: var(--text-light) !important;
-    border-color: var(--border-color) !important;
-}
-
-.table thead th {
-    color: var(--text-muted) !important;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    border-bottom-width: 2px !important;
-}
-
-.table-hover > tbody > tr:hover {
-    background-color: var(--hover-bg) !important;
-    color: var(--accent-color) !important;
-}
-
-.table-hover > tbody > tr:hover > * {
-    color: var(--accent-color) !important;
-}
-
-/* ============================================================
-   NAV TABS / BADGES
-============================================================ */
-.nav-tabs {
-    border-bottom: 2px solid var(--border-color) !important;
-}
-
-.nav-tabs .nav-link {
-    background: transparent !important;
-    border: none !important;
-    border-bottom: 3px solid transparent !important;
-    color: var(--text-muted) !important;
-}
-
-.nav-tabs .nav-link.active {
-    color: var(--text-light) !important;
-    border-bottom-color: var(--accent-color) !important;
-}
-
-.badge.bg-success {
-    background-color: rgba(34, 197, 94, 0.2) !important;
-    color: var(--color-status-ativa) !important;
-}
-
-.badge.bg-secondary {
-    background-color: rgba(136, 136, 136, 0.2) !important;
-    color: var(--text-muted) !important;
-}
-
-/* ============================================================
-   CLASSES DE UTILIDADE (SCROLL, ALINHAMENTO)
-============================================================ */
-.row-eq-height .card {
-    height: 100%;
-}
-
-.vendedor-list-container {
-    max-height: 220px; 
-    overflow-y: auto;
-    padding: 0.5rem;
-    margin: -0.5rem;
-}
-
-.vendedor-list-container::-webkit-scrollbar {
-    width: 8px;
-}
-
-.vendedor-list-container::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.vendedor-list-container::-webkit-scrollbar-thumb {
-    background-color: var(--border-color);
-    border-radius: 20px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-}
-
-.vendedor-list-container::-webkit-scrollbar-thumb:hover {
-    background-color: var(--accent-color);
-}
-
-.text-success {
-    color: var(--color-success) !important;
-}
-
-.text-danger {
-    color: #f87171 !important;
-}
-
-/* ============================================================
-   RESPONSIVIDADE (Telas menores, como tablets e celulares)
-============================================================ */
-
-/* Estilos para telas com 992px de largura ou menos (tablets e celulares) */
-@media (max-width: 992px) {
-    /* Esconde a sidebar para fora da tela */
-    aside.sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.3s ease-in-out;
-        z-index: 2000; /* Garante que a sidebar fique sobre o conteúdo */
-    }
-
-    /* Classe para exibir a sidebar quando o botão for clicado */
-    aside.sidebar.is-open {
-        transform: translateX(0);
-    }
-
-    /* Faz o conteúdo principal ocupar toda a tela */
-    main.main-content {
-        margin-left: 0;
-        width: 100%;
-        padding: 1.5rem; /* Reduz o padding em telas menores */
-    }
-    
-    /* Faz com que os botões de filtro na consulta quebrem a linha */
-    #form-filtros-consulta {
-        flex-wrap: wrap; /* Permite que os itens quebrem para a próxima linha */
-        justify-content: flex-start;
-        width: 100%;
-        margin-top: 1rem; /* Adiciona espaço quando os filtros quebram a linha */
-    }
-    
-    .card-header.d-flex {
-        flex-wrap: wrap; /* Garante que o cabeçalho do card possa quebrar a linha */
-    }
-    
-    /* Empilha os botões de Salvar e Limpar no formulário */
-    #form-novo-relatorio .d-flex.gap-3 {
-       flex-direction: column;
-    }
-
-    .btn {
-        width: 100%; /* Faz os botões ocuparem a largura total quando empilhados */
-    }
-
-    /* Ajusta o contêiner do botão de PDF e os botões de Salvar */
-    .d-flex.justify-content-between.align-items-center,
-    .d-flex.gap-3.mt-4 {
-        flex-direction: column;
-        align-items: stretch !important;
-    }
-}
-
-
-/* Estilos para telas com 768px ou menos (celulares) */
-@media (max-width: 768px) {
-    /* Garante que todas as colunas do grid fiquem empilhadas (uma em cima da outra) */
-    .row > [class*="col-"] {
-        width: 100%;
-        margin-bottom: 1rem; /* Adiciona um espaço vertical entre as colunas */
-    }
-    
-    .row > [class*="col-"]:last-child {
-        margin-bottom: 0;
-    }
-
-    /* Ajusta o rodapé do modal para empilhar os botões */
-    .modal-footer.justify-content-between {
-        flex-direction: column-reverse;
-        gap: 0.75rem;
-    }
-
-    .modal-footer.justify-content-between > div {
-        display: flex;
-        gap: 0.5rem;
-        width: 100%;
-    }
-    .modal-footer.justify-content-between > div > .btn {
-        flex-grow: 1;
-    }
-}/* ============================================================
-   RESPONSIVIDADE (NOVA VERSÃO - MAIS COMPACTA)
-============================================================ */
-
-/* === Telas de Tablet (e abaixo) - max-width: 992px === */
-@media (max-width: 992px) {
-    /* Esconde a sidebar para fora da tela, preparando para o modo "gaveta" */
-    aside.sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.3s ease-in-out;
-        z-index: 2000; /* Garante que a sidebar fique sobre todo o conteúdo */
-    }
-
-    /* Classe ".is-open" para exibir a sidebar quando o botão for clicado */
-    aside.sidebar.is-open {
-        transform: translateX(0);
-    }
-
-    /* Faz o conteúdo principal ocupar toda a largura da tela */
-    main.main-content {
-        margin-left: 0;
-        width: 100%;
-    }
-
-    /* Permite que os filtros de consulta quebrem a linha de forma organizada */
-    #form-filtros-consulta {
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        width: 100%;
-        margin-top: 1rem; /* Espaço quando quebra a linha abaixo do título */
-    }
-    
-    .card-header.d-flex {
-        flex-wrap: wrap; /* Garante que o cabeçalho do card possa quebrar a linha */
-    }
-}
-
-
-/* === Telas de Celular - max-width: 768px === */
-@media (max-width: 768px) {
-    /* Diminui o espaçamento geral para maximizar a área de conteúdo */
-    main.main-content {
-        padding: 1rem;
-    }
-
-    /* Ajusta os títulos para economizar espaço vertical */
-    h4.mb-3, .card-header h5 {
-        font-size: 1.1rem; /* Reduz o tamanho da fonte dos títulos */
-    }
-
-    /* Organiza o cabeçalho principal do formulário (Título + Botão PDF) */
-    .d-flex.justify-content-between.align-items-center {
-        flex-direction: column;
-        align-items: flex-start !important; /* Alinha tudo à esquerda */
-        gap: 1rem;
-    }
-    
-    /* Mantém 2 colunas em campos de input simples para compactar o formulário.
-       Isso funciona para "Clientes Monit." vs "Vendas Monit.", por exemplo. */
-    .row .col-6 {
-       flex: 0 0 50%;
-       max-width: 50%;
-    }
-
-    /* Empilha os botões principais de Ação no final do formulário */
-    .d-flex.gap-3.mt-4 {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    /* Faz com que APENAS os botões principais de ação ocupem 100% da largura */
-    .d-flex.gap-3.mt-4 .btn {
-        width: 100%;
-    }
-
-    /* Ajusta o rodapé do modal para empilhar os botões de forma limpa */
-    .modal-footer.justify-content-between {
-        flex-direction: column-reverse; /* Coloca o botão de cancelar acima */
-        gap: 0.75rem;
-    }
-
-    .modal-footer.justify-content-between > div {
-        display: flex;
-        gap: 0.5rem;
-        width: 100%;
-    }
-
-    /* Faz os botões no rodapé do modal ocuparem o espaço igualmente */
-    .modal-footer.justify-content-between > div > .btn {
-        flex-grow: 1;
-    }
-
-    /* Garante que o container da tabela seja rolável horizontalmente */
-    .table-responsive {
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius-small);
-    }
+/* Aplica um brilho cinza ao passar o mouse sobre botões secundários */
+.btn-secondary:hover, .btn-outline-secondary:hover {
+    box-shadow: 0 0 12px rgba(108, 117, 125, 0.4);
 }
