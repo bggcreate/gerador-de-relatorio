@@ -46,14 +46,13 @@ async function loadPage(path) {
 
         pageContent.innerHTML = await response.text();
         
-        // ** PONTO CRÍTICO CORRIGIDO **
         // Garante que a função de inicialização da página seja chamada
         const initFunc = pageInitializers[activePage];
         if (typeof initFunc === 'function') {
-            // Adia a execução para garantir que o DOM da nova página esteja 100% pronto
+           
             setTimeout(() => {
                 try {
-                    // Passa o currentUser para a função, caso ela precise
+                    
                     initFunc(currentUser);
                 } catch (err) {
                     console.error(`Erro ao inicializar a página '${activePage}':`, err);
