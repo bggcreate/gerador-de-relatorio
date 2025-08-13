@@ -1,0 +1,3 @@
+# Ignorar a pasta de dados que contém o banco de dados
+data/
+.env
