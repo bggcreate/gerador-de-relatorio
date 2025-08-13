@@ -7,7 +7,6 @@ import { initGerenciarLojasPage } from './pages/gerenciar-lojas.js';
 import { initDemandasPage } from './pages/demandas.js';
 import { initNovoRelatorioPage } from './pages/novo-relatorio.js';
 import { initGerenciarUsuariosPage } from './pages/gerenciar-usuarios.js';
-// Adicione aqui imports para outras páginas se houver (ex: historico, etc.)
 
 const pageInitializers = {
     'admin': initAdminPage,
