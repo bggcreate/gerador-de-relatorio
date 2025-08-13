@@ -269,6 +269,29 @@ app.post('/api/demandas', requirePageLogin, (req, res) => { const { loja_nome, d
 app.get('/api/demandas/:status', requirePageLogin, (req, res) => { const status = req.params.status === 'pendentes' ? 'pendente' : 'concluido'; db.all(`SELECT * FROM demandas WHERE status = ? ORDER BY criado_em DESC`, [status], (err, demandas) => { if (err) return res.status(500).json({ error: err.message }); res.json(demandas || []); }); });
 app.put('/api/demandas/:id/concluir', requirePageLogin, (req, res) => { db.run("UPDATE demandas SET status = 'concluido', concluido_por_usuario = ?, concluido_em = CURRENT_TIMESTAMP WHERE id = ?", [req.session.username, req.params.id], function (err) { if (err) return res.status(500).json({ error: 'Erro ao concluir demanda.' }); if (this.changes === 0) return res.status(404).json({ error: 'Demanda não encontrada.' }); res.json({ success: true }); }); });
 app.delete('/api/demandas/:id', requirePageLogin, (req, res) => { db.run("DELETE FROM demandas WHERE id = ?", [req.params.id], function (err) { if (err) return res.status(500).json({ error: 'Erro ao excluir demanda.' }); if (this.changes === 0) return res.status(404).json({ error: "Demanda não encontrada." }); res.json({ success: true }); }); });
+app.get('/api/backup/info', requirePageLogin, requireAdmin, (req, res) => {
+    try {
+        const stats = fs.statSync(DB_PATH);
+        const sizeMB = (stats.size / (1024 * 1024)).toFixed(2);
+        res.json({ sizeMB });
+    } catch (error) {
+        console.error("Erro ao obter informações do backup:", error);
+        res.status(500).json({ error: 'Não foi possível obter informações do banco de dados.' });
+    }
+});
+
+// API para limpar tabelas específicas do banco de dados
+app.delete('/api/backup/clear', requirePageLogin, requireAdmin, (req, res) => {
+    db.serialize(() => {
+        db.run("DELETE FROM relatorios", (err) => {
+            if (err) return res.status(500).json({ error: 'Erro ao limpar relatórios.' });
+        });
+        db.run("DELETE FROM demandas", (err) => {
+            if (err) return res.status(500).json({ error: 'Erro ao limpar demandas.' });
+        });
+        res.json({ success: true, message: 'Relatórios e demandas foram limpos.' });
+    });
+});
 app.get('/api/backup/download', requirePageLogin, requireAdmin, (req, res) => { const date = new Date().toISOString().slice(0, 10); const fileName = `backup_reports_${date}.db`; res.download(DB_PATH, fileName, (err) => { if (err && !res.headersSent) { res.status(500).send("Não foi possível baixar o arquivo de backup."); } }); });
 app.post('/api/backup/restore', requirePageLogin, requireAdmin, upload.single('backupFile'), (req, res) => { if (!req.file) { return res.status(400).json({ error: "Nenhum arquivo de backup foi enviado." }); } const backupBuffer = req.file.buffer; db.close((err) => { if (err) { console.error("Erro ao fechar o DB antes de restaurar:", err.message); return res.status(500).json({ error: "Não foi possível fechar a conexão com o banco de dados atual." }); } fs.writeFile(DB_PATH, backupBuffer, (err) => { if (err) { console.error("Falha ao escrever o arquivo de backup:", err.message); db = new sqlite3.Database(DB_PATH); return res.status(500).json({ error: "Falha ao substituir o arquivo de banco de dados." }); } db = new sqlite3.Database(DB_PATH, (err) => { if (err) { console.error("DB restaurado, mas falha ao reconectar:", err.message); return res.status(500).json({ error: "Banco de dados restaurado, mas falha ao reconectar. Reinicie o servidor." }); } console.log("Banco de dados restaurado e reconectado com sucesso."); res.json({ success: true, message: "Banco de dados restaurado com sucesso. A página será recarregada." }); }); }); }); });
 
