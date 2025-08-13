@@ -1,3 +1,13 @@
 # Ignorar a pasta de dados que contém o banco de dados
 data/
+
+
 .env
+
+
+.gitignore
+
+README.md
+
+# Ignorar pasta com relatórios de Excel gerados
+relatorios-gerados/
