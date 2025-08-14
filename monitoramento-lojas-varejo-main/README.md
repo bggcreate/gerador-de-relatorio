@@ -25,7 +25,7 @@ Siga os passos abaixo para **baixar** e **rodar** o sistema localmente:
 Primeiro, clone o repositório para sua máquina local. Abra o terminal e execute o comando:
 
 ```bash
-git clone https://github.com/seuusuario/gerador-relatorios-lojas.git
+git clone https://github.com/bggcreate/gerador-relatorios-lojas.git
 ```
 ### 2. Acessar o Diretório do Projeto
 
