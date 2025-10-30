@@ -294,7 +294,45 @@ app.delete('/api/backup/clear', requirePageLogin, requireAdmin, (req, res) => {
 });
 app.get('/api/backup/download', requirePageLogin, requireAdmin, (req, res) => { const date = new Date().toISOString().slice(0, 10); const fileName = `backup_reports_${date}.db`; res.download(DB_PATH, fileName, (err) => { if (err && !res.headersSent) { res.status(500).send("Não foi possível baixar o arquivo de backup."); } }); });
 app.post('/api/backup/restore', requirePageLogin, requireAdmin, upload.single('backupFile'), (req, res) => { if (!req.file) { return res.status(400).json({ error: "Nenhum arquivo de backup foi enviado." }); } const backupBuffer = req.file.buffer; db.close((err) => { if (err) { console.error("Erro ao fechar o DB antes de restaurar:", err.message); return res.status(500).json({ error: "Não foi possível fechar a conexão com o banco de dados atual." }); } fs.writeFile(DB_PATH, backupBuffer, (err) => { if (err) { console.error("Falha ao escrever o arquivo de backup:", err.message); db = new sqlite3.Database(DB_PATH); return res.status(500).json({ error: "Falha ao substituir o arquivo de banco de dados." }); } db = new sqlite3.Database(DB_PATH, (err) => { if (err) { console.error("DB restaurado, mas falha ao reconectar:", err.message); return res.status(500).json({ error: "Banco de dados restaurado, mas falha ao reconectar. Reinicie o servidor." }); } console.log("Banco de dados restaurado e reconectado com sucesso."); res.json({ success: true, message: "Banco de dados restaurado com sucesso. A página será recarregada." }); }); }); }); });
+app.get("/api/export/excel-all", requirePageLogin, async (req, res) => {
+  try {
+    const ExcelJS = require("exceljs");
 
+    const relatorios = await new Promise((resolve, reject) => {
+      db.all("SELECT * FROM relatorios ORDER BY data DESC", (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+
+    if (!relatorios.length) {
+      return res.status(404).json({ error: "Nenhum relatório encontrado." });
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const ws = workbook.addWorksheet("Relatórios");
+
+    ws.columns = [
+      { header: "ID", key: "id", width: 8 },
+      { header: "Loja", key: "loja", width: 25 },
+      { header: "Data", key: "data", width: 15 },
+      { header: "Total (R$)", key: "total_vendas", width: 15 },
+      { header: "Atendimentos", key: "atendimentos", width: 15 },
+      { header: "Taxa Conversão", key: "taxa_conversao", width: 15 },
+    ];
+
+    relatorios.forEach(r => ws.addRow(r));
+
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", "attachment; filename=Relatorios_Completos.xlsx");
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error("Erro ao exportar todos os relatórios:", error);
+    res.status(500).json({ error: "Falha ao gerar o arquivo Excel." });
+  }
+});
 // =================================================================
 // INICIALIZAÇÃO DO SERVIDOR
 // =================================================================

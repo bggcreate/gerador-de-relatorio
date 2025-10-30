@@ -1,0 +1,117 @@
+<div class="container-fluid">
+    <h4 class="mb-3"><i class="bi bi-file-earmark-text me-2"></i>Logs do Sistema</h4>
+    
+    <!-- Card de Filtros -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-funnel me-2"></i>Filtros
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Tipo de Log</label>
+                    <select id="log-type-filter" class="form-select">
+                        <option value="all">Todos</option>
+                        <option value="error">Erros</option>
+                        <option value="warning">Avisos</option>
+                        <option value="info">Informações</option>
+                        <option value="access">Acessos</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Data Início</label>
+                    <input type="date" id="log-date-start" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Data Fim</label>
+                    <input type="date" id="log-date-end" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <button id="btn-filter-logs" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i>Filtrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card de Logs -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-ul me-2"></i>Registros de Log</span>
+            <button id="btn-clear-logs" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash me-2"></i>Limpar Logs
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">Data/Hora</th>
+                            <th style="width: 10%;">Tipo</th>
+                            <th style="width: 15%;">Usuário</th>
+                            <th style="width: 20%;">Ação</th>
+                            <th style="width: 40%;">Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-table-body">
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <button id="btn-load-more-logs" class="btn btn-outline-secondary d-none">
+                Carregar Mais Logs
+            </button>
+        </div>
+    </div>
+
+    <!-- Estatísticas de Sistema -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2" id="stat-errors">0</h3>
+                    <p class="text-muted mb-0">Erros (24h)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-circle-fill text-warning" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2" id="stat-warnings">0</h3>
+                    <p class="text-muted mb-0">Avisos (24h)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-people-fill text-info" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2" id="stat-users">0</h3>
+                    <p class="text-muted mb-0">Usuários Ativos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-clock-history text-success" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2" id="stat-uptime">--</h3>
+                    <p class="text-muted mb-0">Tempo Ativo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

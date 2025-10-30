@@ -1,0 +1,307 @@
+<div class="container-fluid" style="max-width: 1400px;">
+    <h1 class="h3 mb-4"><i class="bi bi-tools me-2"></i> Assistência Técnica</h1>
+    
+    <!-- Seletor de Lojas (Cards) -->
+    <div id="seletor-lojas" class="mb-4" style="display: none;">
+        <div class="alert alert-info mb-3">
+            <i class="bi bi-info-circle me-2"></i> Selecione uma loja para acessar Nova Assistência e Estoque
+        </div>
+        <div id="cards-lojas" class="row g-3"></div>
+    </div>
+    
+    <!-- Título da Loja Selecionada -->
+    <div id="titulo-loja-selecionada" class="mb-4" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="h4 mb-0" id="texto-loja-selecionada">Assistência Loja X</h2>
+            <button id="btn-voltar-lojas" class="btn btn-secondary" onclick="window.voltarParaTodasLojas()">
+                <i class="bi bi-arrow-left me-2"></i> Voltar
+            </button>
+        </div>
+    </div>
+    
+    <!-- Navegação por Abas -->
+    <ul class="nav nav-tabs mb-4" id="assistenciaTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="chamados-tab" data-bs-toggle="tab" data-bs-target="#chamados" type="button" role="tab">
+                <i class="bi bi-clipboard-check me-1"></i> Chamados
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="cadastro-tab" data-bs-toggle="tab" data-bs-target="#cadastro" type="button" role="tab">
+                <i class="bi bi-plus-circle me-1"></i> Nova Assistência
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="estoque-tab" data-bs-toggle="tab" data-bs-target="#estoque" type="button" role="tab">
+                <i class="bi bi-box-seam me-1"></i> Estoque
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="historico-tab" data-bs-toggle="tab" data-bs-target="#historico" type="button" role="tab">
+                <i class="bi bi-clock-history me-1"></i> Histórico
+            </button>
+        </li>
+    </ul>
+
+    <!-- Conteúdo das Abas -->
+    <div class="tab-content" id="assistenciaTabContent">
+        
+        <!-- ABA 1: CHAMADOS -->
+        <div class="tab-pane fade show active" id="chamados" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Chamados em Andamento</span>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" id="filter-loja-chamados" style="width: 200px; display: none;">
+                            <option value="">Todas as Lojas</option>
+                        </select>
+                        <select class="form-select form-select-sm" id="filter-status" style="width: 180px;">
+                            <option value="todos">Todos os Status</option>
+                            <option value="Em andamento" selected>Em andamento</option>
+                            <option value="Aguardando peças">Aguardando peças</option>
+                            <option value="Concluído">Concluído</option>
+                        </select>
+                        <input type="text" class="form-control form-control-sm" id="search-chamados" placeholder="Buscar..." style="width: 200px;">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>CPF</th>
+                                    <th>Pedido</th>
+                                    <th>Aparelho</th>
+                                    <th>Status</th>
+                                    <th>Data Entrada</th>
+                                    <th class="text-end pe-3">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-chamados">
+                                <tr><td colspan="7" class="text-center">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 2: CADASTRO -->
+        <div class="tab-pane fade" id="cadastro" role="tabpanel">
+            <div class="card">
+                <div class="card-header">Cadastrar Nova Assistência</div>
+                <div class="card-body">
+                    <form id="form-assistencia">
+                        <input type="hidden" id="assistencia-id">
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="cliente-nome" class="form-label">Nome do Cliente *</label>
+                                <input type="text" class="form-control" id="cliente-nome" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="cliente-cpf" class="form-label">CPF *</label>
+                                <input type="text" class="form-control" id="cliente-cpf" placeholder="000.000.000-00" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="numero-pedido" class="form-label">Nº Pedido</label>
+                                <input type="text" class="form-control" id="numero-pedido">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="data-entrada" class="form-label">Data de Entrada *</label>
+                                <input type="date" class="form-control" id="data-entrada" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="loja-assist" class="form-label">Loja</label>
+                                <select class="form-select" id="loja-assist">
+                                    <option value="">Selecione uma loja...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="valor-peca" class="form-label">Valor Peça (Loja)</label>
+                                <input type="number" class="form-control" id="valor-peca" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="valor-servico" class="form-label">Valor Serviço (Cliente)</label>
+                                <input type="number" class="form-control" id="valor-servico" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="aparelho" class="form-label">Aparelho *</label>
+                                <input type="text" class="form-control" id="aparelho" placeholder="Ex: iPhone 13 Pro" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="peca-select" class="form-label">Peça a ser Trocada</label>
+                                <select class="form-select" id="peca-select">
+                                    <option value="">Selecione uma peça...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-9 mb-3">
+                                <label for="observacoes" class="form-label">Observações</label>
+                                <textarea class="form-control" id="observacoes" rows="3" placeholder="Informações adicionais sobre a assistência"></textarea>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="status-select" class="form-label">Status</label>
+                                <select class="form-select" id="status-select">
+                                    <option value="Em andamento" selected>Em andamento</option>
+                                    <option value="Falta de peças">Falta de peças</option>
+                                    <option value="Concluído">Concluído</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i> Salvar Assistência
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="btn-cancelar">
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 3: ESTOQUE -->
+        <div class="tab-pane fade" id="estoque" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Estoque de Peças</span>
+                    <div class="d-flex gap-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="filter-disponivel">
+                            <label class="form-check-label" for="filter-disponivel">
+                                Apenas Disponíveis
+                            </label>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" id="search-estoque" placeholder="Buscar peça..." style="width: 200px;">
+                        <button class="btn btn-primary btn-sm" id="btn-adicionar-peca">
+                            <i class="bi bi-plus-circle me-1"></i> Adicionar Peça
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Peça</th>
+                                    <th>Código</th>
+                                    <th>Quantidade</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-3">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-estoque">
+                                <tr><td colspan="6" class="text-center">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 4: HISTÓRICO -->
+        <div class="tab-pane fade" id="historico" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Histórico de Assistências</span>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" id="filter-loja-historico" style="width: 200px; display: none;">
+                            <option value="">Todas as Lojas</option>
+                        </select>
+                        <input type="text" class="form-control form-control-sm" id="search-historico" placeholder="Buscar..." style="width: 200px;">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>CPF</th>
+                                    <th>Nº Pedido</th>
+                                    <th>Loja</th>
+                                    <th>Técnico</th>
+                                    <th>Status</th>
+                                    <th>Data Entrada</th>
+                                    <th>Última Atualização</th>
+                                    <th class="text-end pe-3">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-historico">
+                                <tr><td colspan="9" class="text-center">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Peça do Estoque -->
+    <div class="modal fade" id="modal-peca" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="form-peca">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalPecaLabel">Adicionar Peça</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="peca-id">
+                        <div class="mb-3">
+                            <label for="peca-nome" class="form-label">Nome da Peça</label>
+                            <input type="text" class="form-control" id="peca-nome" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="peca-codigo" class="form-label">Código Interno</label>
+                            <input type="text" class="form-control" id="peca-codigo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="peca-quantidade" class="form-label">Quantidade</label>
+                            <input type="number" class="form-control" id="peca-quantidade" value="0" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="peca-valor" class="form-label">Valor (Custo)</label>
+                            <input type="number" class="form-control" id="peca-valor" step="0.01" value="0" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Ver Detalhes da Assistência -->
+    <div class="modal fade" id="modal-detalhes" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalhes da Assistência</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalhes-content">
+                    <!-- Conteúdo dinâmico -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

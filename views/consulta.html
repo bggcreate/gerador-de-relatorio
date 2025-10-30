@@ -4,11 +4,6 @@
         <div class="card-header"><i class="bi bi-file-earmark-excel me-2"></i>Exportar para Excel</div>
         <div class="card-body">
              <form id="form-export-excel" class="row g-3 align-items-end">
-                <div class="mt-2">
-  <button id="btn-exportar-tudo" class="btn btn-outline-light btn-sm">
-    📦 Teste*
-  </button>
-</div>
                 <div class="col-lg-4 col-md-6">
                     <label for="export-month" class="form-label">Mês</label>
                     <select id="export-month" class="form-select">
@@ -23,7 +18,19 @@
                     <select id="export-year" class="form-select"></select>
                 </div>
                 <div class="col-lg-4 col-md-12">
-                    <button type="submit" class="btn btn-success w-100">Exportar Mês Selecionado</button>
+                    <div class="btn-group w-100" role="group">
+                        <button type="submit" class="btn btn-excel" style="width: 70%;">
+                            Exportar Mês Selecionado
+                        </button>
+                        <button type="button" class="btn btn-excel dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style="width: 30%;">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" id="btn-exportar-todos-relatorios">
+                                Exportar TODOS os Relatórios
+                            </a></li>
+                        </ul>
+                    </div>
                 </div>
             </form>
         </div>

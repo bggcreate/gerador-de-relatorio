@@ -1,0 +1,299 @@
+<div class="container-fluid" style="max-width: 1600px;">
+    <!-- CARD DE FILTROS -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="form-filtros-dashboard">
+                <div class="row gx-3 gy-3 align-items-end">
+                    <!-- Loja -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label for="filtro-loja-dashboard" class="form-label small text-uppercase fw-semibold">Loja</label>
+                        <select id="filtro-loja-dashboard" class="form-select form-select-sm">
+                            <option value="todas" selected>Todas as Lojas</option>
+                        </select>
+                    </div>
+
+                    <!-- Período Rápido -->
+                    <div class="col-12 col-lg-5">
+                        <label class="form-label small text-uppercase fw-semibold">Período Rápido</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-period="hoje">Hoje</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-period="7d">7 dias</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-period="mes-atual">Este Mês</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-period="mes-passado">Mês Passado</button>
+                        </div>
+                    </div>
+
+                    <!-- Período Manual -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label for="filtro-data-inicio-dashboard" class="form-label small text-uppercase fw-semibold">Período Manual</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="date" class="form-control form-control-sm" id="filtro-data-inicio-dashboard" placeholder="Início">
+                            </div>
+                            <div class="col-6">
+                                <input type="date" class="form-control form-control-sm" id="filtro-data-fim-dashboard" placeholder="Fim">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botão Analisar -->
+                    <div class="col-12 col-md-6 col-lg-1">
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Analisar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CARDS DE VISÃO GERAL (NOVO) -->
+    <h4 class="mb-3">Visão Geral</h4>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <i class="bi bi-building fs-2" style="color: var(--color-info);"></i>
+                    </div>
+                    <h3 class="mb-1" id="overview-total-lojas">-</h3>
+                    <small class="text-muted">Total de Lojas Ativas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <i class="bi bi-trophy fs-2" style="color: var(--color-warning);"></i>
+                    </div>
+                    <h5 class="mb-1" id="overview-melhor-loja">-</h5>
+                    <small class="text-muted">Melhor Loja (Conv.)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <i class="bi bi-graph-up-arrow fs-2" style="color: var(--color-success);"></i>
+                    </div>
+                    <h3 class="mb-1" id="overview-media-conversao">-</h3>
+                    <small class="text-muted">Média de Conversão</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <i class="bi bi-cart-check fs-2" style="color: var(--accent-primary);"></i>
+                    </div>
+                    <h3 class="mb-1" id="overview-total-vendas">-</h3>
+                    <small class="text-muted">Total de Vendas</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARD DE DEMANDAS PENDENTES -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-list-check me-2"></i>Demandas Pendentes</span>
+                    <a href="#demandas" class="btn btn-sm btn-outline-primary">Ver Todas</a>
+                </div>
+                <div class="card-body">
+                    <div id="dashboard-demandas-container">
+                        <div class="text-center text-muted py-3">
+                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                            <p class="mb-0 mt-2 small">Carregando demandas...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CARDS DE MÉTRICAS PRINCIPAIS -->
+    <h4 class="mb-3 mt-4">Métricas Principais</h4>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-xl-6" id="monitoramento-card">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-display me-2"></i>Monitoramento</div>
+                <div class="card-body">
+                    <div class="row align-items-center text-center">
+                        <div class="col-4 border-end">
+                            <h3 class="mb-1" id="geral-clientes">0</h3>
+                            <small id="geral-clientes-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
+                            <small class="text-muted">CLIENTES</small>
+                        </div>
+                        <div class="col-4 border-end">
+                            <h3 class="mb-1" id="geral-vendas">0</h3>
+                            <small id="geral-vendas-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
+                            <small class="text-muted">VENDAS</small>
+                        </div>
+                        <div class="col-4">
+                            <h2 class="mb-1" id="geral-tx-conversao">0.00%</h2>
+                            <small id="geral-tx-conversao-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
+                            <small class="text-muted">TX. CONVERSÃO</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-xl-6" id="loja-card-col">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-shop me-2"></i>Loja (Bluve)</div>
+                <div class="card-body">
+                    <div class="row align-items-center text-center">
+                        <div class="col-4 border-end">
+                            <h3 class="mb-1" id="loja-clientes">0</h3>
+                            <small id="loja-clientes-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
+                            <small class="text-muted">CLIENTES</small>
+                        </div>
+                        <div class="col-4 border-end">
+                            <h3 class="mb-1" id="loja-vendas">0</h3>
+                            <small id="loja-vendas-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
+                            <small class="text-muted">VENDAS</small>
+                        </div>
+                        <div class="col-4">
+                            <h2 class="mb-1" id="loja-tx-conversao">0.00%</h2>
+                            <small id="loja-tx-conversao-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
+                            <small class="text-muted">TX. CONVERSÃO</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- GRÁFICOS COMPARATIVOS -->
+    <div id="comparative-charts-section">
+        <h4 class="mb-3 mt-4"><i class="bi bi-graph-up"></i> Análise Comparativa</h4>
+        <div class="row g-3 mb-4">
+            <!-- Gráfico de Barras Comparativo -->
+            <div class="col-12 col-lg-8">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-bar-chart-fill me-2"></i>Comparativo de Desempenho por Loja</span>
+                        <select id="bar-chart-metric-select" class="form-select form-select-sm" style="width: auto;">
+                            <option value="vendas" selected>Vendas</option>
+                            <option value="clientes">Clientes</option>
+                            <option value="conversao">Taxa de Conversão</option>
+                        </select>
+                    </div>
+                    <div class="card-body" style="height: 400px; position: relative;">
+                        <canvas id="dashboard-bar-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico Donut -->
+            <div class="col-12 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header"><i class="bi bi-pie-chart-fill me-2"></i>Distribuição de Conversão</div>
+                    <div class="card-body" style="height: 400px; position: relative;">
+                        <canvas id="dashboard-donut-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRÁFICO DE LINHA (EVOLUÇÃO) -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header"><i class="bi bi-graph-up-arrow me-2"></i>Evolução da Taxa de Conversão ao Longo do Tempo</div>
+                <div class="card-body" style="height: 350px; position: relative;">
+                    <canvas id="dashboard-line-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASSISTÊNCIA TÉCNICA -->
+    <h4 class="mb-3 mt-4"><i class="bi bi-tools"></i> Assistência Técnica - Visão Geral</h4>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <i class="bi bi-person-fill-gear fs-2" style="color: #4CAF50;"></i>
+                    </div>
+                    <h5 class="mb-1" id="assist-top-tecnico">-</h5>
+                    <small class="text-muted">Técnico com Mais Assistências</small>
+                    <p class="mb-0 mt-2"><strong id="assist-top-tecnico-count">0</strong> assistências</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <i class="bi bi-shop-window fs-2" style="color: #2196F3;"></i>
+                    </div>
+                    <h5 class="mb-1" id="assist-top-loja">-</h5>
+                    <small class="text-muted">Loja com Mais Assistências</small>
+                    <p class="mb-0 mt-2"><strong id="assist-top-loja-count">0</strong> assistências</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <i class="bi bi-check-circle fs-2" style="color: var(--color-success);"></i>
+                    </div>
+                    <h3 class="mb-1" id="assist-concluidas">0</h3>
+                    <small class="text-muted">Assistências Concluídas</small>
+                    <p class="mb-0 mt-2 small"><span id="assist-em-andamento">0</span> em andamento</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <i class="bi bi-cash-coin fs-2" style="color: var(--accent-color);"></i>
+                    </div>
+                    <h3 class="mb-1" id="assist-valor-total">R$ 0,00</h3>
+                    <small class="text-muted">Valor Total em Assistências</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASSISTÊNCIA POR LOJA -->
+    <h4 class="mb-3 mt-4"><i class="bi bi-bar-chart-line-fill"></i> Assistência Técnica por Loja</h4>
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-table me-2"></i>Detalhamento por Loja</span>
+                    <button id="btn-refresh-assist-loja" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead style="position: sticky; top: 0; background-color: var(--content-bg); z-index: 10;">
+                                <tr>
+                                    <th class="ps-3">Loja</th>
+                                    <th>Total de Assistências</th>
+                                    <th>Concluídas</th>
+                                    <th>Em Andamento</th>
+                                    <th>Valor Total</th>
+                                    <th>Taxa de Conclusão</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assist-por-loja-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

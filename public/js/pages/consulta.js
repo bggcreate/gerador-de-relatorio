@@ -3,7 +3,6 @@ import { showToast, showConfirmModal } from '../utils.js';
 let eventController;
 
 export function initConsultaPage() {
-    
     const formFiltros = document.getElementById('form-filtros-consulta');
     const tableBody = document.getElementById('tabela-relatorios-corpo');
     const filtroLoja = document.getElementById('filtro-loja');
@@ -147,17 +146,17 @@ export function initConsultaPage() {
     
     // --- Event Listeners ---
     document.getElementById('btn-copiar-texto-modal')?.addEventListener('click', async () => {
-    if (!currentReportId) return;
-    try {
-        const response = await fetch(`/api/relatorios/${currentReportId}/txt`);
-        if (!response.ok) throw new Error("Falha ao buscar texto para cópia.");
-        const textToCopy = await response.text();
-        await navigator.clipboard.writeText(textToCopy);
-        showToast('Sucesso!', 'Texto copiado.', 'success');
-    } catch (err) {
-        showToast('Erro', 'Não foi possível copiar o texto.', 'danger');
-    }
-}, { signal: eventController.signal });
+        if (!currentReportId) return;
+        try {
+            const response = await fetch(`/api/relatorios/${currentReportId}/txt`);
+            if (!response.ok) throw new Error("Falha ao buscar texto para cópia.");
+            const textToCopy = await response.text();
+            await navigator.clipboard.writeText(textToCopy);
+            showToast('Sucesso!', 'Texto copiado.', 'success');
+        } catch (err) {
+            showToast('Erro', 'Não foi possível copiar o texto.', 'danger');
+        }
+    }, { signal: eventController.signal });
 
     document.getElementById('btn-gerar-pdf-modal')?.addEventListener('click', () => {
         if (!currentReportId) return;
@@ -188,36 +187,6 @@ export function initConsultaPage() {
     filtroOrdem.addEventListener('change', () => carregarRelatorios(true), { signal: eventController.signal });
 
     const formExport = document.getElementById('form-export-excel');
-    const btnExportarTudo = document.getElementById('btn-exportar-tudo');
-
-btnExportarTudo?.addEventListener('click', async () => {
-  btnExportarTudo.disabled = true;
-  const originalText = btnExportarTudo.innerHTML;
-  btnExportarTudo.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Gerando...`;
-
-  try {
-    const response = await fetch('/api/export/excel-all');
-    if (!response.ok) throw new Error("Erro ao gerar o arquivo.");
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Relatorios_Completos_${new Date().toLocaleDateString('pt-BR')}.xlsx`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-
-    showToast("Sucesso", "Arquivo de todos os relatórios gerado com sucesso!", "success");
-  } catch (err) {
-    console.error(err);
-    showToast("Erro", "Não foi possível gerar o Excel completo.", "danger");
-  } finally {
-    btnExportarTudo.disabled = false;
-    btnExportarTudo.innerHTML = originalText;
-  }
-});
     const exportMonthSelect = document.getElementById('export-month');
     const exportYearSelect = document.getElementById('export-year');
     
@@ -232,7 +201,7 @@ btnExportarTudo?.addEventListener('click', async () => {
 
     formExport.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = e.target.querySelector('button');
+        const btn = e.target.querySelector('button[type="submit"]');
         const originalText = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Gerando...`;
@@ -259,6 +228,40 @@ btnExportarTudo?.addEventListener('click', async () => {
             btn.innerHTML = originalText;
         }
     }, { signal: eventController.signal });
+
+    // Evento para exportar TODOS os relatórios
+    const btnExportarTodos = document.getElementById('btn-exportar-todos-relatorios');
+    if (btnExportarTodos) {
+        btnExportarTodos.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const originalText = btnExportarTodos.innerHTML;
+            btnExportarTodos.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Gerando...`;
+            btnExportarTodos.style.pointerEvents = 'none';
+            
+            try {
+                const response = await fetch(`/api/export/excel/all`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    const currentDate = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+                    a.download = `Todos_Relatorios_${currentDate}.xlsx`;
+                    a.href = url;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    showToast("Sucesso!", "Todos os relatórios foram exportados!", "success");
+                } else {
+                    const result = await response.json();
+                    showToast("Erro ao Exportar", result.error || "Não foi possível gerar.", "danger");
+                }
+            } catch (err) {
+                showToast("Erro", "Falha na exportação.", "danger");
+            } finally {
+                btnExportarTodos.innerHTML = originalText;
+                btnExportarTodos.style.pointerEvents = 'auto';
+            }
+        }, { signal: eventController.signal });
+    }
 
     carregarLojasNoFiltro().then(() => carregarRelatorios(true));
 }
