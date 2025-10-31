@@ -62,6 +62,16 @@ Sistema web para monitoramento e geração de relatórios de lojas de varejo, de
 
 ## Mudanças Recentes
 
+### Botão para Ocultar/Mostrar Sidebar (2025-10-31)
+- 🎛️ **Toggle de Navegação**: Botão para ocultar/mostrar a barra lateral de navegação
+- 💾 **Estado Persistente**: Preferência salva no localStorage entre sessões
+- 🎬 **Animações Suaves**: Transições fluidas com cubic-bezier personalizado
+- 🔘 **Botão Flutuante**: Quando oculta, aparece um botão flutuante elegante para restaurar
+- 📐 **Layout Adaptativo**: Conteúdo principal se ajusta automaticamente ao espaço disponível
+- ✨ **Design Premium**: Integrado perfeitamente com o design Apple/Loft existente
+- 🖱️ **Microinterações**: Feedback visual em hover e clique (scale animations)
+- 📱 **Desktop Only**: Funcionalidade disponível apenas em telas grandes (>992px)
+
 ### Redesign Visual Completo - Estilo Apple (2025-10-31)
 - 🎨 **Design Premium**: Visual completamente renovado com estética inspirada na Apple
 - ✨ **Glassmorphism**: Efeitos de vidro fosco em cards, modais e menus com backdrop blur

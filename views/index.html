@@ -18,11 +18,16 @@
     <aside class="sidebar-desktop d-none d-lg-flex">
         <div class="sidebar-header">
             <div class="logo-container">
-                <i class="bi bi-bar-chart-line-fill"></i><span>Reports</span>
+                <i class="bi bi-bar-chart-line-fill"></i><span class="sidebar-text">Reports</span>
             </div>
-            <button id="theme-toggle" class="theme-toggle" title="Alternar Tema">
-                <i class="bi bi-moon-fill"></i>
-            </button>
+            <div class="sidebar-controls">
+                <button id="theme-toggle" class="theme-toggle" title="Alternar Tema">
+                    <i class="bi bi-moon-fill"></i>
+                </button>
+                <button id="sidebar-toggle" class="theme-toggle" title="Ocultar Menu">
+                    <i class="bi bi-layout-sidebar-inset"></i>
+                </button>
+            </div>
         </div>
         <nav class="sidebar-nav">
             <li id="nav-alertas" class="nav-item d-none"><a class="nav-link" href="/alertas-tecnico">Alertas</a></li>
@@ -54,6 +59,13 @@
             <i class="bi bi-moon-fill"></i>
         </button>
     </header>
+
+    <!-- =================================================================
+         BOTÃO FLUTUANTE PARA MOSTRAR SIDEBAR (quando oculta)
+    ================================================================== -->
+    <button id="sidebar-show-btn" class="sidebar-show-btn d-none d-lg-flex" title="Mostrar Menu">
+        <i class="bi bi-layout-sidebar-inset-reverse"></i>
+    </button>
 
     <!-- =================================================================
          CONTEÚDO PRINCIPAL

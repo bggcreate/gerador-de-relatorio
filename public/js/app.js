@@ -163,11 +163,57 @@ function getRoleDisplayName(role) {
     return roleNames[role] || role;
 }
 
+// =================================================================
+// CONTROLE DE SIDEBAR TOGGLE
+// =================================================================
+function initSidebarToggle() {
+    const sidebar = document.querySelector('.sidebar-desktop');
+    const mainContent = document.querySelector('.main-content');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const showBtn = document.getElementById('sidebar-show-btn');
+    
+    if (!sidebar || !mainContent || !toggleBtn || !showBtn) return;
+    
+    // Carregar estado salvo do localStorage
+    const sidebarHidden = localStorage.getItem('sidebarHidden') === 'true';
+    
+    if (sidebarHidden) {
+        sidebar.classList.add('sidebar-hidden');
+        mainContent.classList.add('sidebar-hidden');
+        showBtn.classList.add('visible');
+    }
+    
+    // Toggle sidebar ao clicar no botão de ocultar
+    toggleBtn.addEventListener('click', () => {
+        const isHidden = sidebar.classList.toggle('sidebar-hidden');
+        mainContent.classList.toggle('sidebar-hidden');
+        
+        if (isHidden) {
+            showBtn.classList.add('visible');
+            localStorage.setItem('sidebarHidden', 'true');
+        } else {
+            showBtn.classList.remove('visible');
+            localStorage.setItem('sidebarHidden', 'false');
+        }
+    });
+    
+    // Mostrar sidebar ao clicar no botão flutuante
+    showBtn.addEventListener('click', () => {
+        sidebar.classList.remove('sidebar-hidden');
+        mainContent.classList.remove('sidebar-hidden');
+        showBtn.classList.remove('visible');
+        localStorage.setItem('sidebarHidden', 'false');
+    });
+}
+
 async function main() {
     await setupSessionAndUI();
     
     // Inicializar animações globais da página
     initPageAnimations();
+    
+    // Inicializar controle de sidebar toggle
+    initSidebarToggle();
     
     // Redirecionar técnico para alertas se estiver na home
     if (currentUser && currentUser.role === 'tecnico') {

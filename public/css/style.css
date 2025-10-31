@@ -323,6 +323,7 @@ body.page-loaded {
     display: flex;
     flex-direction: column;
     box-shadow: var(--shadow-sm);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sidebar-header {
@@ -348,14 +349,19 @@ body.page-loaded {
     font-size: 1.8rem;
 }
 
-/* Botão Dark/Light Mode */
+.sidebar-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Botão Dark/Light Mode e Toggle Sidebar */
 .theme-toggle {
     background: var(--hover-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-medium);
     padding: 0.5rem;
     cursor: pointer;
-    transition: all var(--transition-speed);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -368,9 +374,66 @@ body.page-loaded {
     transform: scale(1.05);
 }
 
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
 .theme-toggle i {
     font-size: 1.2rem;
     color: var(--text-primary) !important;
+    transition: transform 0.3s ease;
+}
+
+/* Sidebar oculta */
+.sidebar-desktop.sidebar-hidden {
+    transform: translateX(-100%);
+}
+
+.sidebar-desktop.sidebar-hidden .sidebar-text {
+    opacity: 0;
+}
+
+/* Botão flutuante para mostrar sidebar */
+.sidebar-show-btn {
+    position: fixed;
+    top: 2rem;
+    left: 1rem;
+    width: 48px;
+    height: 48px;
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.sidebar-show-btn i {
+    font-size: 1.3rem;
+    color: var(--text-primary) !important;
+}
+
+.sidebar-show-btn:hover {
+    background: var(--hover-bg);
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-show-btn:active {
+    transform: scale(0.95);
+}
+
+.sidebar-show-btn.visible {
+    display: flex;
+    opacity: 1;
+    animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sidebar-nav {
@@ -672,7 +735,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
    LAYOUT RESPONSIVO
 ============================================================ */
 @media (min-width: 992px) { 
-    .main-content { margin-left: var(--sidebar-width); } 
+    .main-content { 
+        margin-left: var(--sidebar-width);
+        transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .main-content.sidebar-hidden {
+        margin-left: 0;
+    }
 }
 
 @media (max-width: 991.98px) { 
