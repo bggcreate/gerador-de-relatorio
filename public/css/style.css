@@ -1597,6 +1597,56 @@ img {
     border-radius: 2px;
 }
 
+/* ============================================================
+   SCROLL MINIMALISTA PARA CARDS
+============================================================ */
+.scrollable-card-content {
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.scrollable-card-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+    transition: background 0.2s ease;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}
+
+/* Para tabelas dentro de cards com scroll */
+.scrollable-table-wrapper {
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+.scrollable-table-wrapper::-webkit-scrollbar {
+    width: 4px;
+}
+
+.scrollable-table-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollable-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+    transition: background 0.2s ease;
+}
+
+.scrollable-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}
+
 /* Responsivo */
 @media (max-width: 767.98px) {
     .vendedor-card {
@@ -1609,5 +1659,13 @@ img {
     .vendedor-field.vendedor-vendas {
         width: calc(50% - 0.2rem) !important;
         min-width: auto !important;
+    }
+    
+    .scrollable-card-content {
+        max-height: 300px;
+    }
+    
+    .scrollable-table-wrapper {
+        max-height: 400px;
     }
 }
