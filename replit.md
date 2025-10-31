@@ -64,6 +64,20 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 
 ## Recent Changes
 
+### Scroll Minimalista e Card Bluve (2025-10-31)
+- 📜 **Scroll Minimalista em Cards Expansíveis**:
+  - Adicionadas classes CSS `.scrollable-card-content` e `.scrollable-table-wrapper` para containers com scroll
+  - Scrollbar minimalista de 4px com hover effect em laranja (accent-primary)
+  - Aplicado no card "Demandas Pendentes" (max-height: 400px)
+  - Aplicado na tabela "Assistência Técnica por Loja" (max-height: 500px)
+  - Cards agora mantêm altura fixa e não ocupam toda a tela quando há muitos dados
+  - Responsive: altura reduzida em mobile (300px e 400px respectivamente)
+- 🏪 **Card Bluve**:
+  - Confirmado que o card "Loja (Bluve)" já estava implementado ao lado do card "Monitoramento"
+  - Exibe métricas de CLIENTES, VENDAS e TX. CONVERSÃO
+  - Dados carregados automaticamente do novo relatório via variáveis `total_clientes_loja`, `total_vendas_loja`, `tx_conversao_loja`
+  - Comparações com período anterior funcionando corretamente
+
 ### UI Redesign - Logo e Navegação (2025-10-31)
 - 🔲 **Nova Logo - Grid Quadriculado**: 
   - Substituído ícone anterior por grid quadriculado (bi-grid-3x3-gap-fill) - estilo Loft Design
