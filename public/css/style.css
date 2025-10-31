@@ -565,6 +565,46 @@ body.page-loaded {
     transform: scale(1.05);
 }
 
+/* Submenu de Configurações */
+.submenu-link {
+    font-size: 0.825rem !important;
+    padding: 0.5rem 1rem 0.5rem 2.5rem !important;
+    color: var(--text-tertiary) !important;
+}
+
+.submenu-link:hover {
+    color: var(--text-primary) !important;
+    background-color: var(--hover-bg);
+}
+
+.nav-link.dropdown-toggle::after {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+}
+
+.nav-link.dropdown-toggle[aria-expanded="true"]::after {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu-dark {
+    background-color: var(--content-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-top: 0.5rem;
+}
+
+.dropdown-menu-dark .dropdown-item {
+    color: var(--text-secondary) !important;
+    padding: 0.625rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.dropdown-menu-dark .dropdown-item:hover {
+    background-color: var(--hover-bg) !important;
+    color: var(--text-primary) !important;
+}
+
 .sidebar-footer {
     margin-top: auto;
     padding-top: 1.5rem;
