@@ -62,6 +62,66 @@ Sistema web para monitoramento e geração de relatórios de lojas de varejo, de
 
 ## Mudanças Recentes
 
+### Redesign Visual Completo v2 - Refinamento e Correções (2025-10-31)
+- ✨ **Refinamento Completo do Loft Design System**: Correção de todas as proporções, espaçamentos e alinhamentos
+- 🔘 **Botões Padronizados**: 
+  - Proporções perfeitas e consistentes em todos os tamanhos (.btn, .btn-sm, .btn-lg)
+  - Padding otimizado: 0.625rem × 1.125rem (padrão), 0.5rem × 0.875rem (small), 0.75rem × 1.5rem (large)
+  - Border-radius harmonizado: 10px (padrão), 8px (small), 12px (large)
+  - Gradientes lineares no btn-primary para visual premium
+  - Microanimações com ripple effect e scale transform
+  - Hover states elevados com box-shadow aprimorado
+- 🧭 **Navbar/Sidebar Corrigida**:
+  - Header sidebar com flex layout otimizado e gap reduzido (0.5rem)
+  - Botões de controle (theme toggle e sidebar toggle) redimensionados para 36×36px
+  - Flex-shrink: 0 para evitar que botões sejam comprimidos
+  - Logo container com flex: 1 e text-overflow: ellipsis
+  - Alinhamento perfeito sem botões saindo do container
+- 🎨 **Cards Aprimorados**:
+  - Border-radius aumentado para 14px para visual mais suave
+  - Box-shadow em camadas múltiplas (2 níveis) para profundidade realista
+  - Hover com borda laranja sutil (rgba(255, 140, 66, 0.3))
+  - Card-header com ícones coloridos (accent-primary)
+  - Padding aumentado (1.5rem) para melhor respiração
+- 📝 **Formulários Modernizados**:
+  - Form labels com font-weight: 600 para maior hierarquia
+  - Inputs com border-radius: 10px e padding: 0.625rem × 1rem
+  - Focus states com box-shadow de 5px e elevação (translateY(-1px))
+  - Hover states com sombra sutil
+  - Suporte para .form-control-sm e .form-control-lg
+- 📱 **Mobile Header Premium**:
+  - Altura reduzida para 60px (mais compacto)
+  - Background com backdrop-filter blur(20px) e opacity 0.95
+  - Botões de menu com tamanho fixo 40×40px
+  - Título com flex: 1 para melhor distribuição de espaço
+  - Box-shadow mais suave (0 2px 12px rgba(0, 0, 0, 0.04))
+- 🌟 **Login Page v2 - Ultra Premium**:
+  - Card aumentado (max-width: 460px) com padding 3rem × 2.75rem
+  - Background gradient refinado com 3 camadas radiais
+  - Ícone com gradient linear e clip-path para efeito premium
+  - Inputs maiores (padding: 1rem × 1.125rem, border-radius: 14px)
+  - Botão primário com gradient e sombra forte
+  - Hover no card com elevação de 5px e border laranja
+  - **CORREÇÃO CRÍTICA**: Removido overflow: hidden para permitir scroll em telas pequenas
+  - Min-height no body em vez de height fixa
+  - Media query para max-height: 700px alinha conteúdo no topo
+  - Padding ajustável (1.5rem → 1rem em mobile)
+- 📐 **Responsividade Aprimorada**:
+  - Breakpoint @991.98px com padding 1.25rem e top offset 75px
+  - Breakpoint @767.98px com padding 1rem e ajustes de tipografia
+  - Cards e formulários mantêm boas proporções em todas as telas
+  - Tabelas com padding otimizado (0.75rem × 0.5rem)
+  - Botões mantêm tamanho legível em mobile
+- 🎯 **Acessibilidade**:
+  - Atributos autocomplete adicionados no login (username, current-password)
+  - Sem mais warnings do browser console
+  - Scrolling funcional em todas as viewports
+- ✅ **Validação pelo Architect**: 
+  - Pass completo após correção do scrolling
+  - Sem regressões detectadas
+  - Design mantém identidade Loft
+  - Todas as funcionalidades preservadas
+
 ### Botão para Ocultar/Mostrar Sidebar (2025-10-31)
 - 🎛️ **Toggle de Navegação**: Botão para ocultar/mostrar a barra lateral de navegação
 - 💾 **Estado Persistente**: Preferência salva no localStorage entre sessões
