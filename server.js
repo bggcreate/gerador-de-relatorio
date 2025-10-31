@@ -1,5 +1,5 @@
 // =================================================================
-// SISTEMA DE FLUXO 
+// SISTEMA DE FLUXO - teste
 // =================================================================
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
@@ -1542,3 +1542,4 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando em http://0.0.0.0:${PORT}`);
     logEvent('info', 'system', 'server_start', `Servidor iniciado em http://0.0.0.0:${PORT}`);
 });
+
