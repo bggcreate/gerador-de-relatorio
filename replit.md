@@ -62,6 +62,58 @@ Sistema web para monitoramento e geração de relatórios de lojas de varejo, de
 
 ## Mudanças Recentes
 
+### Redesign Visual Completo - Estilo Apple (2025-10-31)
+- 🎨 **Design Premium**: Visual completamente renovado com estética inspirada na Apple
+- ✨ **Glassmorphism**: Efeitos de vidro fosco em cards, modais e menus com backdrop blur
+- 🌈 **Página de Login Hero**: 
+  - Fundo com gradiente sutil (branco → laranja pastel)
+  - Animações de float suaves no background
+  - Card flutuante com sombras refinadas
+  - Fade-in sequenciado de todos os elementos
+  - Inputs com transformação ao focus
+- 🎯 **Microanimações Globais**:
+  - Botões com efeito ripple e scale transform
+  - Hover states com translateY(-2px)
+  - Active states com feedback tátil (scale 0.98)
+  - Transições com cubic-bezier(0.16, 1, 0.3, 1)
+- 📊 **Cards e Componentes**:
+  - Sombras em múltiplas camadas para profundidade
+  - Hover com elevação suave (translateY e box-shadow)
+  - Borders mais suaves (12px border-radius)
+  - Backdrop filter blur(10px) para efeito premium
+- 🧭 **Sidebar Navigation**:
+  - Barra de acento deslizante (3px laranja) em hover/active
+  - Ícones com animação de scale (1.1x em hover)
+  - Translateo X(4px) suave ao passar o mouse
+  - Ícone ativo colorido com accent-primary
+- 📱 **Experiência Mobile Premium**:
+  - Menu mobile com slide-in + fade opacity
+  - Touch feedback em todos os botões (scale animations)
+  - Backdrop blur no modal e backdrop
+  - Espaçamento otimizado para polegar (1rem+ padding)
+  - Headers mobile com animações suaves
+- 🔄 **Animações de Scroll**:
+  - IntersectionObserver para fade-in progressivo
+  - Cards aparecem com translateY(30px) → 0
+  - Transições de 0.6s com easing personalizado
+  - Classe .will-animate para controle preciso
+- ⏳ **Loading States**:
+  - Spinner customizado com animation keyframes
+  - Função setButtonLoading() para estados async
+  - Página com fade-in global ao carregar
+  - Animações de esqueleto prontas para uso
+- 🎨 **CSS Tokens Aprimorados**:
+  - Sombras refinadas (shadow-sm, shadow-md, shadow-lg)
+  - Border-radius consistente (8px, 12px, 16px, 20px, 24px)
+  - Transitions com cubic-bezier para fluidez premium
+  - Cores vibrantes mantidas para dashboard
+- 💡 **Detalhes de Polish**:
+  - Tipografia Inter com letter-spacing ajustado
+  - Form inputs com elevação ao focus
+  - Theme toggle com microanimação
+  - Todas as funcionalidades mantidas 100% intactas
+- ✅ **Validação**: Aprovado pelo Architect sem regressões detectadas
+
 ### Dashboard de Assistência Técnica e Filtros por Loja do Técnico (2025-10-29)
 - 🏪 **Campo loja_tecnico**: Técnicos agora têm uma loja específica atribuída
 - 🔒 **Restrição por Loja**: Técnicos só visualizam e criam assistências para sua loja
