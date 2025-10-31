@@ -106,7 +106,6 @@ async function setupSessionAndUI() {
             'nav-demandas': permissions.demandas || false,
             'nav-assistencia': permissions.assistencia || false,
             'nav-configuracoes': permissions['gerenciar-usuarios'] || false,
-            'nav-gerenciar-usuarios': permissions['gerenciar-usuarios'] || false,
             'nav-logs': permissions.logs || false
         };
         

@@ -18,9 +18,12 @@
     <aside class="sidebar-desktop d-none d-lg-flex">
         <div class="sidebar-header">
             <div class="logo-container">
-                <i class="bi bi-bar-chart-line-fill"></i><span class="sidebar-text">Reports</span>
+                <i class="bi bi-heart-fill"></i>
             </div>
             <div class="sidebar-controls">
+                <button id="theme-toggle-desktop" class="theme-toggle" title="Alternar Tema">
+                    <i class="bi bi-moon-fill"></i>
+                </button>
                 <button id="sidebar-toggle" class="theme-toggle" title="Ocultar Menu">
                     <i class="bi bi-layout-sidebar-inset"></i>
                 </button>
@@ -34,7 +37,6 @@
             <li id="nav-demandas" class="nav-item d-none"><a class="nav-link" href="/demandas">Demandas</a></li>
             <li id="nav-assistencia" class="nav-item d-none"><a class="nav-link" href="/assistencia">Assistência Técnica</a></li>
             <li id="nav-logs" class="nav-item d-none"><a class="nav-link" href="/logs">Logs</a></li>
-            <li id="nav-gerenciar-usuarios" class="nav-item d-none"><a class="nav-link" href="/gerenciar-usuarios">Usuários</a></li>
         </nav>
         <div class="sidebar-footer">
             <div id="user-info-container"></div>
@@ -49,8 +51,7 @@
             <i class="bi bi-list"></i>
         </button>
         <div class="mobile-header-title">
-            <i class="bi bi-bar-chart-line-fill"></i>
-            <span>Reports</span>
+            <i class="bi bi-heart-fill"></i>
         </div>
         <button id="theme-toggle-mobile" class="theme-toggle" title="Alternar Tema" style="margin-left: auto;">
             <i class="bi bi-moon-fill"></i>
@@ -62,13 +63,6 @@
     ================================================================== -->
     <button id="sidebar-show-btn" class="sidebar-show-btn d-none d-lg-flex" title="Mostrar Menu">
         <i class="bi bi-layout-sidebar-inset-reverse"></i>
-    </button>
-
-    <!-- =================================================================
-         BOTÃO DE TEMA FLUTUANTE (canto superior direito)
-    ================================================================== -->
-    <button id="theme-toggle-floating" class="theme-toggle-floating d-none d-lg-flex" title="Alternar Tema">
-        <i class="bi bi-moon-fill"></i>
     </button>
 
     <!-- =================================================================
@@ -88,7 +82,7 @@
             <div class="modal-content mobile-menu-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="mobileMenuModalLabel">
-                         <i class="bi bi-bar-chart-line-fill"></i><span>Reports</span>
+                         <i class="bi bi-heart-fill"></i>
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -102,7 +96,6 @@
                         <li id="nav-demandas" class="nav-item d-none"><a class="nav-link" href="/demandas">Demandas</a></li>
                         <li id="nav-assistencia" class="nav-item d-none"><a class="nav-link" href="/assistencia">Assistência Técnica</a></li>
                         <li id="nav-logs" class="nav-item d-none"><a class="nav-link" href="/logs">Logs</a></li>
-                        <li id="nav-gerenciar-usuarios" class="nav-item d-none"><a class="nav-link" href="/gerenciar-usuarios">Usuários</a></li>
                     </nav>
                 </div>
             </div>

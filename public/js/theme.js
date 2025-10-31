@@ -23,23 +23,17 @@ class ThemeManager {
     }
 
     setupToggleButton() {
-        const toggleBtn = document.getElementById('theme-toggle');
+        const toggleBtnDesktop = document.getElementById('theme-toggle-desktop');
         const toggleBtnMobile = document.getElementById('theme-toggle-mobile');
-        const toggleBtnFloating = document.getElementById('theme-toggle-floating');
         
-        if (toggleBtn) {
-            this.updateButtonIcon(toggleBtn);
-            toggleBtn.addEventListener('click', () => this.toggle());
+        if (toggleBtnDesktop) {
+            this.updateButtonIcon(toggleBtnDesktop);
+            toggleBtnDesktop.addEventListener('click', () => this.toggle());
         }
         
         if (toggleBtnMobile) {
             this.updateButtonIcon(toggleBtnMobile);
             toggleBtnMobile.addEventListener('click', () => this.toggle());
-        }
-        
-        if (toggleBtnFloating) {
-            this.updateButtonIcon(toggleBtnFloating);
-            toggleBtnFloating.addEventListener('click', () => this.toggle());
         }
     }
 
@@ -62,13 +56,11 @@ class ThemeManager {
     }
 
     updateAllButtons() {
-        const toggleBtn = document.getElementById('theme-toggle');
+        const toggleBtnDesktop = document.getElementById('theme-toggle-desktop');
         const toggleBtnMobile = document.getElementById('theme-toggle-mobile');
-        const toggleBtnFloating = document.getElementById('theme-toggle-floating');
         
-        if (toggleBtn) this.updateButtonIcon(toggleBtn);
+        if (toggleBtnDesktop) this.updateButtonIcon(toggleBtnDesktop);
         if (toggleBtnMobile) this.updateButtonIcon(toggleBtnMobile);
-        if (toggleBtnFloating) this.updateButtonIcon(toggleBtnFloating);
     }
 
     getStoredTheme() {
