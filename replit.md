@@ -64,20 +64,20 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 
 ## Recent Changes
 
-### UI Refinements - Compact Mode (2025-10-31)
-- 🌓 **Botão de Modo Noturno Ultra Compacto**: 
-  - Reduzido de 48px para **36px** (width/height)
-  - Border-radius de 12px para 10px (mais sutil)
-  - Ícone reduzido: 1.3rem → 1.1rem
-  - Posicionamento: top/right de 2rem → 1.25rem
-  - Box-shadow mais suave: 0 2px 10px (antes 0 4px 16px)
-  - Visual minimalista e discreto
-- 🗑️ **Remoção de Botão Duplicado**: 
-  - Removido botão de tema antigo da sidebar (#theme-toggle)
-  - Mantido apenas botão flutuante (desktop) e mobile
-  - Theme.js já protege contra elementos faltantes
+### UI Redesign - Logo e Navegação (2025-10-31)
+- ❤️ **Nova Logo - Coração**: 
+  - Substituído ícone anterior (bi-bar-chart-line-fill) por coração (bi-heart-fill)
+  - Texto "Reports" removido de todas as interfaces
+  - Mudanças aplicadas em: login, navbar desktop, header mobile, menu modal
+  - Visual minimalista focado apenas no ícone
+- 🌓 **Reposicionamento do Botão de Modo Noturno**: 
+  - Botão movido para .sidebar-controls ao lado do toggle da sidebar
+  - ID atualizado: #theme-toggle-desktop
+  - Removido botão flutuante duplicado (#theme-toggle-floating)
+  - Theme.js atualizado para usar apenas botões desktop e mobile
+  - Mesmo estilo visual dos outros botões de controle (36px)
 - 📋 **Simplificação do Menu**:
-  - Removido item "Configurações" com submenu
-  - Restaurado item "Usuários" diretamente no menu principal
-  - Razão: Botão de engrenagem já existe ao lado do "live"
-  - Menu agora mais limpo e direto
+  - Removida aba "Usuários" do menu principal
+  - Acesso a gestão de usuários mantido via botão de configurações (engrenagem)
+  - app.js atualizado para remover referência a nav-gerenciar-usuarios
+  - Menu principal agora mais limpo e focado
