@@ -67,3 +67,56 @@ export function showConfirmModal(message) {
         confirmModal.show();
     });
 }
+
+/**
+ * Inicializa animações de scroll para elementos
+ * Adiciona a classe 'fade-in-up' aos elementos que entram na viewport
+ */
+export function initScrollAnimations() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    const animateElements = document.querySelectorAll('.card, .animate-on-scroll');
+    animateElements.forEach(el => {
+        el.classList.add('will-animate');
+        observer.observe(el);
+    });
+}
+
+/**
+ * Adiciona efeito de loading suave em botões
+ * @param {HTMLElement} button O botão a ser modificado
+ * @param {boolean} isLoading Se está carregando ou não
+ */
+export function setButtonLoading(button, isLoading) {
+    if (isLoading) {
+        button.dataset.originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Carregando...';
+    } else {
+        button.disabled = false;
+        button.innerHTML = button.dataset.originalText || button.innerHTML;
+    }
+}
+
+/**
+ * Inicializa animações globais da página
+ */
+export function initPageAnimations() {
+    document.body.classList.add('page-loaded');
+    
+    setTimeout(() => {
+        initScrollAnimations();
+    }, 100);
+}

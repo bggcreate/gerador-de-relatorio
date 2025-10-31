@@ -10,6 +10,7 @@ import { initAlertasTecnicoPage } from './pages/alertas-tecnico.js';
 import { initNovoRelatorioPage } from './pages/novo-relatorio.js';
 import { initGerenciarUsuariosPage } from './pages/gerenciar-usuarios.js';
 import { initLogsPage } from './pages/logs.js';
+import { initPageAnimations, initScrollAnimations } from './utils.js';
 
 const pageInitializers = {
     'admin': initAdminPage,
@@ -55,6 +56,9 @@ async function loadPage(path) {
         if (!response.ok) throw new Error(`Página /content/${activePage} não encontrada.`);
 
         pageContent.innerHTML = await response.text();
+        
+        // Inicializar animações de scroll para os novos elementos
+        setTimeout(() => initScrollAnimations(), 50);
         
         // Garante que a função de inicialização da página seja chamada
         const initFunc = pageInitializers[activePage];
@@ -161,6 +165,9 @@ function getRoleDisplayName(role) {
 
 async function main() {
     await setupSessionAndUI();
+    
+    // Inicializar animações globais da página
+    initPageAnimations();
     
     // Redirecionar técnico para alertas se estiver na home
     if (currentUser && currentUser.role === 'tecnico') {
