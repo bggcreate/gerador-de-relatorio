@@ -21,6 +21,8 @@ const { requireRole, requirePage, getLojaFilter, getPermissions, ROLES } = requi
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.set('trust proxy', true);
+
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(64).toString('hex');
 if (!process.env.SESSION_SECRET) {
     console.warn('⚠️  ATENÇÃO: SESSION_SECRET não configurado. Usando um secret gerado automaticamente.');
