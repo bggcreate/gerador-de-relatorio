@@ -65,17 +65,17 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 ## Recent Changes
 
 ### UI Redesign - Logo e Navegação (2025-10-31)
-- ❤️ **Nova Logo - Coração**: 
-  - Substituído ícone anterior (bi-bar-chart-line-fill) por coração (bi-heart-fill)
+- 🔲 **Nova Logo - Grid Quadriculado**: 
+  - Substituído ícone anterior por grid quadriculado (bi-grid-3x3-gap-fill) - estilo Loft Design
   - Texto "Reports" removido de todas as interfaces
   - Mudanças aplicadas em: login, navbar desktop, header mobile, menu modal
   - Visual minimalista focado apenas no ícone
 - 🌓 **Reposicionamento do Botão de Modo Noturno**: 
-  - Botão movido para .sidebar-controls ao lado do toggle da sidebar
-  - ID atualizado: #theme-toggle-desktop
-  - Removido botão flutuante duplicado (#theme-toggle-floating)
-  - Theme.js atualizado para usar apenas botões desktop e mobile
-  - Mesmo estilo visual dos outros botões de controle (36px)
+  - Botão movido do topo da sidebar para o rodapé
+  - Posicionado junto com botões de ação (Live, Engrenagem, Logout)
+  - Injetado dinamicamente via app.js no userInfoContainer
+  - Theme.js com proteção contra listeners duplicados (data-theme-initialized)
+  - Funciona corretamente em desktop e mobile
 - 📋 **Simplificação do Menu**:
   - Removida aba "Usuários" do menu principal
   - Acesso a gestão de usuários mantido via botão de configurações (engrenagem)
