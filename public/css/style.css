@@ -451,6 +451,47 @@ body.page-loaded {
     animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Botão flutuante de tema (canto superior direito) */
+.theme-toggle-floating {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    width: 48px;
+    height: 48px;
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-toggle-floating i {
+    font-size: 1.3rem;
+    color: var(--text-primary) !important;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-toggle-floating:hover {
+    background: var(--hover-bg);
+    transform: scale(1.05) rotate(5deg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.theme-toggle-floating:hover i {
+    transform: rotate(15deg) scale(1.1);
+}
+
+.theme-toggle-floating:active {
+    transform: scale(0.95);
+}
+
 .sidebar-nav {
     list-style: none !important;
     padding: 0 !important;
@@ -618,6 +659,60 @@ body.page-loaded {
 
 .card-body {
     padding: 1.5rem !important;
+}
+
+/* Cards Elaborados com Efeitos Especiais */
+.card-hover-effect {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: visible;
+}
+
+.card-hover-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(255, 140, 66, 0.05), rgba(255, 140, 66, 0));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.card-hover-effect:hover::before {
+    opacity: 1;
+}
+
+.card-hover-effect:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12),
+                0 4px 12px rgba(255, 140, 66, 0.15);
+}
+
+.icon-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.card-hover-effect:hover .icon-badge {
+    transform: rotate(10deg) scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.bg-purple {
+    background-color: var(--color-purple) !important;
+    color: white !important;
 }
 
 /* Formulários Redesenhados - Elegantes e Modernos */

@@ -25,6 +25,7 @@ class ThemeManager {
     setupToggleButton() {
         const toggleBtn = document.getElementById('theme-toggle');
         const toggleBtnMobile = document.getElementById('theme-toggle-mobile');
+        const toggleBtnFloating = document.getElementById('theme-toggle-floating');
         
         if (toggleBtn) {
             this.updateButtonIcon(toggleBtn);
@@ -34,6 +35,11 @@ class ThemeManager {
         if (toggleBtnMobile) {
             this.updateButtonIcon(toggleBtnMobile);
             toggleBtnMobile.addEventListener('click', () => this.toggle());
+        }
+        
+        if (toggleBtnFloating) {
+            this.updateButtonIcon(toggleBtnFloating);
+            toggleBtnFloating.addEventListener('click', () => this.toggle());
         }
     }
 
@@ -58,9 +64,11 @@ class ThemeManager {
     updateAllButtons() {
         const toggleBtn = document.getElementById('theme-toggle');
         const toggleBtnMobile = document.getElementById('theme-toggle-mobile');
+        const toggleBtnFloating = document.getElementById('theme-toggle-floating');
         
         if (toggleBtn) this.updateButtonIcon(toggleBtn);
         if (toggleBtnMobile) this.updateButtonIcon(toggleBtnMobile);
+        if (toggleBtnFloating) this.updateButtonIcon(toggleBtnFloating);
     }
 
     getStoredTheme() {
