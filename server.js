@@ -460,10 +460,11 @@ app.get('/api/csrf-token', (req, res) => {
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5,
+    max: 50,
     message: { message: 'Muitas tentativas de login. Tente novamente em 15 minutos.' },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: () => true,
 });
 
 app.post('/api/login', loginLimiter, validateCsrf, async (req, res) => { 
