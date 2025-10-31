@@ -72,11 +72,15 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
   - Aplicado na tabela "Assistência Técnica por Loja" (max-height: 500px)
   - Cards agora mantêm altura fixa e não ocupam toda a tela quando há muitos dados
   - Responsive: altura reduzida em mobile (300px e 400px respectivamente)
-- 🏪 **Card Bluve**:
-  - Confirmado que o card "Loja (Bluve)" já estava implementado ao lado do card "Monitoramento"
-  - Exibe métricas de CLIENTES, VENDAS e TX. CONVERSÃO
-  - Dados carregados automaticamente do novo relatório via variáveis `total_clientes_loja`, `total_vendas_loja`, `tx_conversao_loja`
-  - Comparações com período anterior funcionando corretamente
+- 🏪 **Card Bluve e Controle de Visualização por Perfil**:
+  - **Card "Loja (Bluve)"**: Visível para TODOS os usuários (admin, gerente, técnico)
+    - Exibe métricas de CLIENTES, VENDAS e TX. CONVERSÃO
+    - Dados carregados automaticamente do novo relatório via `total_clientes_loja`, `total_vendas_loja`, `tx_conversao_loja`
+    - Comparações com período anterior funcionando corretamente
+  - **Card "Monitoramento"**: Visível APENAS para admin
+    - Oculto automaticamente para gerente e técnico
+    - Quando oculto, o card Bluve ocupa largura total (col-xl-12)
+  - **Gráficos Comparativos**: Visíveis apenas para admin, ocultos para gerente e técnico
 
 ### UI Redesign - Logo e Navegação (2025-10-31)
 - 🔲 **Nova Logo - Grid Quadriculado**: 
