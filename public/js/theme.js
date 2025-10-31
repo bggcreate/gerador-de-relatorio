@@ -26,14 +26,22 @@ class ThemeManager {
         const toggleBtnDesktop = document.getElementById('theme-toggle-desktop');
         const toggleBtnMobile = document.getElementById('theme-toggle-mobile');
         
-        if (toggleBtnDesktop) {
+        if (toggleBtnDesktop && !toggleBtnDesktop.dataset.themeInitialized) {
             this.updateButtonIcon(toggleBtnDesktop);
             toggleBtnDesktop.addEventListener('click', () => this.toggle());
+            toggleBtnDesktop.dataset.themeInitialized = 'true';
+        } else if (toggleBtnDesktop) {
+            // Apenas atualiza o ícone se já foi inicializado
+            this.updateButtonIcon(toggleBtnDesktop);
         }
         
-        if (toggleBtnMobile) {
+        if (toggleBtnMobile && !toggleBtnMobile.dataset.themeInitialized) {
             this.updateButtonIcon(toggleBtnMobile);
             toggleBtnMobile.addEventListener('click', () => this.toggle());
+            toggleBtnMobile.dataset.themeInitialized = 'true';
+        } else if (toggleBtnMobile) {
+            // Apenas atualiza o ícone se já foi inicializado
+            this.updateButtonIcon(toggleBtnMobile);
         }
     }
 

@@ -146,8 +146,14 @@ async function setupSessionAndUI() {
                 </div>
                 <div class="user-actions">
                     ${actionButtons}
+                    <button id="theme-toggle-desktop" class="btn" title="Alternar Tema"><i class="bi bi-moon-fill"></i></button>
                     <a href="/logout" class="btn" title="Sair"><i class="bi bi-box-arrow-right"></i></a>
                 </div>`;
+            
+            // Reinicializar o theme manager para o botão injetado dinamicamente
+            if (window.themeManager) {
+                window.themeManager.setupToggleButton();
+            }
         }
     } catch (e) { console.error("Falha na sessão:", e); window.location.href = '/login'; }
 }
