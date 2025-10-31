@@ -1,20 +1,31 @@
 // =================================================================
 // SISTEMA DE FLUXO - teste
 // =================================================================
+require('dotenv').config();
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const session = require('express-session');
 const fs = require('fs');
+const crypto = require('crypto');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const multer = require('multer');
 const pdf = require('pdf-parse');
+const bcrypt = require('bcrypt');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
 const { requireRole, requirePage, getLojaFilter, getPermissions, ROLES } = require('./middleware/roleAuth');
 
-
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
+
+const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(64).toString('hex');
+if (!process.env.SESSION_SECRET) {
+    console.warn('⚠️  ATENÇÃO: SESSION_SECRET não configurado. Usando um secret gerado automaticamente.');
+    console.warn('⚠️  Para produção, configure a variável de ambiente SESSION_SECRET.');
+}
 
 // --- CONFIGURAÇÃO GERAL ---
 const dataDir = path.join(__dirname, 'data');
@@ -22,20 +33,80 @@ if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
 }
 const DB_PATH = path.join(dataDir, 'relatorios.db');
+
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'", "https://cdn.jsdelivr.net"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'none'"],
+        },
+    },
+    crossOriginEmbedderPolicy: false,
+}));
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(session({
-    secret: 'chave-definitiva-123',
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }
+    cookie: { 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000
+    },
+    name: 'sessionId'
 }));
 
 // --- CONFIGURAÇÃO DO MULTER ---
 const upload = multer({ storage: multer.memoryStorage() });
 
 // --- MIDDLEWARES ---
+const generateCsrfToken = () => crypto.randomBytes(32).toString('hex');
+
+const csrfProtection = (req, res, next) => {
+    if (!req.session.csrfToken) {
+        req.session.csrfToken = generateCsrfToken();
+    }
+    next();
+};
+
+const validateCsrf = (req, res, next) => {
+    const token = req.headers['x-csrf-token'] || req.body._csrf;
+    
+    if (!req.session.csrfToken || token !== req.session.csrfToken) {
+        logEvent('security', req.session?.username || 'unknown', 'csrf_violation', `CSRF token inválido para ${req.method} ${req.path}`, req);
+        return res.status(403).json({ error: 'CSRF token inválido. Tente novamente.' });
+    }
+    next();
+};
+
+const auditMiddleware = (req, res, next) => {
+    const privilegedRoles = ['admin', 'dev'];
+    const mutatingMethods = ['POST', 'PUT', 'DELETE'];
+    
+    if (req.session && req.session.username && privilegedRoles.includes(req.session.role)) {
+        if (mutatingMethods.includes(req.method) && !req.path.includes('/api/login')) {
+            const action = `${req.method} ${req.path}`;
+            const details = `Ação privilegiada executada por ${req.session.role}`;
+            logEvent('audit', req.session.username, action, details, req);
+        }
+    }
+    next();
+};
+
+app.use(csrfProtection);
+app.use(auditMiddleware);
+
 const requirePageLogin = (req, res, next) => {
     if (req.session && req.session.userId) {
         return next();
@@ -148,6 +219,26 @@ let db = new sqlite3.Database(DB_PATH, err => {
             if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar loja em estoque_tecnico:', err.message);
         });
         
+        db.run(`ALTER TABLE usuarios ADD COLUMN password_hashed INTEGER DEFAULT 0`, (err) => {
+            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar password_hashed:', err.message);
+        });
+        
+        db.run(`ALTER TABLE logs ADD COLUMN ip_address TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar ip_address em logs:', err.message);
+        });
+        db.run(`ALTER TABLE logs ADD COLUMN user_agent TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar user_agent em logs:', err.message);
+        });
+        db.run(`ALTER TABLE logs ADD COLUMN event_type TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar event_type em logs:', err.message);
+        });
+        db.run(`ALTER TABLE logs ADD COLUMN route TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar route em logs:', err.message);
+        });
+        db.run(`ALTER TABLE logs ADD COLUMN payload_hash TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar payload_hash em logs:', err.message);
+        });
+        
         const adminUsername = 'admin';
         const correctPassword = 'admin';
         db.get('SELECT * FROM usuarios WHERE username = ?', [adminUsername], (err, row) => {
@@ -207,6 +298,11 @@ app.get('/logs', requirePageLogin, requirePage(['logs']), (req, res) => {
 
 // Backup - apenas admin e dev
 app.get('/backup', requirePageLogin, requirePage(['backup']), (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
+app.get('/dev/system', requirePageLogin, requireRole([ROLES.DEV]), (req, res) => {
+    logEvent('dev_access', req.session.username, 'system_access', 'Desenvolvedor acessou painel de sistema', req);
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
@@ -355,22 +451,86 @@ app.post('/api/process-pdf', requirePageLogin, upload.single('pdfFile'), async (
 // <<<---------------------------------------------------->>>
 
 
-// APIs DE SESSÃO E USUÁRIOS 
-app.post('/api/login', (req, res) => { 
+// APIs DE SESSÃO E USUÁRIOS
+app.get('/api/csrf-token', (req, res) => {
+    res.json({ csrfToken: req.session.csrfToken });
+});
+
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { message: 'Muitas tentativas de login. Tente novamente em 15 minutos.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+app.post('/api/login', loginLimiter, validateCsrf, async (req, res) => { 
     const { username, password } = req.body; 
-    db.get('SELECT * FROM usuarios WHERE username = ? AND password = ?', [username, password], (err, user) => { 
-        if (err || !user) return res.status(401).json({ message: 'Credenciais inválidas.' }); 
-        req.session.userId = user.id; 
-        req.session.username = user.username; 
-        req.session.role = user.role;
-        req.session.loja_gerente = user.loja_gerente;
-        req.session.lojas_consultor = user.lojas_consultor;
-        req.session.loja_tecnico = user.loja_tecnico;
-        logEvent('access', user.username, 'login', `Usuário ${user.username} (${user.role}) fez login`);
-        res.json({ success: true }); 
+    
+    if (!username || !password) {
+        logEvent('security', username || 'unknown', 'login_failed', 'Tentativa de login sem credenciais', req);
+        return res.status(400).json({ message: 'Username e senha são obrigatórios.' });
+    }
+    
+    db.get('SELECT * FROM usuarios WHERE username = ?', [username], async (err, user) => { 
+        if (err) {
+            logEvent('error', username, 'login_error', `Erro no banco de dados: ${err.message}`, req);
+            return res.status(500).json({ message: 'Erro interno do servidor.' }); 
+        }
+        
+        if (!user) {
+            logEvent('security', username, 'login_failed', 'Usuário não encontrado', req);
+            return res.status(401).json({ message: 'Credenciais inválidas.' }); 
+        }
+        
+        try {
+            let passwordMatch = false;
+            
+            if (user.password_hashed === 1) {
+                passwordMatch = await bcrypt.compare(password, user.password);
+            } else {
+                passwordMatch = (user.password === password);
+                
+                if (passwordMatch) {
+                    const hashedPassword = await bcrypt.hash(password, 10);
+                    db.run('UPDATE usuarios SET password = ?, password_hashed = 1 WHERE id = ?', 
+                        [hashedPassword, user.id], 
+                        (err) => {
+                            if (err) console.error('Erro ao migrar senha para hash:', err.message);
+                            else console.log(`✓ Senha do usuário ${username} migrada para bcrypt`);
+                        }
+                    );
+                }
+            }
+            
+            if (!passwordMatch) {
+                logEvent('security', username, 'login_failed', 'Senha incorreta', req);
+                return res.status(401).json({ message: 'Credenciais inválidas.' }); 
+            }
+            
+            req.session.userId = user.id; 
+            req.session.username = user.username; 
+            req.session.role = user.role;
+            req.session.loja_gerente = user.loja_gerente;
+            req.session.lojas_consultor = user.lojas_consultor;
+            req.session.loja_tecnico = user.loja_tecnico;
+            
+            logEvent('access', user.username, 'login_success', `Usuário ${user.username} (${user.role}) fez login com sucesso`, req);
+            res.json({ success: true }); 
+        } catch (error) {
+            logEvent('error', username, 'login_error', `Erro ao processar login: ${error.message}`, req);
+            res.status(500).json({ message: 'Erro ao processar login.' });
+        }
     }); 
 });
-app.get('/logout', (req, res) => { req.session.destroy(() => res.redirect('/login')); });
+app.get('/logout', (req, res) => { 
+    const username = req.session?.username;
+    const role = req.session?.role;
+    if (username) {
+        logEvent('access', username, 'logout', `Usuário ${username} (${role}) fez logout`, req);
+    }
+    req.session.destroy(() => res.redirect('/login')); 
+});
 app.get('/api/session-info', requirePageLogin, (req, res) => { 
     const permissions = getPermissions(req.session.role);
     res.json({ 
@@ -386,47 +546,70 @@ app.get('/api/usuarios', requirePageLogin, requireRole(['admin', 'dev']), (req, 
         res.json(users || []); 
     }); 
 });
-app.post('/api/usuarios', requirePageLogin, requireRole(['admin', 'dev']), (req, res) => { 
+app.post('/api/usuarios', requirePageLogin, requireRole(['admin', 'dev']), validateCsrf, async (req, res) => { 
     const { username, password, role, loja_gerente, lojas_consultor, loja_tecnico } = req.body; 
     if (!username || !password || !role) return res.status(400).json({ error: 'Username, senha e cargo são obrigatórios.' }); 
     
-    // Admin não pode criar usuários Dev
     if (req.session.role === 'admin' && role === 'dev') {
         return res.status(403).json({ error: 'Apenas desenvolvedores podem criar usuários com cargo Dev.' });
     }
     
-    const lojas_consultor_str = Array.isArray(lojas_consultor) ? lojas_consultor.join(',') : (lojas_consultor || '');
-    db.run('INSERT INTO usuarios (username, password, role, loja_gerente, lojas_consultor, loja_tecnico) VALUES (?, ?, ?, ?, ?, ?)', 
-        [username, password, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null], 
-        function (err) { 
-            if (err) return res.status(500).json({ error: 'Erro ao criar usuário. O nome de usuário já pode existir.' }); 
-            res.status(201).json({ success: true, id: this.lastID }); 
-        }
-    ); 
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const lojas_consultor_str = Array.isArray(lojas_consultor) ? lojas_consultor.join(',') : (lojas_consultor || '');
+        
+        db.run('INSERT INTO usuarios (username, password, role, loja_gerente, lojas_consultor, loja_tecnico, password_hashed) VALUES (?, ?, ?, ?, ?, ?, 1)', 
+            [username, hashedPassword, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null], 
+            function (err) { 
+                if (err) {
+                    logEvent('error', req.session.username, 'user_creation_failed', `Erro ao criar usuário ${username}: ${err.message}`, req);
+                    return res.status(500).json({ error: 'Erro ao criar usuário. O nome de usuário já pode existir.' }); 
+                }
+                logEvent('admin', req.session.username, 'user_created', `Usuário ${username} criado com cargo ${role}`, req);
+                res.status(201).json({ success: true, id: this.lastID }); 
+            }
+        );
+    } catch (error) {
+        logEvent('error', req.session.username, 'user_creation_error', `Erro ao hash senha: ${error.message}`, req);
+        res.status(500).json({ error: 'Erro ao processar senha.' });
+    }
 });
-app.put('/api/usuarios/:id', requirePageLogin, requireRole(['admin', 'dev']), (req, res) => { 
+app.put('/api/usuarios/:id', requirePageLogin, requireRole(['admin', 'dev']), validateCsrf, async (req, res) => { 
     const { id } = req.params; 
     const { username, password, role, loja_gerente, lojas_consultor, loja_tecnico } = req.body; 
     if (!username || !role) return res.status(400).json({ error: 'Username e Cargo são obrigatórios.' }); 
     
-    // Admin não pode alterar usuários para cargo Dev
     if (req.session.role === 'admin' && role === 'dev') {
         return res.status(403).json({ error: 'Apenas desenvolvedores podem criar/alterar usuários com cargo Dev.' });
     }
     
-    const lojas_consultor_str = Array.isArray(lojas_consultor) ? lojas_consultor.join(',') : (lojas_consultor || '');
-    const sql = password ? 
-        'UPDATE usuarios SET username = ?, password = ?, role = ?, loja_gerente = ?, lojas_consultor = ?, loja_tecnico = ? WHERE id = ?' : 
-        'UPDATE usuarios SET username = ?, role = ?, loja_gerente = ?, lojas_consultor = ?, loja_tecnico = ? WHERE id = ?'; 
-    const params = password ? 
-        [username, password, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null, id] : 
-        [username, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null, id]; 
-    db.run(sql, params, function (err) { 
-        if (err) return res.status(500).json({ error: 'Erro ao atualizar usuário.' }); 
-        res.json({ success: true }); 
-    }); 
+    try {
+        const lojas_consultor_str = Array.isArray(lojas_consultor) ? lojas_consultor.join(',') : (lojas_consultor || '');
+        let sql, params;
+        
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            sql = 'UPDATE usuarios SET username = ?, password = ?, password_hashed = 1, role = ?, loja_gerente = ?, lojas_consultor = ?, loja_tecnico = ? WHERE id = ?';
+            params = [username, hashedPassword, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null, id];
+        } else {
+            sql = 'UPDATE usuarios SET username = ?, role = ?, loja_gerente = ?, lojas_consultor = ?, loja_tecnico = ? WHERE id = ?';
+            params = [username, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null, id];
+        }
+        
+        db.run(sql, params, function (err) { 
+            if (err) {
+                logEvent('error', req.session.username, 'user_update_failed', `Erro ao atualizar usuário ${username}: ${err.message}`, req);
+                return res.status(500).json({ error: 'Erro ao atualizar usuário.' }); 
+            }
+            logEvent('admin', req.session.username, 'user_updated', `Usuário ${username} atualizado`, req);
+            res.json({ success: true }); 
+        }); 
+    } catch (error) {
+        logEvent('error', req.session.username, 'user_update_error', `Erro ao hash senha: ${error.message}`, req);
+        res.status(500).json({ error: 'Erro ao processar senha.' });
+    }
 });
-app.delete('/api/usuarios/:id', requirePageLogin, requireRole(['admin', 'dev']), (req, res) => { 
+app.delete('/api/usuarios/:id', requirePageLogin, requireRole(['admin', 'dev']), validateCsrf, (req, res) => { 
     const { id } = req.params; 
     if (id == req.session.userId) return res.status(403).json({ error: 'Não é permitido excluir o próprio usuário logado.' }); 
     db.run("DELETE FROM usuarios WHERE id = ?", [id], function (err) { 
@@ -621,10 +804,10 @@ app.get('/api/relatorios', requirePageLogin, (req, res) => {
         }); 
     }); 
 });
-app.post('/api/relatorios', requirePageLogin, (req, res) => { const d = req.body; const sql = `INSERT INTO relatorios (loja, data, hora_abertura, hora_fechamento, gerente_entrada, gerente_saida, clientes_monitoramento, vendas_monitoramento, clientes_loja, vendas_loja, total_vendas_dinheiro, ticket_medio, pa, quantidade_trocas, quantidade_omni, quantidade_funcao_especial, vendedores, enviado_por_usuario, vendas_cartao, vendas_pix, vendas_dinheiro) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`; const params = [ d.loja, d.data, d.hora_abertura, d.hora_fechamento, d.gerente_entrada, d.gerente_saida, parseInt(d.clientes_monitoramento, 10) || 0, parseInt(d.vendas_monitoramento, 10) || 0, parseInt(d.clientes_loja, 10) || 0, parseInt(d.vendas_loja, 10) || 0, parseFloat(String(d.total_vendas_dinheiro).replace(/[R$\s.]/g, '').replace(',', '.')) || 0, d.ticket_medio || 'R$ 0,00', d.pa || '0.00', parseInt(d.quantidade_trocas, 10) || 0, parseInt(d.quantidade_omni, 10) || 0, parseInt(d.quantidade_funcao_especial, 10) || 0, d.vendedores || '[]', req.session.username, parseInt(d.vendas_cartao, 10) || 0, parseInt(d.vendas_pix, 10) || 0, parseInt(d.vendas_dinheiro, 10) || 0 ]; db.run(sql, params, function (err) { if (err) { console.error("Erro ao inserir relatório:", err.message); return res.status(500).json({ error: 'Falha ao salvar relatório.' }); } res.status(201).json({ success: true, id: this.lastID }); }); });
+app.post('/api/relatorios', requirePageLogin, validateCsrf, (req, res) => { const d = req.body; const sql = `INSERT INTO relatorios (loja, data, hora_abertura, hora_fechamento, gerente_entrada, gerente_saida, clientes_monitoramento, vendas_monitoramento, clientes_loja, vendas_loja, total_vendas_dinheiro, ticket_medio, pa, quantidade_trocas, quantidade_omni, quantidade_funcao_especial, vendedores, enviado_por_usuario, vendas_cartao, vendas_pix, vendas_dinheiro) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`; const params = [ d.loja, d.data, d.hora_abertura, d.hora_fechamento, d.gerente_entrada, d.gerente_saida, parseInt(d.clientes_monitoramento, 10) || 0, parseInt(d.vendas_monitoramento, 10) || 0, parseInt(d.clientes_loja, 10) || 0, parseInt(d.vendas_loja, 10) || 0, parseFloat(String(d.total_vendas_dinheiro).replace(/[R$\s.]/g, '').replace(',', '.')) || 0, d.ticket_medio || 'R$ 0,00', d.pa || '0.00', parseInt(d.quantidade_trocas, 10) || 0, parseInt(d.quantidade_omni, 10) || 0, parseInt(d.quantidade_funcao_especial, 10) || 0, d.vendedores || '[]', req.session.username, parseInt(d.vendas_cartao, 10) || 0, parseInt(d.vendas_pix, 10) || 0, parseInt(d.vendas_dinheiro, 10) || 0 ]; db.run(sql, params, function (err) { if (err) { console.error("Erro ao inserir relatório:", err.message); return res.status(500).json({ error: 'Falha ao salvar relatório.' }); } res.status(201).json({ success: true, id: this.lastID }); }); });
 app.get('/api/relatorios/:id', requirePageLogin, (req, res) => { db.get("SELECT * FROM relatorios WHERE id = ?", [req.params.id], (err, relatorio) => { if (err) return res.status(500).json({ error: err.message }); if (!relatorio) return res.status(404).json({ error: "Relatório não encontrado" }); res.json({ relatorio }); }); });
-app.put('/api/relatorios/:id', requirePageLogin, (req, res) => { const { id } = req.params; const d = req.body; const sql = `UPDATE relatorios SET loja=?, data=?, hora_abertura=?, hora_fechamento=?, gerente_entrada=?, gerente_saida=?, clientes_monitoramento=?, vendas_monitoramento=?, clientes_loja=?, vendas_loja=?, total_vendas_dinheiro=?, ticket_medio=?, pa=?, quantidade_trocas=?, quantidade_omni=?, quantidade_funcao_especial=?, vendedores=?, vendas_cartao=?, vendas_pix=?, vendas_dinheiro=? WHERE id=?`; const params = [ d.loja, d.data, d.hora_abertura, d.hora_fechamento, d.gerente_entrada, d.gerente_saida, parseInt(d.clientes_monitoramento, 10) || 0, parseInt(d.vendas_monitoramento, 10) || 0, parseInt(d.clientes_loja, 10) || 0, parseInt(d.vendas_loja, 10) || 0, parseFloat(String(d.total_vendas_dinheiro).replace(/[R$\s.]/g, '').replace(',', '.')) || 0, d.ticket_medio || 'R$ 0,00', d.pa || '0.00', parseInt(d.quantidade_trocas, 10) || 0, parseInt(d.quantidade_omni, 10) || 0, parseInt(d.quantidade_funcao_especial, 10) || 0, d.vendedores || '[]', parseInt(d.vendas_cartao, 10) || 0, parseInt(d.vendas_pix, 10) || 0, parseInt(d.vendas_dinheiro, 10) || 0, id ]; db.run(sql, params, function (err) { if (err) { console.error("Erro ao atualizar relatório:", err.message); return res.status(500).json({ error: 'Falha ao atualizar o relatório.' }); } if (this.changes === 0) return res.status(404).json({ error: "Relatório não encontrado." }); res.json({ success: true, id: id }); }); });
-app.delete('/api/relatorios/:id', requirePageLogin, (req, res) => { db.run("DELETE FROM relatorios WHERE id = ?", [req.params.id], function (err) { if (err) return res.status(500).json({ error: err.message }); if (this.changes === 0) return res.status(404).json({ error: "Relatório não encontrado" }); res.json({ success: true, message: "Relatório excluído." }); }); });
+app.put('/api/relatorios/:id', requirePageLogin, validateCsrf, (req, res) => { const { id } = req.params; const d = req.body; const sql = `UPDATE relatorios SET loja=?, data=?, hora_abertura=?, hora_fechamento=?, gerente_entrada=?, gerente_saida=?, clientes_monitoramento=?, vendas_monitoramento=?, clientes_loja=?, vendas_loja=?, total_vendas_dinheiro=?, ticket_medio=?, pa=?, quantidade_trocas=?, quantidade_omni=?, quantidade_funcao_especial=?, vendedores=?, vendas_cartao=?, vendas_pix=?, vendas_dinheiro=? WHERE id=?`; const params = [ d.loja, d.data, d.hora_abertura, d.hora_fechamento, d.gerente_entrada, d.gerente_saida, parseInt(d.clientes_monitoramento, 10) || 0, parseInt(d.vendas_monitoramento, 10) || 0, parseInt(d.clientes_loja, 10) || 0, parseInt(d.vendas_loja, 10) || 0, parseFloat(String(d.total_vendas_dinheiro).replace(/[R$\s.]/g, '').replace(',', '.')) || 0, d.ticket_medio || 'R$ 0,00', d.pa || '0.00', parseInt(d.quantidade_trocas, 10) || 0, parseInt(d.quantidade_omni, 10) || 0, parseInt(d.quantidade_funcao_especial, 10) || 0, d.vendedores || '[]', parseInt(d.vendas_cartao, 10) || 0, parseInt(d.vendas_pix, 10) || 0, parseInt(d.vendas_dinheiro, 10) || 0, id ]; db.run(sql, params, function (err) { if (err) { console.error("Erro ao atualizar relatório:", err.message); return res.status(500).json({ error: 'Falha ao atualizar o relatório.' }); } if (this.changes === 0) return res.status(404).json({ error: "Relatório não encontrado." }); res.json({ success: true, id: id }); }); });
+app.delete('/api/relatorios/:id', requirePageLogin, validateCsrf, (req, res) => { db.run("DELETE FROM relatorios WHERE id = ?", [req.params.id], function (err) { if (err) return res.status(500).json({ error: err.message }); if (this.changes === 0) return res.status(404).json({ error: "Relatório não encontrado" }); res.json({ success: true, message: "Relatório excluído." }); }); });
 const formatCurrency = (value) => { const numberValue = Number(value) || 0; return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numberValue); };
 const formatarRelatorioTexto = (r) => { const rp = processarRelatorio(r); if (!rp) return "Erro ao processar relatório."; let equipeInfo = 'Nenhum vendedor registrado.\n'; if (rp.vendedores_processados && rp.vendedores_processados.length > 0) { equipeInfo = rp.vendedores_processados.map(v => { return `${v.nome}: ${v.atendimentos} Atendimentos / ${v.vendas} Vendas / ${v.tx_conversao}%`; }).join('\n'); } let funcaoEspecialInfo = ''; if (rp.funcao_especial === "Omni") { funcaoEspecialInfo = `Omni: ${rp.quantidade_omni || 0}\n`; } else if (rp.funcao_especial === "Busca por Assist. Tec.") { funcaoEspecialInfo = `Busca por assist tec: ${rp.quantidade_funcao_especial || 0}\n`; } const totalVendasQuantidade = (rp.vendas_cartao || 0) + (rp.vendas_pix || 0) + (rp.vendas_dinheiro || 0); const content = ` DATA: ${new Date(rp.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} \n\nClientes: ${rp.clientes_monitoramento || 0}\nBluve: ${rp.clientes_loja || 0}\nVendas / Monitoramento: ${rp.vendas_monitoramento_total || 0}\nVendas / Loja: ${rp.vendas_loja || 0}\nTaxa de conversão da loja: ${rp.tx_conversao_loja || '0.00'}%\nTaxa de conversão do monitoramento: ${rp.tx_conversao_monitoramento || '0.00'}%\n\nAbertura: ${rp.hora_abertura || '--:--'} - ${rp.hora_fechamento || '--:--'}\nGerente: ${rp.gerente_entrada || '--:--'} - ${rp.gerente_saida || '--:--'}\nVendas em Cartão: ${rp.vendas_cartao || 0}\nVendas em Pix: ${rp.vendas_pix || 0}\nVendas em Dinheiro: ${rp.vendas_dinheiro || 0}\n${funcaoEspecialInfo}Total vendas: ${totalVendasQuantidade}\nTroca/Devolução: ${rp.quantidade_trocas || 0}\n\nDesempenho Equipe:\n\n${equipeInfo}\n\nTM: ${rp.ticket_medio || 'R$ 0,00'} / P.A: ${rp.pa || '0.00'} / Total: ${formatCurrency(rp.total_vendas_dinheiro)} / `; return content.trim(); };
 app.get('/api/relatorios/:id/txt', requirePageLogin, (req, res) => { const sql = ` SELECT r.*, l.funcao_especial FROM relatorios r LEFT JOIN lojas l ON r.loja = l.nome WHERE r.id = ? `; db.get(sql, [req.params.id], (err, r) => { if (err || !r) return res.status(404).send('Relatório não encontrado'); res.setHeader('Content-disposition', `attachment; filename=relatorio_${r.loja.replace(/ /g, '_')}_${r.data}.txt`); res.setHeader('Content-type', 'text/plain; charset=utf-8'); res.send(formatarRelatorioTexto(r)); }); });
@@ -772,18 +955,18 @@ app.get('/api/dashboard-data', requirePageLogin, (req, res) => {
     db.get(sql, params, (err, row) => { 
         if (err) return res.status(500).json({ error: err.message }); 
         
-        // Se for gerente, remover dados de monitoramento da resposta
-        const isGerente = req.session.role === 'gerente';
+        const allowedMonitoramentoRoles = ['admin', 'monitoramento', 'dev', 'consultor'];
+        const canViewMonitoramento = allowedMonitoramentoRoles.includes(req.session.role);
         
         const vendas_m_total = (row.total_vendas_monitoramento || 0) + (row.total_omni || 0); 
         const response = { 
             ...row, 
             tx_conversao_monitoramento: (row.total_clientes_monitoramento > 0 ? (vendas_m_total / row.total_clientes_monitoramento) * 100 : 0), 
-            tx_conversao_loja: (row.total_clientes_loja > 0 ? (row.total_vendas_loja / row.total_clientes_loja) * 100 : 0) 
+            tx_conversao_loja: (row.total_clientes_loja > 0 ? (row.total_vendas_loja / row.total_clientes_loja) * 100 : 0),
+            canViewMonitoramento 
         };
         
-        // Remover campos de monitoramento se for gerente
-        if (isGerente) {
+        if (!canViewMonitoramento) {
             delete response.total_clientes_monitoramento;
             delete response.total_vendas_monitoramento;
             delete response.total_omni;
@@ -791,6 +974,49 @@ app.get('/api/dashboard-data', requirePageLogin, (req, res) => {
         }
         
         res.json(response); 
+    }); 
+});
+
+app.get('/api/dashboard-bluve', requirePageLogin, (req, res) => { 
+    let whereClauses = []; 
+    let params = []; 
+    
+    const lojaFilter = getLojaFilter(req.session.role, req.session.loja_gerente, req.session.lojas_consultor, req.session.loja_tecnico);
+    if (lojaFilter) {
+        whereClauses.push(lojaFilter.clause);
+        params.push(...lojaFilter.params);
+    }
+    
+    if (req.query.loja && req.query.loja !== 'todas') { 
+        whereClauses.push('loja = ?'); 
+        params.push(req.query.loja); 
+    } 
+    if (req.query.data_inicio) { 
+        whereClauses.push('data >= ?'); 
+        params.push(req.query.data_inicio); 
+    } 
+    if (req.query.data_fim) { 
+        whereClauses.push('data <= ?'); 
+        params.push(req.query.data_fim); 
+    } 
+    
+    const whereString = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : ''; 
+    const sql = `SELECT 
+        COALESCE(SUM(clientes_loja), 0) as clientes_atendidos, 
+        COALESCE(SUM(vendas_loja), 0) as vendas,
+        CASE 
+            WHEN SUM(clientes_loja) > 0 THEN (CAST(SUM(vendas_loja) AS REAL) / SUM(clientes_loja)) * 100
+            ELSE 0
+        END as taxa_conversao
+    FROM relatorios ${whereString}`; 
+    
+    db.get(sql, params, (err, row) => { 
+        if (err) return res.status(500).json({ error: err.message }); 
+        res.json({
+            clientes_atendidos: row.clientes_atendidos || 0,
+            vendas: row.vendas || 0,
+            taxa_conversao: row.taxa_conversao ? parseFloat(row.taxa_conversao.toFixed(2)) : 0
+        }); 
     }); 
 });
 app.get('/api/ranking', requirePageLogin, (req, res) => { 
@@ -1033,11 +1259,39 @@ app.delete('/api/logs', requirePageLogin, requireRole(['dev']), (req, res) => {
     });
 });
 
-// Função auxiliar para registrar logs
-function logEvent(type, username, action, details) {
-    db.run('INSERT INTO logs (type, username, action, details) VALUES (?, ?, ?, ?)', 
-        [type, username, action, details],
-        (err) => { if (err) console.error('Erro ao registrar log:', err.message); }
+// Função auxiliar para obter IP real do cliente
+function getClientIp(req) {
+    return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
+           req.headers['x-real-ip'] || 
+           req.connection?.remoteAddress || 
+           req.socket?.remoteAddress ||
+           'unknown';
+}
+
+// Função auxiliar para criar hash de payload (sem expor dados sensíveis)
+function hashPayload(data) {
+    if (!data || typeof data !== 'object') return null;
+    const sanitized = JSON.stringify(data);
+    return crypto.createHash('sha256').update(sanitized).digest('hex').substring(0, 16);
+}
+
+// Função auxiliar para registrar logs com auditoria completa
+function logEvent(type, username, action, details, req = null) {
+    const ip_address = req ? getClientIp(req) : null;
+    const user_agent = req ? req.headers['user-agent'] : null;
+    const route = req ? req.path : null;
+    const event_type = type;
+    const payload_hash = req ? hashPayload(req.body) : null;
+    
+    db.run(
+        `INSERT INTO logs (type, username, action, details, ip_address, user_agent, event_type, route, payload_hash) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+        [type, username, action, details, ip_address, user_agent, event_type, route, payload_hash],
+        (err) => { 
+            if (err && !err.message.includes('no column named')) {
+                console.error('Erro ao registrar log:', err.message); 
+            }
+        }
     );
 }
 

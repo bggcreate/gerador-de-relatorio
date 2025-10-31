@@ -492,35 +492,31 @@ export function initAdminPage(currentUser) {
     const quickPeriodButtons = document.querySelectorAll('[data-period]');
     const barChartMetricSelect = document.getElementById('bar-chart-metric-select');
     
-    // Detectar se é gerente ou técnico para adaptar dashboard
+    const allowedMonitoramentoRoles = ['admin', 'monitoramento', 'dev', 'consultor'];
+    const canViewMonitoramento = currentUser && allowedMonitoramentoRoles.includes(currentUser.role);
     const isGerente = currentUser && currentUser.role === 'gerente';
     const isTecnico = currentUser && currentUser.role === 'tecnico';
     const isNotAdmin = isGerente || isTecnico;
     
-    // Ocultar gráficos comparativos e dados de monitoramento para gerentes e técnicos
-    if (isNotAdmin) {
-        // Ocultar seção de análise comparativa (gráficos de barras e donut)
+    if (!canViewMonitoramento) {
         const comparativeSection = document.getElementById('comparative-charts-section');
         if (comparativeSection) comparativeSection.style.display = 'none';
         
-        // Ocultar card de Monitoramento
         const monitoramentoCard = document.getElementById('monitoramento-card');
         if (monitoramentoCard) monitoramentoCard.style.display = 'none';
         
-        // Fazer card de Loja (Bluve) ocupar largura total
         const lojaCardCol = document.getElementById('loja-card-col');
         if (lojaCardCol) {
             lojaCardCol.classList.remove('col-xl-6');
             lojaCardCol.classList.add('col-xl-12');
         }
         
-        // Ocultar opção "Todas as Lojas" do filtro para gerentes
-        if (isGerente && lojaSelect) {
-            const todasOption = lojaSelect.querySelector('option[value="todas"]');
-            if (todasOption) todasOption.remove();
-        }
-        
-        console.log(`Dashboard adaptado para ${currentUser.role} - dados de monitoramento ocultos`);
+        console.log(`Dashboard adaptado para ${currentUser.role} - card Monitoramento oculto (visível apenas para admin, monitoramento, dev, consultor)`);
+    }
+    
+    if (isGerente && lojaSelect) {
+        const todasOption = lojaSelect.querySelector('option[value="todas"]');
+        if (todasOption) todasOption.remove();
     }
 
     async function carregarLojas() {

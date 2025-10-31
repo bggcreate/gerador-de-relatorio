@@ -1,4 +1,4 @@
-import { showToast, showConfirmModal } from '../utils.js';
+import { showToast, showConfirmModal, getAuthHeaders } from '../utils.js';
 
 export function initGerenciarLojasPage() {
     // Aguardar currentUser estar disponível
@@ -101,7 +101,7 @@ function initGerenciarLojas() {
         const confirmed = await showConfirmModal(`Tem certeza que deseja excluir esta loja?`);
         if (!confirmed) return;
         try {
-            const response = await fetch(`/api/lojas/${id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/lojas/${id}`, { method: 'DELETE', headers: await getAuthHeaders() });
             if (!response.ok) throw new Error('Falha ao excluir.');
             showToast('Sucesso', 'Loja excluída.', 'success');
             carregarLojas();
@@ -123,7 +123,7 @@ function initGerenciarLojas() {
         const method = id ? 'PUT' : 'POST';
         const url = id ? `/api/lojas/${id}` : '/api/lojas';
         try {
-            const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            const response = await fetch(url, { method, headers: await getAuthHeaders(), body: JSON.stringify(data) });
             if (!response.ok) throw new Error('Falha ao salvar. Nome já existe?');
             showToast('Sucesso', `Loja salva.`, 'success');
             modal.hide();
@@ -267,7 +267,7 @@ function initGerenciarVendedores() {
         if (!confirmed) return;
         
         try {
-            const response = await fetch(`/api/vendedores/${id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/vendedores/${id}`, { method: 'DELETE', headers: await getAuthHeaders() });
             if (!response.ok) throw new Error('Falha ao excluir.');
             showToast('Sucesso', 'Vendedor excluído.', 'success');
             carregarVendedores(lojaAtualId);
@@ -319,7 +319,7 @@ function initGerenciarVendedores() {
         try {
             const response = await fetch(url, { 
                 method, 
-                headers: { 'Content-Type': 'application/json' }, 
+                headers: await getAuthHeaders(), 
                 body: JSON.stringify(data) 
             });
             

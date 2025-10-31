@@ -1,4 +1,4 @@
-import { showToast, showConfirmModal } from '../utils.js';
+import { showToast, showConfirmModal, getAuthHeaders } from '../utils.js';
 
 let eventController;
 
@@ -124,7 +124,10 @@ export function initConsultaPage() {
         const confirmed = await showConfirmModal(`Tem certeza que deseja excluir o relatório #${id}?`);
         if (!confirmed) return;
         try {
-            const response = await fetch(`/api/relatorios/${id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/relatorios/${id}`, { 
+                method: 'DELETE',
+                headers: await getAuthHeaders()
+            });
             if (!response.ok) throw new Error('Falha ao excluir o relatório.');
             showToast('Sucesso', 'Relatório excluído com sucesso.', 'success');
             carregarRelatorios(true);

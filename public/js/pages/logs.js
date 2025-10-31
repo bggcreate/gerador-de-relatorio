@@ -1,4 +1,4 @@
-import { showToast } from '../utils.js';
+import { showToast, getAuthHeaders } from '../utils.js';
 
 export function initLogsPage() {
     const tableBody = document.getElementById('logs-table-body');
@@ -91,7 +91,7 @@ export function initLogsPage() {
         }
 
         try {
-            const response = await fetch('/api/logs', { method: 'DELETE' });
+            const response = await fetch('/api/logs', { method: 'DELETE', headers: await getAuthHeaders() });
             if (response.ok) {
                 showToast('Sucesso', 'Logs limpos com sucesso.', 'success');
                 loadLogs(true);

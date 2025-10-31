@@ -1,4 +1,4 @@
-import { showToast, showConfirmModal } from '../utils.js';
+import { showToast, showConfirmModal, getAuthHeaders } from '../utils.js';
 
 export function initGerenciarUsuariosPage(currentUser) {
     // Ocultar aba de backup para admin
@@ -193,7 +193,10 @@ function initUsuarios(currentUser) {
         const confirmed = await showConfirmModal(`Tem certeza que deseja excluir o usuário #${id}?`);
         if (!confirmed) return;
         try { 
-            const response = await fetch(`/api/usuarios/${id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/usuarios/${id}`, { 
+                method: 'DELETE',
+                headers: await getAuthHeaders()
+            });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error);
             showToast('Sucesso', 'Usuário excluído com sucesso.', 'success');
@@ -241,7 +244,7 @@ function initUsuarios(currentUser) {
         try {
             const response = await fetch(url, { 
                 method, 
-                headers: { 'Content-Type': 'application/json' }, 
+                headers: await getAuthHeaders(), 
                 body: JSON.stringify(data) 
             });
             const result = await response.json();
@@ -294,7 +297,10 @@ function initBackup() {
         btnLimparDb.disabled = true;
         btnLimparDb.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Limpando...';
         try {
-            const response = await fetch('/api/backup/clear', { method: 'DELETE' });
+            const response = await fetch('/api/backup/clear', { 
+                method: 'DELETE',
+                headers: await getAuthHeaders()
+            });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error);
             showToast('Sucesso', 'Banco de dados limpo com sucesso.', 'success');

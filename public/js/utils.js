@@ -120,3 +120,39 @@ export function initPageAnimations() {
         initScrollAnimations();
     }, 100);
 }
+
+let cachedCsrfToken = null;
+
+/**
+ * Obtém o token CSRF do servidor e armazena em cache
+ * @returns {Promise<string>} O token CSRF
+ */
+export async function getCsrfToken() {
+    if (cachedCsrfToken) {
+        return cachedCsrfToken;
+    }
+    
+    try {
+        const response = await fetch('/api/csrf-token');
+        const data = await response.json();
+        cachedCsrfToken = data.csrfToken;
+        return cachedCsrfToken;
+    } catch (error) {
+        console.error('Failed to fetch CSRF token:', error);
+        return null;
+    }
+}
+
+/**
+ * Cria headers padrão para requisições fetch incluindo CSRF token
+ * @param {Object} additionalHeaders Headers adicionais
+ * @returns {Promise<Object>} Headers com CSRF token
+ */
+export async function getAuthHeaders(additionalHeaders = {}) {
+    const csrfToken = await getCsrfToken();
+    return {
+        'Content-Type': 'application/json',
+        'x-csrf-token': csrfToken,
+        ...additionalHeaders
+    };
+}

@@ -1,4 +1,4 @@
-import { showToast } from '../utils.js';
+import { showToast, getCsrfToken, getAuthHeaders } from '../utils.js';
 
 export function initNovoRelatorioPage() {
     const form = document.getElementById('form-novo-relatorio');
@@ -360,7 +360,7 @@ export function initNovoRelatorioPage() {
         btnSalvarTudo.disabled = true;
         btnSalvarTudo.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvando...';
         try {
-            const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            const response = await fetch(url, { method, headers: await getAuthHeaders(), body: JSON.stringify(data) });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'Erro desconhecido ao salvar.');
             showToast('Sucesso!', reportId ? 'Relatório atualizado com sucesso!' : 'Relatório salvo com sucesso!', 'success');
@@ -390,7 +390,12 @@ export function initNovoRelatorioPage() {
         try {
             const formData = new FormData();
             formData.append('pdfFile', file);
-            const response = await fetch('/api/process-pdf', { method: 'POST', body: formData });
+            const csrfToken = await getCsrfToken();
+            const response = await fetch('/api/process-pdf', { 
+                method: 'POST', 
+                headers: { 'x-csrf-token': csrfToken },
+                body: formData 
+            });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'Erro ao processar PDF.');
             

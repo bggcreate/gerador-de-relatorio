@@ -200,6 +200,20 @@
         </div>
     </div>
     <script>
+        let csrfToken = null;
+
+        async function fetchCsrfToken() {
+            try {
+                const response = await fetch('/api/csrf-token');
+                const data = await response.json();
+                csrfToken = data.csrfToken;
+            } catch (error) {
+                console.error('Failed to fetch CSRF token:', error);
+            }
+        }
+
+        fetchCsrfToken();
+
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
@@ -208,7 +222,10 @@
 
             const response = await fetch('/api/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': csrfToken
+                },
                 body: JSON.stringify({
                     username: form.username.value,
                     password: form.password.value

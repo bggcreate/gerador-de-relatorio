@@ -1,3 +1,5 @@
+import { getAuthHeaders } from '../utils.js';
+
 export function initAssistenciaPage() {
     if (!window.currentUser) {
         setTimeout(initAssistenciaPage, 100);
@@ -363,7 +365,7 @@ async function salvarPeca(e) {
         
         const response = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: await getAuthHeaders(),
             body: JSON.stringify(data)
         });
         
@@ -399,7 +401,7 @@ window.deletarPeca = async function(id) {
     if (!confirm('Tem certeza que deseja remover esta peça do estoque?')) return;
     
     try {
-        const response = await fetch(`/api/estoque-tecnico/${id}`, { method: 'DELETE' });
+        const response = await fetch(`/api/estoque-tecnico/${id}`, { method: 'DELETE', headers: await getAuthHeaders() });
         
         if (response.ok) {
             showToast('Peça removida do estoque', 'success');
@@ -517,7 +519,7 @@ async function salvarAssistencia(e) {
         
         const response = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: await getAuthHeaders(),
             body: JSON.stringify(data)
         });
         
@@ -569,7 +571,7 @@ window.concluirAssistencia = async function(id) {
     if (!confirm('Deseja marcar esta assistência como concluída?')) return;
     
     try {
-        const response = await fetch(`/api/assistencias/${id}/concluir`, { method: 'POST' });
+        const response = await fetch(`/api/assistencias/${id}/concluir`, { method: 'POST', headers: await getAuthHeaders() });
         const result = await response.json();
         
         if (response.ok) {
@@ -587,7 +589,7 @@ window.deletarAssistencia = async function(id) {
     if (!confirm('Tem certeza que deseja excluir esta assistência?')) return;
     
     try {
-        const response = await fetch(`/api/assistencias/${id}`, { method: 'DELETE' });
+        const response = await fetch(`/api/assistencias/${id}`, { method: 'DELETE', headers: await getAuthHeaders() });
         const result = await response.json();
         
         if (response.ok) {

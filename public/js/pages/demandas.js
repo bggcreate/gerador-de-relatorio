@@ -1,4 +1,4 @@
-import { showToast, showConfirmModal } from '../utils.js';
+import { showToast, showConfirmModal, getAuthHeaders } from '../utils.js';
 
 export function initDemandasPage() {
     const containerPendentes = document.getElementById('demandas-pendentes-container');
@@ -76,7 +76,7 @@ export function initDemandasPage() {
             return;
         }
         try {
-            const response = await fetch('/api/demandas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            const response = await fetch('/api/demandas', { method: 'POST', headers: await getAuthHeaders(), body: JSON.stringify(data) });
             if (!response.ok) throw new Error('Falha ao adicionar demanda.');
             modalDemanda.hide();
             e.target.reset();
@@ -111,7 +111,7 @@ export function initDemandasPage() {
             const confirmed = await showConfirmModal('Marcar esta demanda como concluída?');
             if (!confirmed) return;
             try {
-                const response = await fetch(`/api/demandas/${id}/concluir`, { method: 'PUT' });
+                const response = await fetch(`/api/demandas/${id}/concluir`, { method: 'PUT', headers: await getAuthHeaders() });
                 if (!response.ok) throw new Error('Falha ao concluir demanda.');
                 showToast('Sucesso', 'Demanda movida para o histórico.', 'info');
                 carregarDemandas('pendentes');
@@ -122,7 +122,7 @@ export function initDemandasPage() {
             const confirmed = await showConfirmModal('EXCLUIR PERMANENTEMENTE esta demanda?');
             if (!confirmed) return;
             try {
-                const response = await fetch(`/api/demandas/${id}`, { method: 'DELETE' });
+                const response = await fetch(`/api/demandas/${id}`, { method: 'DELETE', headers: await getAuthHeaders() });
                 if (!response.ok) throw new Error('Falha ao excluir demanda.');
                 showToast('Sucesso', 'Demanda excluída.', 'success');
                 // A lógica para recarregar o histórico estava errada, corrigido.
