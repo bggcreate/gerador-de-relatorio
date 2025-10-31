@@ -514,6 +514,13 @@ export function initAdminPage(currentUser) {
         console.log(`Dashboard adaptado para ${currentUser.role} - card Monitoramento oculto (visível apenas para admin, monitoramento, dev, consultor)`);
     }
     
+    // Garantir que o card Bluve esteja sempre visível
+    const lojaCardCol = document.getElementById('loja-card-col');
+    if (lojaCardCol) {
+        lojaCardCol.style.display = '';
+        console.log('Card Bluve garantido como visível');
+    }
+    
     if (isGerente && lojaSelect) {
         const todasOption = lojaSelect.querySelector('option[value="todas"]');
         if (todasOption) todasOption.remove();
