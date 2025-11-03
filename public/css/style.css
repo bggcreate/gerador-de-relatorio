@@ -1647,6 +1647,31 @@ img {
     background: var(--accent-primary);
 }
 
+/* Custom scrollbar for assistance tickets container */
+#assist-tickets-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+#assist-tickets-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#assist-tickets-container::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+}
+
+#assist-tickets-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+#assist-tickets-container::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}
+
 /* Responsivo */
 @media (max-width: 767.98px) {
     .vendedor-card {
@@ -1667,5 +1692,9 @@ img {
     
     .scrollable-table-wrapper {
         max-height: 400px;
+    }
+    
+    #assist-tickets-container {
+        max-height: 300px !important;
     }
 }

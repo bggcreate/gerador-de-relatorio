@@ -1815,6 +1815,96 @@ app.get('/api/assistencias/por-loja', requirePageLogin, requireRole(['gerente', 
     });
 });
 
+// API - Estatísticas Diárias de Assistência com Filtro de Loja
+app.get('/api/assistencias/stats-daily', requirePageLogin, requireRole(['gerente', 'consultor', 'admin', 'dev']), (req, res) => {
+    const { loja } = req.query;
+    const hoje = new Date().toISOString().split('T')[0];
+    
+    let whereClauses = [`DATE(data_saida) = ?`];
+    let params = [hoje];
+    
+    if (loja && loja !== 'todas') {
+        whereClauses.push('TRIM(loja) = ?');
+        params.push(loja.trim());
+    }
+    
+    const whereString = whereClauses.join(' AND ');
+    
+    db.get(`
+        SELECT 
+            SUM(CASE WHEN status = 'Concluído' THEN 1 ELSE 0 END) as concluidas_hoje,
+            SUM(CASE WHEN status = 'Concluído' THEN (valor_peca_loja + valor_servico_cliente) ELSE 0 END) as faturamento_hoje
+        FROM assistencias
+        WHERE ${whereString}
+    `, params, (err, totais) => {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        let whereClausesAndamento = ['status = ?'];
+        let paramsAndamento = ['Em andamento'];
+        
+        if (loja && loja !== 'todas') {
+            whereClausesAndamento.push('TRIM(loja) = ?');
+            paramsAndamento.push(loja.trim());
+        }
+        
+        const whereStringAndamento = whereClausesAndamento.join(' AND ');
+        
+        db.get(`
+            SELECT COUNT(*) as em_andamento
+            FROM assistencias
+            WHERE ${whereStringAndamento}
+        `, paramsAndamento, (err2, andamento) => {
+            if (err2) return res.status(500).json({ error: err2.message });
+            
+            res.json({
+                concluidas_hoje: totais?.concluidas_hoje || 0,
+                faturamento_hoje: totais?.faturamento_hoje || 0,
+                em_andamento: andamento?.em_andamento || 0
+            });
+        });
+    });
+});
+
+// API - Lista de Tickets de Assistência
+app.get('/api/assistencias/tickets', requirePageLogin, requireRole(['gerente', 'consultor', 'admin', 'dev']), (req, res) => {
+    const { loja, limit } = req.query;
+    
+    let whereClauses = ["status IN ('Em andamento', 'Aguardando peças')"];
+    let params = [];
+    
+    if (loja && loja !== 'todas') {
+        whereClauses.push('TRIM(loja) = ?');
+        params.push(loja.trim());
+    }
+    
+    const whereString = whereClauses.join(' AND ');
+    const limitClause = limit ? `LIMIT ${parseInt(limit)}` : 'LIMIT 50';
+    
+    db.all(`
+        SELECT 
+            id,
+            cliente_nome,
+            cliente_cpf,
+            numero_pedido,
+            aparelho,
+            status,
+            loja,
+            data_entrada,
+            data_saida,
+            tecnico_responsavel,
+            defeito_reclamado,
+            valor_peca_loja,
+            valor_servico_cliente
+        FROM assistencias
+        WHERE ${whereString}
+        ORDER BY data_entrada DESC
+        ${limitClause}
+    `, params, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows || []);
+    });
+});
+
 // =================================================================
 // INICIALIZAÇÃO DO SERVIDOR
 // =================================================================
