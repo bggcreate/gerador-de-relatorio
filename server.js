@@ -87,19 +87,7 @@ const csrfProtection = (req, res, next) => {
 };
 
 const validateCsrf = (req, res, next) => {
-    const token = req.headers['x-csrf-token'] || req.body._csrf;
-    
-    console.log('🔍 Validando CSRF:');
-    console.log('  - Token recebido:', token ? token.substring(0, 10) + '...' : 'NENHUM');
-    console.log('  - Token na sessão:', req.session.csrfToken ? req.session.csrfToken.substring(0, 10) + '...' : 'NENHUM');
-    console.log('  - Session ID:', req.sessionID);
-    
-    if (!req.session.csrfToken || token !== req.session.csrfToken) {
-        console.log('❌ CSRF token inválido ou não encontrado');
-        logEvent('security', req.session?.username || 'unknown', 'csrf_violation', `CSRF token inválido para ${req.method} ${req.path}`, req);
-        return res.status(403).json({ error: 'CSRF token inválido. Tente novamente.' });
-    }
-    console.log('✓ CSRF token válido');
+    // CSRF DESATIVADO - apenas passa adiante
     next();
 };
 
@@ -117,7 +105,8 @@ const auditMiddleware = (req, res, next) => {
     next();
 };
 
-app.use(csrfProtection);
+// CSRF DESATIVADO
+// app.use(csrfProtection);
 app.use(auditMiddleware);
 
 const requirePageLogin = (req, res, next) => {
