@@ -155,55 +155,42 @@ function canAccessLoja(db) {
 
 /**
  * Retorna filtro SQL baseado no role do usuário
+ * MODIFICADO: Agora todos os usuários veem todos os dados
  */
 function getLojaFilter(role, loja_gerente, lojas_consultor, loja_tecnico) {
-    // Se não tem role, trata como admin (compatibilidade com sessões antigas)
-    if (!role) {
-        return null;
-    }
-
-    // Dev, Admin e Monitoramento veem tudo
-    if (role === ROLES.DEV || role === ROLES.ADMIN || role === ROLES.MONITORAMENTO) {
-        return null;
-    }
-
-    // Gerente - filtrar por uma loja
-    if (role === ROLES.GERENTE && loja_gerente) {
-        return {
-            clause: 'TRIM(loja) = ?',
-            params: [loja_gerente.trim()]
-        };
-    }
-
-    // Consultor - filtrar por múltiplas lojas
-    if (role === ROLES.CONSULTOR && lojas_consultor) {
-        const lojas = lojas_consultor.split(',').map(l => l.trim()).filter(l => l);
-        if (lojas.length > 0) {
-            const placeholders = lojas.map(() => '?').join(',');
-            return {
-                clause: `TRIM(loja) IN (${placeholders})`,
-                params: lojas
-            };
-        }
-    }
-
-    // Técnico - filtrar por uma loja
-    if (role === ROLES.TECNICO && loja_tecnico) {
-        return {
-            clause: 'TRIM(loja) = ?',
-            params: [loja_tecnico.trim()]
-        };
-    }
-
-    // Sem acesso
+    // TODOS OS USUÁRIOS VEEM TODOS OS DADOS - Sem filtros
     return null;
 }
 
 /**
  * Retorna permissões do role no formato esperado pelo frontend
+ * MODIFICADO: Suporta permissões customizadas do usuário
  */
-function getPermissions(role) {
-    const rolePermissions = PERMISSIONS[role] || PERMISSIONS[ROLES.GERENTE];
+function getPermissions(role, customPermissions = null) {
+    // Se há permissões customizadas, usar elas
+    if (customPermissions) {
+        try {
+            const custom = typeof customPermissions === 'string' ? JSON.parse(customPermissions) : customPermissions;
+            
+            // Converter menuItems array para objeto com propriedades individuais
+            const menuPermissions = {};
+            if (custom.menuItems && Array.isArray(custom.menuItems)) {
+                custom.menuItems.forEach(item => {
+                    menuPermissions[item] = true;
+                });
+            }
+            
+            return {
+                ...custom,
+                ...menuPermissions
+            };
+        } catch (e) {
+            console.error('Erro ao parsear permissões customizadas:', e);
+        }
+    }
+    
+    // Fallback para permissões baseadas em role
+    const rolePermissions = PERMISSIONS[role] || PERMISSIONS[ROLES.ADMIN];
     
     // Converter menuItems array para objeto com propriedades individuais
     const menuPermissions = {};

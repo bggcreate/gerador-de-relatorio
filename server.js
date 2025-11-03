@@ -241,6 +241,11 @@ let db = new sqlite3.Database(DB_PATH, err => {
             if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar payload_hash em logs:', err.message);
         });
         
+        // Adicionar coluna de permissões customizadas
+        db.run(`ALTER TABLE usuarios ADD COLUMN custom_permissions TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar custom_permissions:', err.message);
+        });
+        
         const adminUsername = 'admin';
         const correctPassword = 'admin';
         db.get('SELECT * FROM usuarios WHERE username = ?', [adminUsername], (err, row) => {
@@ -532,6 +537,7 @@ app.post('/api/login', loginLimiter, validateCsrf, async (req, res) => {
             req.session.loja_gerente = user.loja_gerente;
             req.session.lojas_consultor = user.lojas_consultor;
             req.session.loja_tecnico = user.loja_tecnico;
+            req.session.custom_permissions = user.custom_permissions;
             
             req.session.save((err) => {
                 if (err) {
@@ -558,22 +564,26 @@ app.get('/logout', (req, res) => {
     req.session.destroy(() => res.redirect('/login')); 
 });
 app.get('/api/session-info', requirePageLogin, (req, res) => { 
-    const permissions = getPermissions(req.session.role);
-    res.json({ 
-        id: req.session.userId, 
-        username: req.session.username, 
-        role: req.session.role,
-        permissions: permissions
-    }); 
+    // Buscar permissões customizadas do usuário
+    db.get('SELECT custom_permissions FROM usuarios WHERE id = ?', [req.session.userId], (err, user) => {
+        const customPerms = user?.custom_permissions || req.session.custom_permissions;
+        const permissions = getPermissions(req.session.role, customPerms);
+        res.json({ 
+            id: req.session.userId, 
+            username: req.session.username, 
+            role: req.session.role,
+            permissions: permissions
+        });
+    });
 });
 app.get('/api/usuarios', requirePageLogin, requireRole(['admin', 'dev']), (req, res) => { 
-    db.all("SELECT id, username, role, loja_gerente, lojas_consultor, loja_tecnico FROM usuarios ORDER BY username", (err, users) => { 
+    db.all("SELECT id, username, role, loja_gerente, lojas_consultor, loja_tecnico, custom_permissions FROM usuarios ORDER BY username", (err, users) => { 
         if (err) return res.status(500).json({ error: err.message }); 
         res.json(users || []); 
     }); 
 });
 app.post('/api/usuarios', requirePageLogin, requireRole(['admin', 'dev']), validateCsrf, async (req, res) => { 
-    const { username, password, role, loja_gerente, lojas_consultor, loja_tecnico } = req.body; 
+    const { username, password, role, loja_gerente, lojas_consultor, loja_tecnico, custom_permissions } = req.body; 
     if (!username || !password || !role) return res.status(400).json({ error: 'Username, senha e cargo são obrigatórios.' }); 
     
     if (req.session.role === 'admin' && role === 'dev') {
@@ -583,9 +593,10 @@ app.post('/api/usuarios', requirePageLogin, requireRole(['admin', 'dev']), valid
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const lojas_consultor_str = Array.isArray(lojas_consultor) ? lojas_consultor.join(',') : (lojas_consultor || '');
+        const custom_permissions_str = custom_permissions ? (typeof custom_permissions === 'string' ? custom_permissions : JSON.stringify(custom_permissions)) : null;
         
-        db.run('INSERT INTO usuarios (username, password, role, loja_gerente, lojas_consultor, loja_tecnico, password_hashed) VALUES (?, ?, ?, ?, ?, ?, 1)', 
-            [username, hashedPassword, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null], 
+        db.run('INSERT INTO usuarios (username, password, role, loja_gerente, lojas_consultor, loja_tecnico, custom_permissions, password_hashed) VALUES (?, ?, ?, ?, ?, ?, ?, 1)', 
+            [username, hashedPassword, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null, custom_permissions_str], 
             function (err) { 
                 if (err) {
                     logEvent('error', req.session.username, 'user_creation_failed', `Erro ao criar usuário ${username}: ${err.message}`, req);
@@ -602,7 +613,7 @@ app.post('/api/usuarios', requirePageLogin, requireRole(['admin', 'dev']), valid
 });
 app.put('/api/usuarios/:id', requirePageLogin, requireRole(['admin', 'dev']), validateCsrf, async (req, res) => { 
     const { id } = req.params; 
-    const { username, password, role, loja_gerente, lojas_consultor, loja_tecnico } = req.body; 
+    const { username, password, role, loja_gerente, lojas_consultor, loja_tecnico, custom_permissions } = req.body; 
     if (!username || !role) return res.status(400).json({ error: 'Username e Cargo são obrigatórios.' }); 
     
     if (req.session.role === 'admin' && role === 'dev') {
@@ -611,15 +622,16 @@ app.put('/api/usuarios/:id', requirePageLogin, requireRole(['admin', 'dev']), va
     
     try {
         const lojas_consultor_str = Array.isArray(lojas_consultor) ? lojas_consultor.join(',') : (lojas_consultor || '');
+        const custom_permissions_str = custom_permissions ? (typeof custom_permissions === 'string' ? custom_permissions : JSON.stringify(custom_permissions)) : null;
         let sql, params;
         
         if (password) {
             const hashedPassword = await bcrypt.hash(password, 10);
-            sql = 'UPDATE usuarios SET username = ?, password = ?, password_hashed = 1, role = ?, loja_gerente = ?, lojas_consultor = ?, loja_tecnico = ? WHERE id = ?';
-            params = [username, hashedPassword, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null, id];
+            sql = 'UPDATE usuarios SET username = ?, password = ?, password_hashed = 1, role = ?, loja_gerente = ?, lojas_consultor = ?, loja_tecnico = ?, custom_permissions = ? WHERE id = ?';
+            params = [username, hashedPassword, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null, custom_permissions_str, id];
         } else {
-            sql = 'UPDATE usuarios SET username = ?, role = ?, loja_gerente = ?, lojas_consultor = ?, loja_tecnico = ? WHERE id = ?';
-            params = [username, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null, id];
+            sql = 'UPDATE usuarios SET username = ?, role = ?, loja_gerente = ?, lojas_consultor = ?, loja_tecnico = ?, custom_permissions = ? WHERE id = ?';
+            params = [username, role, loja_gerente || null, lojas_consultor_str, loja_tecnico || null, custom_permissions_str, id];
         }
         
         db.run(sql, params, function (err) { 
