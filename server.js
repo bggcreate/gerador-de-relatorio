@@ -533,8 +533,16 @@ app.post('/api/login', loginLimiter, validateCsrf, async (req, res) => {
             req.session.lojas_consultor = user.lojas_consultor;
             req.session.loja_tecnico = user.loja_tecnico;
             
-            logEvent('access', user.username, 'login_success', `Usuário ${user.username} (${user.role}) fez login com sucesso`, req);
-            res.json({ success: true }); 
+            req.session.save((err) => {
+                if (err) {
+                    console.error('❌ Erro ao salvar sessão:', err);
+                    logEvent('error', username, 'login_error', `Erro ao salvar sessão: ${err.message}`, req);
+                    return res.status(500).json({ message: 'Erro ao salvar sessão.' });
+                }
+                console.log(`✓ Login bem-sucedido - Usuário: ${user.username}, Role: ${user.role}, Session ID: ${req.sessionID}`);
+                logEvent('access', user.username, 'login_success', `Usuário ${user.username} (${user.role}) fez login com sucesso`, req);
+                res.json({ success: true });
+            }); 
         } catch (error) {
             logEvent('error', username, 'login_error', `Erro ao processar login: ${error.message}`, req);
             res.status(500).json({ message: 'Erro ao processar login.' });
