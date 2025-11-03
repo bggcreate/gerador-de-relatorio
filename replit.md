@@ -62,7 +62,44 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 - **exceljs**: Library for creating and reading Excel XLSX files.
 - **Bluve/Blu (Planned)**: Future integration for bidirectional store synchronization, automatic report import (daily sales), and utilizing Bluve's APIs (Movement of Sales, Extract, Reconciliation).
 
+## Project Structure
+```
+/
+├── data/                      # Database files
+│   └── relatorios.db         # SQLite database
+├── middleware/               # Custom middleware
+│   └── roleAuth.js          # Role-based authentication
+├── public/                   # Static assets
+│   ├── css/
+│   ├── js/
+│   │   ├── pages/           # Page-specific JavaScript
+│   │   ├── app.js           # Main app logic
+│   │   ├── theme.js         # Theme switching
+│   │   └── utils.js         # Utility functions
+│   └── relatorios_gerados/  # Generated reports
+├── views/                    # HTML templates
+├── docs/                     # Documentation
+├── attached_assets/          # Temporary/attached files
+│   ├── old_prompts/         # Historical prompts
+│   └── screenshots/         # Project screenshots
+├── server.js                 # Main server file
+├── package.json             # Dependencies
+└── replit.md                # Project documentation
+```
+
 ## Recent Changes
+
+### Project Organization (2025-11-03)
+- 🗂️ **Organização de Arquivos e Pastas**:
+  - Removida pasta duplicada `monitoramento-lojas-varejo-main/` que continha código antigo e estava causando conflitos
+  - Removido arquivo `database.db` duplicado (mantido apenas `data/relatorios.db`)
+  - Criada pasta `docs/` para centralizar documentação (README, DASHBOARD_IMPROVEMENTS, EXPORT_ALL_FEATURE, RESUMO_MELHORIAS, ROLES_SYSTEM)
+  - Organizada pasta `attached_assets/` com subpastas `old_prompts/` e `screenshots/`
+  - Estrutura do projeto agora mais limpa e organizada
+- 👤 **Gerenciamento de Usuários**:
+  - Removido preenchimento automático "admin" do campo de login
+  - Criado usuário `dev` com senha `dev123` e perfil desenvolvedor
+  - Sistema agora suporta múltiplos perfis: admin, dev, gerente, consultor, técnico
 
 ### Scroll Minimalista e Card Bluve (2025-10-31)
 - 📜 **Scroll Minimalista em Cards Expansíveis**:
