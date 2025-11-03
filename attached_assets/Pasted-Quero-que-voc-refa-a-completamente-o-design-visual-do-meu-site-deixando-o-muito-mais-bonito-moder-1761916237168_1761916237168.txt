@@ -1,0 +1,52 @@
+Quero que você refaça completamente o design visual do meu site, deixando-o muito mais bonito, moderno e sofisticado, mas sem remover, alterar ou quebrar nenhuma das funcionalidades já existentes.
+Todas as funções, interações e integrações devem continuar funcionando exatamente como estão.
+
+🧩 Objetivo principal:
+
+Transformar o layout atual em uma interface elegante, minimalista e responsiva, com inspiração direta no design do site da Apple — usando sua organização visual, espaçamento, hierarquia tipográfica e fluidez, mas mantendo a identidade da Loft Design (logotipo, cores principais, e essência da marca).
+
+📐 Diretrizes visuais e de estrutura:
+
+Base de referência: design do site da Apple
+
+Identidade: seguir a paleta de cores, tipografia e arte visual da Loft Design.
+
+Layout: compacto, limpo e com margens amplas, respeitando o conceito de “respiro visual”.
+
+Tipografia: moderna e de alta legibilidade (similar à SF Pro Display / Inter / Poppins).
+
+Botões e elementos interativos: sutis, com microanimações suaves e feedback tátil visual.
+
+Imagens e ícones: manter o estilo Loft Design, mas padronizar dimensões e proporções.
+
+Animações: suaves, elegantes e de curta duração (fade, slide, parallax sutil).
+
+Dark/Light mode: se possível, permitir alternância automática ou manual.
+
+Compatibilidade: 100% responsivo (desktop, tablet e mobile).
+
+⚙️ Requisitos técnicos:
+
+Não remover ou alterar nenhuma função existente.
+
+Todo o backend e lógicas JavaScript devem permanecer idênticas.
+
+Você pode refatorar o front-end, HTML, CSS e componentes visuais.
+
+Código limpo, modular e comentado, pronto para manutenção futura.
+
+Compatível com os padrões modernos de acessibilidade e SEO.
+
+💡 Extras (opcionais, mas bem-vindos):
+
+Criar uma home hero impactante, com imagem ou vídeo de fundo leve e copy inspiradora.
+
+Adicionar microinterações (hover, scroll reveal, transições suaves).
+
+Incluir efeitos visuais 3D leves (como parallax ou profundidade no scroll).
+
+Criar versão mobile ultra fluida, no estilo “app-like”.
+
+🏁 Entregável esperado:
+
+Um redesign completo do site Loft Design, com aparência premium e estética inspirada na Apple, sem perda de nenhuma função existente e mantendo a essência da marca.

@@ -1,0 +1,90 @@
+Prompt: Incremento na Aba “Novo Relatório” — Seleção de Vendedores Cadastrados
+
+Ajuste o sistema na aba “Novo Relatório” para que o usuário possa adicionar vendedores já cadastrados (por loja), sem precisar digitar manualmente os nomes e dados no campo “Desempenho da Equipe”.
+
+🧱 Objetivo da Atualização
+
+Integrar a função de cadastro de vendedores por loja à aba “Novo Relatório”.
+
+Permitir que, ao criar um novo relatório, o usuário selecione vendedores existentes do banco de dados.
+
+Quando o vendedor for selecionado, o sistema deve exibir automaticamente os campos:
+
+Nome do vendedor
+
+Loja vinculada
+
+Campo para inserir Atendimentos e Vendas
+
+Exibir automaticamente a Taxa de Conversão (%) calculada em tempo real:
+
+Taxa de Convers
+a
+˜
+o
+=
+(
+Vendas
+Atendimentos
+)
+×
+100
+Taxa de Convers
+a
+˜
+o=(
+Atendimentos
+Vendas
+	​
+
+)×100
+🧮 Comportamento esperado
+
+Campo de seleção (dropdown ou autocomplete) para escolher vendedor entre os cadastrados.
+
+Ao selecionar o vendedor:
+
+Preenche automaticamente os dados básicos (nome, loja).
+
+Permite inserir manualmente os valores de Atendimentos e Vendas para aquele relatório.
+
+Calcula e exibe automaticamente a taxa de conversão.
+
+Possibilidade de adicionar vários vendedores no mesmo relatório (com botão “+ Adicionar Vendedor”).
+
+Exibir os dados em uma tabela dinâmica dentro da aba.
+
+Ao salvar o relatório, todos os vendedores adicionados e seus dados de desempenho devem ser armazenados no banco de dados vinculados a esse relatório.
+
+💻 Interface sugerida
+
+Aba: “Novo Relatório”
+
+Botão: “+ Adicionar Vendedor”
+
+Ao clicar, abre um card ou linha com:
+
+Selecionar Vendedor (dropdown/autocomplete)
+
+Campo: Atendimentos
+
+Campo: Vendas
+
+Campo calculado: Taxa de Conversão (%)
+
+Botão para remover linha
+
+Layout limpo e no mesmo padrão visual (Apple + Loft Design), com ícones minimalistas e animação suave ao adicionar/remover vendedor.
+
+🌐 Integração de dados
+
+Buscar lista de vendedores cadastrados por loja (relacionamento com tabela vendedores no banco de dados).
+
+Vincular cada entrada de desempenho ao ID do vendedor e ao ID do relatório.
+
+Cálculo e exibição da taxa devem ocorrer no front-end, mas também ser armazenados no banco ao salvar o relatório.
+
+🧠 Resumo
+
+Incrementar a aba “Novo Relatório” com a opção de adicionar vendedores já cadastrados, inserir atendimentos e vendas, e calcular automaticamente a taxa de conversão.
+Elimina a digitação manual e mantém integração com o módulo de cadastro de vendedores.
