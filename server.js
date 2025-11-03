@@ -69,7 +69,8 @@ app.use(session({
         sameSite: 'lax',
         maxAge: 24 * 60 * 60 * 1000
     },
-    name: 'sessionId'
+    name: 'sessionId',
+    proxy: true
 }));
 
 // --- CONFIGURAÇÃO DO MULTER ---
@@ -88,10 +89,17 @@ const csrfProtection = (req, res, next) => {
 const validateCsrf = (req, res, next) => {
     const token = req.headers['x-csrf-token'] || req.body._csrf;
     
+    console.log('🔍 Validando CSRF:');
+    console.log('  - Token recebido:', token ? token.substring(0, 10) + '...' : 'NENHUM');
+    console.log('  - Token na sessão:', req.session.csrfToken ? req.session.csrfToken.substring(0, 10) + '...' : 'NENHUM');
+    console.log('  - Session ID:', req.sessionID);
+    
     if (!req.session.csrfToken || token !== req.session.csrfToken) {
+        console.log('❌ CSRF token inválido ou não encontrado');
         logEvent('security', req.session?.username || 'unknown', 'csrf_violation', `CSRF token inválido para ${req.method} ${req.path}`, req);
         return res.status(403).json({ error: 'CSRF token inválido. Tente novamente.' });
     }
+    console.log('✓ CSRF token válido');
     next();
 };
 
@@ -463,11 +471,15 @@ app.get('/api/csrf-token', (req, res) => {
         req.session.csrfToken = generateCsrfToken();
     }
     
+    console.log('🔐 Token CSRF gerado:', req.session.csrfToken.substring(0, 10) + '...');
+    console.log('🍪 Session ID:', req.sessionID);
+    
     req.session.save((err) => {
         if (err) {
-            console.error('Erro ao salvar sessão CSRF:', err);
+            console.error('❌ Erro ao salvar sessão CSRF:', err);
             return res.status(500).json({ error: 'Erro ao gerar token de segurança' });
         }
+        console.log('✓ Sessão CSRF salva com sucesso');
         res.json({ csrfToken: req.session.csrfToken });
     });
 });
