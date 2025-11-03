@@ -89,6 +89,28 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 
 ## Recent Changes
 
+### Dashboard Improvements - Assistência Técnica (2025-11-03)
+- 🛠️ **Redesign da Seção "Assistência Técnica - Visão Geral"**:
+  - Simplificado para mostrar apenas 3 cards com métricas diárias:
+    - Assistências Concluídas (Hoje)
+    - Faturamento (Hoje)
+    - Assistências em Andamento (Hoje)
+  - Adicionado dropdown de filtro por loja no cabeçalho da seção
+  - Filtro afeta todos os cards e o card de tickets simultaneamente
+  - Novo endpoint de API: `/api/assistencias/stats-daily` com suporte a filtro de loja
+- 🎫 **Novo Card "Ticket de Assistências"**:
+  - Card com altura fixa de 400px e scroll interno suave
+  - Exibe tickets em andamento e aguardando peças
+  - Design compacto com informações completas (cliente, aparelho, técnico, defeito, valor)
+  - Scrollbar personalizada discreta com hover effect laranja
+  - Responsivo: altura reduzida para 300px em mobile
+  - Novo endpoint de API: `/api/assistencias/tickets` com suporte a filtro de loja
+  - Botão de atualização manual dos tickets
+- 📊 **Card "Loja (Bluve)"**:
+  - Confirmado funcionamento correto com dados de `clientes_loja`, `vendas_loja` e `tx_conversao_loja`
+  - Exibe comparações com período anterior
+  - Visível para todos os perfis de usuário
+
 ### Database Standardization (2025-11-03)
 - 🗄️ **Padronização do Banco de Dados**:
   - Centralizado o sistema para usar apenas um banco de dados: `data/database.db`
