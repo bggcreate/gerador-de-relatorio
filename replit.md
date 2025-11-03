@@ -21,7 +21,7 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 
 ### Technical Implementations
 - **Backend**: Node.js with Express.js framework.
-- **Database**: SQLite for local data storage, with automatic creation of `relatorios.db` and necessary tables on first run.
+- **Database**: SQLite for local data storage (`database.db`), with automatic creation of necessary tables on first run. Database path is configurable via `DB_PATH` environment variable.
 - **Authentication**: User authentication with different access levels (admin, user, technician). Default admin credentials: `admin`/`admin`.
 - **File Uploads**: Utilizes `multer` for handling file uploads.
 - **PDF Processing**: `pdf-parse` for reading PDFs and `pdfkit` for generating them.
@@ -66,7 +66,7 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 ```
 /
 ├── data/                      # Database files
-│   └── relatorios.db         # SQLite database
+│   └── database.db           # SQLite database (caminho principal configurável)
 ├── middleware/               # Custom middleware
 │   └── roleAuth.js          # Role-based authentication
 ├── public/                   # Static assets
@@ -89,10 +89,18 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 
 ## Recent Changes
 
+### Database Standardization (2025-11-03)
+- 🗄️ **Padronização do Banco de Dados**:
+  - Centralizado o sistema para usar apenas um banco de dados: `data/database.db`
+  - Configurado caminho do banco via variável de ambiente `DB_PATH` (padrão: `database.db`)
+  - Renomeado `relatorios.db` para `database.db` como banco principal
+  - Atualizado sistema de backup/restore para usar caminho configurável
+  - Restaurado backup com dados de login e senha funcionando
+  - Sistema agora garante que não haverá leitura em múltiplos arquivos de banco diferentes
+
 ### Project Organization (2025-11-03)
 - 🗂️ **Organização de Arquivos e Pastas**:
   - Removida pasta duplicada `monitoramento-lojas-varejo-main/` que continha código antigo e estava causando conflitos
-  - Removido arquivo `database.db` duplicado (mantido apenas `data/relatorios.db`)
   - Criada pasta `docs/` para centralizar documentação (README, DASHBOARD_IMPROVEMENTS, EXPORT_ALL_FEATURE, RESUMO_MELHORIAS, ROLES_SYSTEM)
   - Organizada pasta `attached_assets/` com subpastas `old_prompts/` e `screenshots/`
   - Estrutura do projeto agora mais limpa e organizada
