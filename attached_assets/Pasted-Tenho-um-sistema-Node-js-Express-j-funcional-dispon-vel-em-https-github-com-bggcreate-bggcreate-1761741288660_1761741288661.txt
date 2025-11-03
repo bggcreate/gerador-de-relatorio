@@ -1,0 +1,41 @@
+Tenho um sistema Node.js/Express já funcional, disponível em: https://github.com/bggcreate/bggcreate
+
+O sistema já possui uma aba chamada “Dashboard”, mas preciso **aprimorar essa seção** com novos gráficos e ajustes visuais.
+
+Objetivo:
+Melhorar a experiência visual e analítica do dashboard, adicionando gráficos comparativos e organizando o layout de forma limpa e moderna, mantendo o padrão atual do sistema.
+
+Requisitos:
+
+1. Estrutura e Layout:
+- Corrigir espaçamentos e margens entre os elementos do dashboard.
+- Ajustar o alinhamento de botões e caixas (algumas funções estão sobrepostas).
+- Adicionar espaçamento consistente e responsivo entre cards e gráficos.
+- Inserir ícones de exemplo (ex: <i class="icon-example"></i>) para que eu possa substituí-los futuramente por ícones personalizados.
+
+2. Gráficos a adicionar:
+- **Dashboard comparativo entre lojas:** gráfico de barras mostrando o desempenho das lojas (ex: vendas, acessos, ou métricas equivalentes).
+- **Ranking de lojas:** gráfico horizontal tipo “ranking” ou “bar chart” mostrando todas as lojas ordenadas por desempenho geral.
+- **Dashboard donut:** gráfico tipo donut mostrando a taxa de conversão ou eficiência de cada loja (ex: taxa de monitoramento ou taxa “Bluve”).
+- **Visão geral:** pequenos cards no topo com indicadores simples (total de lojas, melhor loja, média de conversão, etc.).
+
+3. Dados:
+- Pode simular dados estáticos ou reutilizar os mesmos dados já existentes na aba Relatórios.
+- Exemplo de estrutura: nome da loja, valor total, taxa de conversão, status, etc.
+- Os gráficos não precisam usar dados reais de banco neste momento (podem ser mockados).
+
+4. Ferramentas:
+- Usar Chart.js ou Recharts para os gráficos.
+- Código dividido em:
+  - `dashboard.html` (estrutura e layout)
+  - `dashboard.js` (lógica e renderização dos gráficos)
+- Manter compatibilidade com o restante do sistema (menu, header, estilos globais).
+
+5. Entregáveis:
+- Código da página `dashboard.html` atualizado.
+- Código do script `dashboard.js` com os novos gráficos e ajustes de layout.
+- Ajustes necessários em CSS ou estrutura existente para corrigir sobreposição e espaçamento.
+- Instruções de integração, caso precise alterar rotas ou links de menu.
+
+Resumo:
+O resultado final deve ser um dashboard organizado, visualmente agradável, com gráficos comparativos entre lojas e espaço adequado entre os elementos. Nenhum dado real adicional precisa ser criado, apenas simulação baseada na estrutura existente.

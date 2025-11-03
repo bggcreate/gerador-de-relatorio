@@ -1,0 +1,67 @@
+🧠 Prompt: Design e Estrutura Base do Site
+
+Crie o design e a estrutura base de um site analítico e moderno, com inspiração visual e de experiência de usuário nos seguintes estilos:
+
+Apple Store (https://www.apple.com/br/store
+) – elegância, espaçamento amplo, cores equilibradas, minimalismo e fluidez.
+
+Loft Design (https://www.iloft.com.br/
+) – identidade criativa, foco em design de interiores, tipografia refinada e um toque de personalidade sofisticada.
+
+O resultado final deve unir o minimalismo tecnológico da Apple com a estética criativa e elegante da Loft, criando um site limpo, moderno e agradável de navegar.
+
+🎨 Diretrizes de Design
+
+Paleta de cores inspirada na Apple: tons claros, brancos e cinzas suaves.
+
+Toques de cor da Loft Design: nuances terrosas, tons de madeira, bege e dourado suave para detalhes.
+
+Modo claro e modo escuro, com um botão de alternância no topo (Dark/Light Mode Switch).
+
+Tipografia moderna e legível (ex: SF Pro Display, Inter, ou Poppins).
+
+Layout baseado em cards e seções bem espaçadas, com uso de sombras suaves e bordas arredondadas (border-radius 2xl).
+
+🧭 Estrutura do Site
+
+Header fixo com:
+
+Logotipo minimalista
+
+Menu de navegação com ícones reformulados (usar ícones minimalistas da biblioteca Lucide ou Feather)
+
+Botão de alternância modo claro/escuro
+
+Página principal (Dashboard analítico):
+
+Seção de resumo geral com cards informativos (estatísticas, dados ou status principais)
+
+Gráficos ou visualizações de dados simples (ex: Recharts ou Chart.js)
+
+Área lateral com filtros ou métricas
+
+Abas ou seções secundárias:
+
+“Visão Geral”
+
+“Relatórios”
+
+“Equipe / Técnicos”
+
+“Assistência Técnica”
+
+“Estoque / Produtos”
+
+Footer minimalista com links institucionais, copyright e modo noturno.
+
+⚙️ Funcionalidades Futuras (planejadas, mas não implementar ainda):
+
+Integração com APIs de dados analíticos
+
+Login / autenticação de usuários
+
+Painel administrativo para controle de técnicos e estoque
+
+💡 Objetivo final:
+
+Um site base pronto para receber funcionalidades futuras, com design elegante, fluido e responsivo, que equilibra o profissionalismo da Apple e a personalidade da Loft, mantendo um foco analítico e interface agradável
