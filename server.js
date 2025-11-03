@@ -458,7 +458,18 @@ app.post('/api/process-pdf', requirePageLogin, upload.single('pdfFile'), async (
 
 // APIs DE SESSÃO E USUÁRIOS
 app.get('/api/csrf-token', (req, res) => {
-    res.json({ csrfToken: req.session.csrfToken });
+    // Garantir que a sessão seja salva antes de retornar o token
+    if (!req.session.csrfToken) {
+        req.session.csrfToken = generateCsrfToken();
+    }
+    
+    req.session.save((err) => {
+        if (err) {
+            console.error('Erro ao salvar sessão CSRF:', err);
+            return res.status(500).json({ error: 'Erro ao gerar token de segurança' });
+        }
+        res.json({ csrfToken: req.session.csrfToken });
+    });
 });
 
 const loginLimiter = rateLimit({
