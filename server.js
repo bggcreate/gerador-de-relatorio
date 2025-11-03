@@ -34,7 +34,10 @@ const dataDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
 }
-const DB_PATH = path.join(dataDir, 'relatorios.db');
+// Caminho configurável do banco de dados (pode ser sobrescrito por variável de ambiente)
+const DB_FILENAME = process.env.DB_PATH || 'database.db';
+const DB_PATH = path.join(dataDir, DB_FILENAME);
+console.log(`📁 Usando banco de dados: ${DB_PATH}`);
 
 app.use(helmet({
     contentSecurityPolicy: {
