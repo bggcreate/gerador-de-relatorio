@@ -206,6 +206,7 @@ function getPermissions(role, customPermissions = null) {
 
 /**
  * Middleware para verificar se usuário pode acessar uma página
+ * MODIFICADO: Agora usa permissões customizadas do usuário
  */
 function requirePage(allowedMenuItems) {
     return (req, res, next) => {
@@ -213,7 +214,7 @@ function requirePage(allowedMenuItems) {
             return res.redirect('/login');
         }
 
-        const permissions = getPermissions(req.session.role);
+        const permissions = getPermissions(req.session.role, req.session.custom_permissions);
         const hasAccess = allowedMenuItems.some(item => permissions.menuItems.includes(item));
 
         if (hasAccess) {
