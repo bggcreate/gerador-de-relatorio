@@ -1,0 +1,68 @@
+Contexto:
+
+No sistema atual, dentro da aba "Dashboard", existem seções como "Métricas Principais" e "Assistência Técnica - Visão Geral".
+Será necessário realizar ajustes visuais e funcionais nessas áreas, conforme descrito abaixo.
+
+🧩 1. Aba: Dashboard → Métricas Principais
+
+Situação atual:
+Existe um card chamado "Monitoramento" que exibe métricas principais (Cliente, Vendas e Taxa de Conversão).
+
+Solicitação:
+Adicionar um novo dashboard dentro dessa seção chamado “Bluve”, que:
+
+Replique a estrutura e layout do card "Monitoramento";
+
+Exiba as mesmas métricas (Cliente, Vendas e Tx. Conversão);
+
+As informações deverão ser extraídas do novo relatório Bluve, e não das mesmas fontes do monitoramento atual;
+
+Deve manter o mesmo estilo visual, responsividade e comportamento dos cards existentes;
+
+Incluir um título "Bluve" claramente identificado no cabeçalho do card.
+
+🧩 2. Aba: Dashboard → Assistência Técnica - Visão Geral
+
+Situação atual:
+Contém cards com informações diversas sobre assistência técnica.
+
+Solicitação:
+
+Exibir apenas três cards principais:
+
+Assistências Concluídas (diárias);
+
+Faturamento (diário);
+
+Assistências em Andamento (diárias);
+
+Os dados devem ser filtrados por data atual (informações diárias);
+
+No canto superior direito, incluir um sistema de dropdown (select) para filtrar por loja, afetando todos os cards da seção conforme a loja selecionada;
+
+Manter o design compacto, harmônico e responsivo.
+
+🧩 3. Card: Ticket de Assistências
+
+Situação atual:
+O card tende a expandir verticalmente conforme o número de registros cresce.
+
+Solicitação:
+
+Redesenhar o card para um formato mais compacto e fixo em altura;
+
+Implementar scroll interno (vertical) para navegação entre os tickets sem expandir o card no layout geral;
+
+Preservar o estilo visual e paleta de cores padrão do dashboard;
+
+O scroll deve ser suave e esteticamente agradável (ex: scrollbar discreta e personalizada).
+
+🎯 Objetivo final
+
+O resultado deve ser um dashboard visualmente equilibrado, organizado e consistente, com:
+
+Um novo painel “Bluve” com suas métricas próprias;
+
+Uma seção de “Assistência Técnica - Visão Geral” otimizada, filtrável por loja e focada em métricas diárias;
+
+Um card de “Ticket de Assistências” mais limpo e funcional com sistema de scroll.
