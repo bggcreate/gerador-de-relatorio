@@ -220,23 +220,36 @@
             const errorDiv = document.getElementById('error-message');
             errorDiv.style.display = 'none';
 
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'x-csrf-token': csrfToken
-                },
-                body: JSON.stringify({
-                    username: form.username.value,
-                    password: form.password.value
-                })
-            });
+            try {
+                if (!csrfToken) {
+                    errorDiv.textContent = 'Erro de segurança. Recarregue a página.';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
 
-            if (response.ok) {
-                window.location.href = '/admin';
-            } else {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-csrf-token': csrfToken
+                    },
+                    body: JSON.stringify({
+                        username: form.username.value,
+                        password: form.password.value
+                    })
+                });
+
                 const result = await response.json();
-                errorDiv.textContent = result.message || 'Ocorreu um erro.';
+                
+                if (response.ok && result.success) {
+                    window.location.href = '/admin';
+                } else {
+                    errorDiv.textContent = result.message || result.error || 'Credenciais inválidas.';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Erro no login:', error);
+                errorDiv.textContent = 'Erro ao conectar com o servidor. Tente novamente.';
                 errorDiv.style.display = 'block';
             }
         });
