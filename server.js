@@ -59,11 +59,11 @@ app.use(express.json());
 app.use(session({
     secret: SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: { 
         httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: false,
+        sameSite: 'lax',
         maxAge: 24 * 60 * 60 * 1000
     },
     name: 'sessionId'

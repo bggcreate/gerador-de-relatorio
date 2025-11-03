@@ -100,6 +100,12 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
   - Removido preenchimento automático "admin" do campo de login
   - Criado usuário `dev` com senha `dev123` e perfil desenvolvedor
   - Sistema agora suporta múltiplos perfis: admin, dev, gerente, consultor, técnico
+- 🔐 **Correção de Autenticação e Sessão**:
+  - Corrigido problema de CSRF token no ambiente Replit
+  - Ajustadas configurações de sessão (`sameSite: 'lax'`, `secure: false`, `saveUninitialized: true`)
+  - Corrigida senha do usuário admin (migração completa para bcrypt)
+  - Melhorado tratamento de erros na página de login com mensagens mais claras
+  - Ambos os usuários (admin e dev) agora com senhas seguras usando bcrypt hash
 
 ### Scroll Minimalista e Card Bluve (2025-10-31)
 - 📜 **Scroll Minimalista em Cards Expansíveis**:
