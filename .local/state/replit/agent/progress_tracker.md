@@ -138,6 +138,25 @@ Arquivos modificados:
 - public/js/pages/gerenciar-lojas.js: Event listener para formulário de vendedor
 - Revisado e aprovado pelo architect
 
+## Correção de Botões e Design (November 4, 2025, 21:25)
+[x] 33. Corrigir botão Detalhes que não funcionava - Completed:
+     - Ajustado acesso aos atributos data- usando getAttribute() diretamente
+     - Botões dentro do modal de detalhes agora funcionam corretamente
+     - Event listeners corrigidos para editarVendedor e excluirVendedor
+     
+[x] 34. Ajustar design para seguir padrão do site - Completed:
+     - Removido btn-group (não segue padrão do consulta.html)
+     - Botões individuais com texto + ícone
+     - 3 botões principais: Detalhes (btn-primary), Editar (btn-outline-secondary), Excluir (btn-outline-danger)
+     - Padding ps-3 e pe-3 para seguir padrão da página de consulta
+     - Header da tabela com classes consistentes
+     - Alinhamento text-end para coluna de ações
+     
+Arquivos modificados:
+- views/gerenciar-lojas.html: Ajustado header com ps-3/pe-3 e min-width 300px
+- public/js/pages/gerenciar-lojas.js: Botões individuais sem btn-group, getAttribute() para dataset
+- Revisado e aprovado pelo architect (2 rodadas de revisão)
+
 ## Remoção da Aba de Alertas e Correção da Página de Lojas (November 4, 2025, 20:30)
 [x] 25. Remover aba de Alertas Técnico - Completed:
      - Removido 'nav-alertas' do array de menuIds em public/js/app.js
