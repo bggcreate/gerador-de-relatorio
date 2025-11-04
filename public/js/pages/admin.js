@@ -184,49 +184,145 @@ function renderDonutChart(rankingData) {
     });
 }
 
-async function loadAssistenciaStats() {
+async function loadDailyAssistenciaStats(loja = 'todas') {
     try {
-        const response = await fetch('/api/assistencias/stats');
+        const url = `/api/assistencias/stats-daily?loja=${encodeURIComponent(loja)}`;
+        const response = await fetch(url);
         if (!response.ok) {
-            console.error('Erro ao carregar estatísticas de assistência técnica');
-            // Valores padrão em caso de erro
-            document.getElementById('assist-top-tecnico').textContent = '-';
-            document.getElementById('assist-top-tecnico-count').textContent = '0';
-            document.getElementById('assist-top-loja').textContent = '-';
-            document.getElementById('assist-top-loja-count').textContent = '0';
-            document.getElementById('assist-concluidas').textContent = '0';
-            document.getElementById('assist-em-andamento').textContent = '0';
-            document.getElementById('assist-valor-total').textContent = 'R$ 0,00';
+            console.error('Erro ao carregar estatísticas diárias de assistência técnica');
+            setDefaultDailyValues();
             return;
         }
         const data = await response.json();
         
-        // Atualizar cards de assistência técnica com proteção contra valores null/undefined
-        const topTecnico = data?.topTecnico || {};
-        const topLoja = data?.topLoja || {};
-        const totais = data?.totais || {};
+        const concluidasEl = document.getElementById('assist-concluidas-diarias');
+        const faturamentoEl = document.getElementById('assist-faturamento-diario');
+        const andamentoEl = document.getElementById('assist-em-andamento-diarias');
         
-        document.getElementById('assist-top-tecnico').textContent = topTecnico.tecnico_responsavel || '-';
-        document.getElementById('assist-top-tecnico-count').textContent = topTecnico.total || 0;
-        
-        document.getElementById('assist-top-loja').textContent = topLoja.loja || '-';
-        document.getElementById('assist-top-loja-count').textContent = topLoja.total || 0;
-        
-        document.getElementById('assist-concluidas').textContent = totais.concluidas || 0;
-        document.getElementById('assist-em-andamento').textContent = totais.em_andamento || 0;
-        
-        const valorTotal = totais.valor_total || 0;
-        document.getElementById('assist-valor-total').textContent = 'R$ ' + valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (concluidasEl) concluidasEl.textContent = data.concluidas_hoje || 0;
+        if (faturamentoEl) {
+            const faturamento = data.faturamento_hoje || 0;
+            faturamentoEl.textContent = 'R$ ' + faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        if (andamentoEl) andamentoEl.textContent = data.em_andamento || 0;
     } catch (error) {
-        console.error('Erro ao carregar estatísticas de assistência técnica:', error);
-        // Valores padrão em caso de erro
-        document.getElementById('assist-top-tecnico').textContent = '-';
-        document.getElementById('assist-top-tecnico-count').textContent = '0';
-        document.getElementById('assist-top-loja').textContent = '-';
-        document.getElementById('assist-top-loja-count').textContent = '0';
-        document.getElementById('assist-concluidas').textContent = '0';
-        document.getElementById('assist-em-andamento').textContent = '0';
-        document.getElementById('assist-valor-total').textContent = 'R$ 0,00';
+        console.error('Erro ao carregar estatísticas diárias de assistência técnica:', error);
+        setDefaultDailyValues();
+    }
+}
+
+function setDefaultDailyValues() {
+    const concluidasEl = document.getElementById('assist-concluidas-diarias');
+    const faturamentoEl = document.getElementById('assist-faturamento-diario');
+    const andamentoEl = document.getElementById('assist-em-andamento-diarias');
+    
+    if (concluidasEl) concluidasEl.textContent = '0';
+    if (faturamentoEl) faturamentoEl.textContent = 'R$ 0,00';
+    if (andamentoEl) andamentoEl.textContent = '0';
+}
+
+async function loadAssistenciaTickets(loja = 'todas') {
+    const container = document.getElementById('assist-tickets-container');
+    if (!container) return;
+    
+    try {
+        const url = `/api/assistencias/tickets?loja=${encodeURIComponent(loja)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Erro ao carregar tickets');
+        }
+        const tickets = await response.json();
+        
+        if (tickets.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-check-circle fs-1"></i>
+                    <p class="mb-0 mt-2">Nenhum ticket em andamento</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = tickets.map(ticket => {
+            const statusColors = {
+                'Em andamento': 'warning',
+                'Aguardando peças': 'info',
+                'Concluído': 'success'
+            };
+            const statusColor = statusColors[ticket.status] || 'secondary';
+            const dataEntrada = new Date(ticket.data_entrada).toLocaleDateString('pt-BR');
+            const valorTotal = (ticket.valor_peca_loja || 0) + (ticket.valor_servico_cliente || 0);
+            
+            return `
+                <div class="card mb-3 border-start border-${statusColor} border-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="mb-1">
+                                    <i class="bi bi-person me-1"></i>${ticket.cliente_nome}
+                                </h6>
+                                <small class="text-muted">CPF: ${ticket.cliente_cpf || '-'}</small>
+                            </div>
+                            <span class="badge bg-${statusColor}">${ticket.status}</span>
+                        </div>
+                        <div class="row g-2 small">
+                            <div class="col-6">
+                                <i class="bi bi-phone me-1"></i><strong>Aparelho:</strong> ${ticket.aparelho || '-'}
+                            </div>
+                            <div class="col-6">
+                                <i class="bi bi-shop me-1"></i><strong>Loja:</strong> ${ticket.loja || '-'}
+                            </div>
+                            <div class="col-6">
+                                <i class="bi bi-calendar me-1"></i><strong>Entrada:</strong> ${dataEntrada}
+                            </div>
+                            <div class="col-6">
+                                <i class="bi bi-person-gear me-1"></i><strong>Técnico:</strong> ${ticket.tecnico_responsavel || '-'}
+                            </div>
+                            ${ticket.numero_pedido ? `
+                            <div class="col-6">
+                                <i class="bi bi-hash me-1"></i><strong>Pedido:</strong> ${ticket.numero_pedido}
+                            </div>` : ''}
+                            ${ticket.defeito_reclamado ? `
+                            <div class="col-12">
+                                <i class="bi bi-exclamation-circle me-1"></i><strong>Defeito:</strong> ${ticket.defeito_reclamado}
+                            </div>` : ''}
+                            <div class="col-12 mt-2">
+                                <strong class="text-success">Valor Total: R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Erro ao carregar tickets de assistência:', error);
+        container.innerHTML = `
+            <div class="text-center text-danger py-5">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p class="mb-0 mt-2 small">Erro ao carregar tickets</p>
+            </div>
+        `;
+    }
+}
+
+async function populateAssistenciaLojaFilter() {
+    try {
+        const response = await fetch('/api/lojas/ativas');
+        if (!response.ok) return;
+        const lojas = await response.json();
+        
+        const select = document.getElementById('filtro-loja-assistencia');
+        if (!select) return;
+        
+        select.innerHTML = '<option value="todas" selected>Todas as Lojas</option>';
+        lojas.forEach(loja => {
+            const option = document.createElement('option');
+            option.value = loja.nome;
+            option.textContent = loja.nome;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar lojas para filtro de assistência:', error);
     }
 }
 
@@ -472,8 +568,7 @@ function updateUI(results, hideMonitData = false) {
     renderBarChart(rankingData);
     renderDonutChart(rankingData);
     
-    // Carregar estatísticas de assistência técnica
-    loadAssistenciaStats();
+    // Carregar estatísticas de assistência técnica (diárias)
     loadAssistenciasPorLoja();
 
     // Ativar tooltips
@@ -643,11 +738,36 @@ export function initAdminPage(currentUser) {
         });
     }
 
+    // Event listeners para seção de assistência técnica diária
+    const filtroLojaAssistencia = document.getElementById('filtro-loja-assistencia');
+    if (filtroLojaAssistencia) {
+        filtroLojaAssistencia.addEventListener('change', (e) => {
+            const lojaSelecionada = e.target.value;
+            loadDailyAssistenciaStats(lojaSelecionada);
+            loadAssistenciaTickets(lojaSelecionada);
+        });
+    }
+
+    const btnRefreshAssistTickets = document.getElementById('btn-refresh-assist-tickets');
+    if (btnRefreshAssistTickets) {
+        btnRefreshAssistTickets.addEventListener('click', () => {
+            const lojaSelecionada = filtroLojaAssistencia ? filtroLojaAssistencia.value : 'todas';
+            loadAssistenciaTickets(lojaSelecionada);
+            showToast('Atualizado', 'Tickets de assistência atualizados', 'success');
+        });
+    }
+
     // Inicialização
     async function inicializar() {
         console.log('Inicializando dashboard...');
         await carregarLojas();
         console.log('Lojas carregadas');
+        
+        // Inicializar seção de assistência técnica
+        await populateAssistenciaLojaFilter();
+        loadDailyAssistenciaStats('todas');
+        loadAssistenciaTickets('todas');
+        
         loadDemandas(); // Carregar demandas pendentes
         console.log('Configurando período de 7 dias');
         setDateRange('7d');

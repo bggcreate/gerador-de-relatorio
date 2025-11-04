@@ -279,52 +279,65 @@
     </div>
 
     <!-- ASSISTÊNCIA TÉCNICA -->
-    <h4 class="mb-3 mt-4"><i class="bi bi-tools"></i> Assistência Técnica - Visão Geral</h4>
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
+        <h4 class="mb-0"><i class="bi bi-tools"></i> Assistência Técnica - Visão Geral</h4>
+        <select id="filtro-loja-assistencia" class="form-select form-select-sm" style="width: 200px;">
+            <option value="todas" selected>Todas as Lojas</option>
+        </select>
+    </div>
     <div class="row g-3 mb-4">
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                        <i class="bi bi-person-fill-gear fs-2" style="color: #4CAF50;"></i>
-                    </div>
-                    <h5 class="mb-1" id="assist-top-tecnico">-</h5>
-                    <small class="text-muted">Técnico com Mais Assistências</small>
-                    <p class="mb-0 mt-2"><strong id="assist-top-tecnico-count">0</strong> assistências</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                        <i class="bi bi-shop-window fs-2" style="color: #2196F3;"></i>
-                    </div>
-                    <h5 class="mb-1" id="assist-top-loja">-</h5>
-                    <small class="text-muted">Loja com Mais Assistências</small>
-                    <p class="mb-0 mt-2"><strong id="assist-top-loja-count">0</strong> assistências</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-4">
             <div class="card h-100">
                 <div class="card-body text-center">
                     <div class="d-flex justify-content-center align-items-center mb-2">
                         <i class="bi bi-check-circle fs-2" style="color: var(--color-success);"></i>
                     </div>
-                    <h3 class="mb-1" id="assist-concluidas">0</h3>
-                    <small class="text-muted">Assistências Concluídas</small>
-                    <p class="mb-0 mt-2 small"><span id="assist-em-andamento">0</span> em andamento</p>
+                    <h3 class="mb-1" id="assist-concluidas-diarias">0</h3>
+                    <small class="text-muted">Assistências Concluídas (Hoje)</small>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-4">
             <div class="card h-100">
                 <div class="card-body text-center">
                     <div class="d-flex justify-content-center align-items-center mb-2">
                         <i class="bi bi-cash-coin fs-2" style="color: var(--accent-color);"></i>
                     </div>
-                    <h3 class="mb-1" id="assist-valor-total">R$ 0,00</h3>
-                    <small class="text-muted">Valor Total em Assistências</small>
+                    <h3 class="mb-1" id="assist-faturamento-diario">R$ 0,00</h3>
+                    <small class="text-muted">Faturamento (Hoje)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <i class="bi bi-hourglass-split fs-2" style="color: var(--color-warning);"></i>
+                    </div>
+                    <h3 class="mb-1" id="assist-em-andamento-diarias">0</h3>
+                    <small class="text-muted">Assistências em Andamento (Hoje)</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TICKET DE ASSISTÊNCIAS -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-ticket-perforated me-2"></i>Ticket de Assistências</span>
+                    <button id="btn-refresh-assist-tickets" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+                <div class="card-body p-0" style="height: 400px; overflow-y: auto;">
+                    <div id="assist-tickets-container" class="p-3">
+                        <div class="text-center text-muted py-5">
+                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                            <p class="mb-0 mt-2 small">Carregando tickets...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
