@@ -44,8 +44,36 @@ Para habilitar o sistema de tokens temporários:
 
 ## Para visualizar o card Bluve:
 1. Recarregue a página com CTRL+SHIFT+R (Windows/Linux) ou CMD+SHIFT+R (Mac) para limpar o cache
-2. Faça login com admin/admin123
+2. Faça login com admin/admin
 3. O card Bluve aparecerá ao lado do card Monitoramento na seção "Métricas Principais"
+
+## Ajustes Realizados (November 4, 2025, 19:15)
+[x] 19. Ajustar estética dos cards Monitoramento e Bluve - Completed:
+     - Removida duplicação de cards (havia duas seções "Métricas Principais")
+     - Design atualizado seguindo padrão do site:
+       * Bordas laterais coloridas (4px): azul #3b82f6 para Monitoramento, laranja #ff6600 para Bluve
+       * Backgrounds sutis: #f0f7ff (azul claro) e #fff5ed (laranja claro)
+       * Removidos gradientes fortes
+       * Design mais clean e profissional
+     - Mantidas funcionalidades de filtro por loja
+
+[x] 20. Corrigir problema ao adicionar lojas - Completed:
+     - Identificado: endpoint POST /api/lojas esperava campo "cargo" não enviado pelo formulário
+     - Solução: adicionado campo "cargo: null" no payload do formulário
+     - Arquivo modificado: public/js/pages/gerenciar-lojas.js
+     - Agora é possível adicionar lojas normalmente
+
+[x] 21. Restaurar banco de dados antigo - Completed:
+     - Backup do banco novo criado: data/database_new_backup.db
+     - Banco antigo restaurado: data/database.db
+     - 10 lojas recuperadas com sucesso (QSQ LOFT CURITIBA, QSQ ESTAÇÃO, QSQ MUELLER, etc)
+     - Colunas adicionadas à tabela lojas: tecnico_username, cargo, cep, numero_contato, gerente
+     - Tabelas criadas: vendedores, logs, assistencias, estoque_tecnico
+     - Sistema funcionando normalmente
+
+## Credenciais de Login Atualizadas:
+Username: admin
+Senha: admin
 
 ## Novas Funcionalidades Implementadas (November 4, 2025, 18:13)
 [x] 17. Cards de Métricas Principais (Monitoramento e Bluve) - Completed:
