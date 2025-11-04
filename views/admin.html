@@ -181,9 +181,23 @@
     
     <!-- CARDS DE MÉTRICAS PRINCIPAIS -->
     <h4 class="mb-3 mt-4">Métricas Principais</h4>
-    <div class="row g-3 mb-4">
+    
+    <style>
+        #loja-card-col {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        #loja-card-col .card {
+            display: block !important;
+            visibility: visible !important;
+        }
+    </style>
+    
+    <div class="row g-3 mb-4" style="display: flex !important;">
         <!-- Card Monitoramento -->
-        <div class="col-12 col-xl-6" id="monitoramento-card">
+        <div class="col-12 col-xl-6" id="monitoramento-card" style="display: block !important;">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-display me-2"></i>Monitoramento</div>
                 <div class="card-body">
@@ -209,12 +223,12 @@
         </div>
         
         <!-- Card Bluve (SEMPRE VISÍVEL) -->
-        <div class="col-12 col-xl-6" id="loja-card-col">
-            <div class="card h-100" style="border: 2px solid #28a745;">
-                <div class="card-header" style="background-color: #28a745; color: white;">
-                    <i class="bi bi-shop me-2"></i>Loja (Bluve)
+        <div class="col-12 col-xl-6" id="loja-card-col" style="display: block !important; visibility: visible !important; opacity: 1 !important; min-height: 200px;">
+            <div class="card h-100" style="display: block !important; border: 3px solid #ff6600; background-color: #fff;">
+                <div class="card-header" style="background: linear-gradient(135deg, #ff6600 0%, #ff8533 100%); color: white; font-weight: bold; font-size: 1.1rem;">
+                    <i class="bi bi-shop me-2"></i>🏪 LOJA (BLUVE)
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="display: block !important;">
                     <div class="row align-items-center text-center">
                         <div class="col-4 border-end">
                             <h3 class="mb-1" id="loja-clientes">0</h3>
