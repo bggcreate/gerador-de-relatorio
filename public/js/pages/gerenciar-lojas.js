@@ -226,16 +226,17 @@ function initGerenciarLojas() {
             numero_contato: document.getElementById('loja-numero-contato').value || null,
             gerente: document.getElementById('loja-gerente').value || null,
             status: document.getElementById('loja-status').value, 
-            funcao_especial: document.getElementById('loja-funcao-especial').value,
+            funcao_especial: document.getElementById('loja-funcao-especial').value || null,
             tecnico_username: document.getElementById('loja-tecnico').value || null,
-            observacoes: document.getElementById('loja-observacoes').value 
+            observacoes: document.getElementById('loja-observacoes').value || null,
+            cargo: null
         };
         const method = id ? 'PUT' : 'POST';
         const url = id ? `/api/lojas/${id}` : '/api/lojas';
         try {
             const response = await fetch(url, { method, headers: await getAuthHeaders(), body: JSON.stringify(data) });
             if (!response.ok) throw new Error('Falha ao salvar. Nome já existe?');
-            showToast('Sucesso', `Loja salva.`, 'success');
+            showToast('Sucesso', `Loja salva com sucesso.`, 'success');
             modal.hide();
             carregarLojas();
         } catch(e) { showToast('Erro', e.message, 'danger'); }

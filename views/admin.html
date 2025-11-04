@@ -99,9 +99,9 @@
     <div class="row g-3 mb-4">
         <!-- CARD MONITORAMENTO -->
         <div class="col-12 col-md-6">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
-                    <span><i class="bi bi-graph-up-arrow me-2"></i>Monitoramento</span>
+            <div class="card h-100" style="border-left: 4px solid #3b82f6;">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #f0f7ff; border-bottom: 2px solid #3b82f6;">
+                    <span style="color: #2563eb; font-weight: 600;"><i class="bi bi-graph-up-arrow me-2"></i>Monitoramento</span>
                     <select id="filtro-loja-monitoramento" class="form-select form-select-sm" style="width: 180px; font-size: 0.875rem;">
                         <option value="">Geral</option>
                     </select>
@@ -133,9 +133,9 @@
 
         <!-- CARD BLUVE -->
         <div class="col-12 col-md-6">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #ff6600 0%, #ff5500 100%); color: white;">
-                    <span><i class="bi bi-shop me-2"></i>Bluve</span>
+            <div class="card h-100" style="border-left: 4px solid #ff6600;">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #fff5ed; border-bottom: 2px solid #ff6600;">
+                    <span style="color: #ff5500; font-weight: 600;"><i class="bi bi-shop me-2"></i>Bluve</span>
                     <select id="filtro-loja-bluve" class="form-select form-select-sm" style="width: 180px; font-size: 0.875rem;">
                         <option value="">Geral</option>
                     </select>
@@ -244,105 +244,6 @@
                         <div class="text-center text-muted py-3">
                             <div class="spinner-border spinner-border-sm" role="status"></div>
                             <p class="mb-0 mt-2 small">Carregando demandas...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- CARDS DE MÉTRICAS PRINCIPAIS -->
-    <h4 class="mb-3 mt-4">Métricas Principais</h4>
-    
-    <style>
-        #metricas-principais-row {
-            display: flex !important;
-            flex-wrap: wrap !important;
-        }
-        
-        #monitoramento-card {
-            flex: 0 0 auto !important;
-        }
-        
-        #loja-card-col {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            flex: 0 0 auto !important;
-        }
-        
-        #loja-card-col .card {
-            display: block !important;
-            visibility: visible !important;
-        }
-        
-        @media (max-width: 1199.98px) {
-            #monitoramento-card,
-            #loja-card-col {
-                width: 100% !important;
-            }
-        }
-        
-        @media (min-width: 1200px) {
-            #monitoramento-card.visible,
-            #loja-card-col {
-                width: 50% !important;
-            }
-            #loja-card-col.full-width {
-                width: 100% !important;
-            }
-        }
-    </style>
-    
-    <div class="row g-3 mb-4" id="metricas-principais-row" style="display: flex !important;">
-        <!-- Card Monitoramento -->
-        <div class="col-12 col-xl-6 visible" id="monitoramento-card" style="display: block !important;">
-            <div class="card h-100">
-                <div class="card-header"><i class="bi bi-display me-2"></i>Monitoramento</div>
-                <div class="card-body">
-                    <div class="row align-items-center text-center">
-                        <div class="col-4 border-end">
-                            <h3 class="mb-1" id="geral-clientes">0</h3>
-                            <small id="geral-clientes-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
-                            <small class="text-muted">CLIENTES</small>
-                        </div>
-                        <div class="col-4 border-end">
-                            <h3 class="mb-1" id="geral-vendas">0</h3>
-                            <small id="geral-vendas-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
-                            <small class="text-muted">VENDAS</small>
-                        </div>
-                        <div class="col-4">
-                            <h2 class="mb-1" id="geral-tx-conversao">0.00%</h2>
-                            <small id="geral-tx-conversao-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
-                            <small class="text-muted">TX. CONVERSÃO</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Card Bluve (SEMPRE VISÍVEL) -->
-        <div class="col-12 col-xl-6" id="loja-card-col" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
-            <div class="card h-100" style="display: block !important; border: 3px solid #ff6600; background-color: #fff;">
-                <div class="card-header" style="background: linear-gradient(135deg, #ff6600 0%, #ff8533 100%); color: white; font-weight: bold; font-size: 1.1rem;">
-                    <i class="bi bi-shop me-2"></i>🏪 LOJA (BLUVE)
-                </div>
-                <div class="card-body" style="display: block !important;">
-                    <div class="row align-items-center text-center">
-                        <div class="col-4 border-end">
-                            <h3 class="mb-1" id="loja-clientes">0</h3>
-                            <small id="loja-clientes-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
-                            <small class="text-muted">CLIENTES</small>
-                        </div>
-                        <div class="col-4 border-end">
-                            <h3 class="mb-1" id="loja-vendas">0</h3>
-                            <small id="loja-vendas-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
-                            <small class="text-muted">VENDAS</small>
-                        </div>
-                        <div class="col-4">
-                            <h2 class="mb-1" id="loja-tx-conversao">0.00%</h2>
-                            <small id="loja-tx-conversao-comp" class="fw-bold d-block" style="min-height: 20px;"></small>
-                            <small class="text-muted">TX. CONVERSÃO</small>
                         </div>
                     </div>
                 </div>
