@@ -104,6 +104,40 @@ Para habilitar o sistema de tokens temporários:
 Username: admin
 Senha: admin
 
+## Melhorias na Aba de Lojas (November 4, 2025, 21:20)
+[x] 29. Tabela de lojas mais compacta - Completed:
+     - Aplicado `table-sm` para reduzir altura das linhas
+     - Header da tabela com classe `table-light`
+     - Colunas centralizadas para melhor visualização
+     - Células com `align-middle` para alinhamento vertical perfeito
+     
+[x] 30. Botões de ação otimizados - Completed:
+     - Agrupados com `btn-group btn-group-sm` do Bootstrap
+     - Apenas ícones (sem texto) para economizar espaço
+     - 4 botões: Detalhes (olho), Editar (lápis), Adicionar Vendedor (+pessoa), Excluir (lixeira)
+     - Cores diferenciadas: azul, cinza, verde, vermelho
+     - Tooltips com títulos descritivos
+     
+[x] 31. Formulário de vendedor funcional - Completed:
+     - Event listener adicionado para submit do form-vendedor
+     - Salva vendedores corretamente (POST/PUT)
+     - Recarrega tabela de lojas após salvar
+     - Reabre modal de detalhes automaticamente após adicionar/editar vendedor
+     - Feedback visual com toasts de sucesso/erro
+     
+[x] 32. Modal de Detalhes aprimorado - Completed:
+     - Mostra todos os vendedores cadastrados na loja selecionada
+     - Permite editar cada vendedor individualmente
+     - Permite excluir vendedores
+     - Botão "Adicionar Vendedor" disponível no modal
+     - Design com ícones e badges coloridos
+     - Mensagem quando não há vendedores vinculados
+     
+Arquivos modificados:
+- views/gerenciar-lojas.html: Tabela compacta com table-sm e cabeçalho table-light
+- public/js/pages/gerenciar-lojas.js: Event listener para formulário de vendedor
+- Revisado e aprovado pelo architect
+
 ## Remoção da Aba de Alertas e Correção da Página de Lojas (November 4, 2025, 20:30)
 [x] 25. Remover aba de Alertas Técnico - Completed:
      - Removido 'nav-alertas' do array de menuIds em public/js/app.js
