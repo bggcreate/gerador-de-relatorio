@@ -612,7 +612,8 @@ export function initAdminPage(currentUser) {
     // Garantir que o card Bluve esteja sempre visível
     const lojaCardCol = document.getElementById('loja-card-col');
     if (lojaCardCol) {
-        lojaCardCol.style.display = '';
+        lojaCardCol.style.display = 'block';
+        lojaCardCol.classList.remove('d-none');
         console.log('Card Bluve garantido como visível');
     }
     

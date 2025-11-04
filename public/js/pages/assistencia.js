@@ -162,10 +162,11 @@ async function renderCardsLojas() {
             console.log('Total de lojas retornadas:', lojas.length);
             console.log('Lojas:', lojas);
             
-            // Filtrar apenas lojas com funcao_especial "Busca por Assist. Tec."
-            const lojasFiltradas = lojas.filter(loja => loja.funcao_especial === 'Busca por Assist. Tec.');
+            // Filtrar apenas lojas com funcao_especial "Busca por Assist. Tec." OU todas as lojas ativas
+            // Mudança: Agora mostra TODAS as lojas ativas para facilitar acesso à assistência técnica
+            const lojasFiltradas = lojas.filter(loja => loja.status === 'ativa' || loja.status === 'Ativa');
             
-            console.log('Lojas filtradas (Busca por Assist. Tec.):', lojasFiltradas.length);
+            console.log('Lojas filtradas (ativas):', lojasFiltradas.length);
             console.log('Lojas filtradas:', lojasFiltradas);
             
             const seletorLojas = document.getElementById('seletor-lojas');
@@ -179,7 +180,7 @@ async function renderCardsLojas() {
             seletorLojas.style.display = 'block';
             
             if (lojasFiltradas.length === 0) {
-                cardsContainer.innerHTML = '<div class="col-12"><p class="text-muted text-center">Nenhuma loja com "Função especial" = "Busca por Assist. Tec." encontrada.</p></div>';
+                cardsContainer.innerHTML = '<div class="col-12"><p class="text-muted text-center">Nenhuma loja ativa encontrada.</p></div>';
             } else {
                 cardsContainer.innerHTML = lojasFiltradas.map(loja => `
                     <div class="col-md-3">

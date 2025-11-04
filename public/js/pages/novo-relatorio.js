@@ -42,6 +42,7 @@ export function initNovoRelatorioPage() {
     let lojaDonutChart = null;
     const DRAFT_KEY = 'draftRelatorio';
     let vendedorCounter = 0;
+    let previousLojaValue = null; // Track previous store to detect changes
 
     // --- Funções de Gerenciamento de Rascunho ---
     function salvarRascunho() {
@@ -156,23 +157,57 @@ export function initNovoRelatorioPage() {
     async function carregarVendedoresDaLoja() {
         const lojaSelecionada = lojasCache.find(loja => loja.nome === lojaSelect.value);
         if (!lojaSelecionada) {
+            console.log('Nenhuma loja selecionada');
             vendedoresCache = [];
             return;
         }
+        
+        console.log(`Carregando vendedores para loja: ${lojaSelecionada.nome} (ID: ${lojaSelecionada.id})`);
         
         try {
             const response = await fetch(`/api/vendedores?loja_id=${lojaSelecionada.id}`);
             if (!response.ok) throw new Error('Falha ao carregar vendedores.');
             const todosVendedores = await response.json();
             vendedoresCache = todosVendedores.filter(v => v.ativo === 1 || v.ativo === true);
+            console.log(`Vendedores carregados: ${vendedoresCache.length} vendedores ativos`);
+            console.log('Vendedores:', vendedoresCache);
+            
+            // Atualizar dropdowns de vendedores existentes com o novo cache
+            atualizarDropdownsVendedores();
         } catch (e) {
             console.error("Erro ao carregar vendedores", e);
             vendedoresCache = [];
         }
     }
     
+    function atualizarDropdownsVendedores() {
+        // Atualizar todos os selects de vendedores existentes com o novo cache
+        const selectsExistentes = containerVendedores.querySelectorAll('.vendedor-select');
+        console.log(`Atualizando ${selectsExistentes.length} dropdowns de vendedores com novo cache`);
+        
+        selectsExistentes.forEach(select => {
+            const valorAtual = select.value; // Preservar seleção atual se possível
+            
+            // Reconstruir opções
+            select.innerHTML = '<option value="">Selecione</option>';
+            vendedoresCache.forEach(v => {
+                const option = document.createElement('option');
+                option.value = v.id;
+                option.textContent = v.nome;
+                if (v.id == valorAtual) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            
+            console.log(`Dropdown atualizado. ${vendedoresCache.length} vendedores disponíveis`);
+        });
+    }
+    
     async function handleSelecaoDeLoja() {
-        const lojaSelecionada = lojasCache.find(loja => loja.nome === lojaSelect.value);
+        const currentLojaValue = lojaSelect.value;
+        console.log(`Loja selecionada: ${currentLojaValue}`);
+        const lojaSelecionada = lojasCache.find(loja => loja.nome === currentLojaValue);
         const containerEspecial = document.getElementById('container-funcao-especial');
         const campoOmni = document.getElementById('campo-omni');
         const campoBuscaAssist = document.getElementById('campo-busca-assist');
@@ -190,8 +225,24 @@ export function initNovoRelatorioPage() {
             calcularEAtualizarGraficos();
         }
         
+        // Detectar se a loja realmente mudou (usuário trocou manualmente)
+        const lojaChanged = previousLojaValue !== null && previousLojaValue !== currentLojaValue;
+        
+        if (lojaChanged) {
+            // IMPORTANTE: Limpar vendedores existentes APENAS quando o usuário trocar de loja
+            // Isso previne limpar vendedores ao carregar rascunhos/edições
+            containerVendedores.innerHTML = '';
+            console.log('Loja alterada: vendedores limpos. Adicione novos vendedores para esta loja.');
+        }
+        
+        // Atualizar loja anterior
+        previousLojaValue = currentLojaValue;
+        
         // Carregar vendedores da loja selecionada
         await carregarVendedoresDaLoja();
+        
+        // Atualizar placeholder de vendedores
+        updateVendedoresPlaceholder();
     }
     
     function adicionarVendedor(vendedor = { nome: '', atendimentos: 0, vendas: 0, id_vendedor: null }, forcarManual = false) {
