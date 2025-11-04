@@ -300,6 +300,54 @@ function initGerenciarLojas() {
         if (action === 'excluir-vendedor') excluirVendedor(id, lojaId);
     });
     
+    // Event listener para o formulário de vendedor
+    const formVendedor = document.getElementById('form-vendedor');
+    if (formVendedor) {
+        formVendedor.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const id = document.getElementById('vendedor-id').value;
+            const lojaId = parseInt(document.getElementById('vendedor-loja-id').value, 10);
+            const data = {
+                loja_id: lojaId,
+                nome: document.getElementById('vendedor-nome').value,
+                telefone: document.getElementById('vendedor-telefone').value,
+                data_entrada: document.getElementById('vendedor-data-entrada').value,
+                data_demissao: document.getElementById('vendedor-data-demissao').value || null,
+                previsao_entrada: document.getElementById('vendedor-previsao-entrada').value || null,
+                previsao_saida: document.getElementById('vendedor-previsao-saida').value || null,
+                ativo: document.getElementById('vendedor-data-demissao').value ? 0 : 1
+            };
+            
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/vendedores/${id}` : '/api/vendedores';
+            
+            try {
+                const response = await fetch(url, { 
+                    method, 
+                    headers: await getAuthHeaders(), 
+                    body: JSON.stringify(data) 
+                });
+                
+                if (!response.ok) throw new Error('Falha ao salvar vendedor.');
+                
+                showToast('Sucesso', 'Vendedor salvo com sucesso.', 'success');
+                
+                // Fechar modal de vendedor
+                const modalVendedor = bootstrap.Modal.getInstance(document.getElementById('modal-vendedor'));
+                if (modalVendedor) modalVendedor.hide();
+                
+                // Recarregar tabela de lojas e reabrir modal de detalhes se aplicável
+                await carregarLojas();
+                if (lojaId) {
+                    setTimeout(() => mostrarDetalhes(lojaId), 300);
+                }
+            } catch (e) {
+                showToast('Erro', e.message, 'danger');
+            }
+        });
+    }
+    
     carregarTecnicos();
     carregarLojas();
 }
