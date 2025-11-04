@@ -17,6 +17,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const { requireRole, requirePage, getLojaFilter, getPermissions, ROLES } = require('./middleware/roleAuth');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -27,6 +28,20 @@ const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(64).toSt
 if (!process.env.SESSION_SECRET) {
     console.warn('⚠️  ATENÇÃO: SESSION_SECRET não configurado. Usando um secret gerado automaticamente.');
     console.warn('⚠️  Para produção, configure a variável de ambiente SESSION_SECRET.');
+}
+
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
+if (!process.env.JWT_SECRET) {
+    console.warn('⚠️  ATENÇÃO: JWT_SECRET não configurado. Usando um secret gerado automaticamente.');
+    console.warn('⚠️  Para produção, configure a variável de ambiente JWT_SECRET.');
+}
+
+const DEV_TEMP_ACCESS_ENABLED = process.env.DEV_TEMP_ACCESS === 'true' && (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV);
+if (DEV_TEMP_ACCESS_ENABLED) {
+    console.log('🔓 Acesso temporário de desenvolvimento HABILITADO');
+    console.warn('⚠️  ATENÇÃO: Desabilite DEV_TEMP_ACCESS antes de fazer deploy em produção!');
+} else {
+    console.log('🔒 Acesso temporário de desenvolvimento DESABILITADO');
 }
 
 // --- CONFIGURAÇÃO GERAL ---
@@ -169,6 +184,21 @@ let db = new sqlite3.Database(DB_PATH, err => {
             details TEXT
         )`);
         
+        db.run(`CREATE TABLE IF NOT EXISTS temp_tokens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            token_hash TEXT UNIQUE NOT NULL,
+            role TEXT DEFAULT 'dev',
+            expira_em DATETIME NOT NULL,
+            ip_origem TEXT,
+            ip_restrito TEXT,
+            revogado INTEGER DEFAULT 0,
+            criado_por TEXT,
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+            usado_em DATETIME,
+            revogado_em DATETIME,
+            revogado_por TEXT
+        )`);
+        
         // Tabelas de Assistência Técnica
         db.run(`CREATE TABLE IF NOT EXISTS estoque_tecnico (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -267,6 +297,128 @@ let db = new sqlite3.Database(DB_PATH, err => {
         });
     });
 });
+
+// =================================================================
+// SISTEMA DE TOKENS JWT TEMPORÁRIOS PARA DESENVOLVIMENTO
+// =================================================================
+
+function generateTempToken(expiresInHours = 1, ipRestricted = null) {
+    const tokenId = crypto.randomBytes(16).toString('hex');
+    const payload = {
+        tokenId,
+        role: 'dev',
+        type: 'temp_access',
+        iat: Math.floor(Date.now() / 1000)
+    };
+    
+    const token = jwt.sign(payload, JWT_SECRET, { 
+        expiresIn: `${expiresInHours}h`,
+        issuer: 'dev-temp-access'
+    });
+    
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    
+    return { token, tokenHash, tokenId, expiresInHours };
+}
+
+function verifyTempToken(token) {
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET, { 
+            issuer: 'dev-temp-access' 
+        });
+        return { valid: true, decoded };
+    } catch (error) {
+        return { valid: false, error: error.message };
+    }
+}
+
+async function saveTempTokenToDb(tokenHash, expiresInHours, ipOrigem, ipRestrito, criadoPor) {
+    return new Promise((resolve, reject) => {
+        const expiraEm = new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString();
+        
+        db.run(
+            `INSERT INTO temp_tokens (token_hash, role, expira_em, ip_origem, ip_restrito, criado_por) 
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [tokenHash, 'dev', expiraEm, ipOrigem, ipRestrito, criadoPor],
+            function(err) {
+                if (err) reject(err);
+                else resolve(this.lastID);
+            }
+        );
+    });
+}
+
+async function validateTempTokenInDb(token, currentIp) {
+    return new Promise((resolve, reject) => {
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+        
+        db.get(
+            `SELECT * FROM temp_tokens WHERE token_hash = ? AND revogado = 0 AND datetime(expira_em) > datetime('now')`,
+            [tokenHash],
+            (err, row) => {
+                if (err) return reject(err);
+                if (!row) return resolve({ valid: false, reason: 'Token não encontrado ou expirado' });
+                
+                if (row.ip_restrito && row.ip_restrito !== currentIp) {
+                    return resolve({ valid: false, reason: 'IP não autorizado' });
+                }
+                
+                db.run(
+                    `UPDATE temp_tokens SET usado_em = datetime('now') WHERE id = ?`,
+                    [row.id],
+                    (err) => {
+                        if (err) console.error('Erro ao atualizar usado_em:', err);
+                    }
+                );
+                
+                resolve({ valid: true, tokenData: row });
+            }
+        );
+    });
+}
+
+const tempTokenAuthMiddleware = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return next();
+    }
+    
+    const token = authHeader.substring(7);
+    
+    const jwtVerification = verifyTempToken(token);
+    if (!jwtVerification.valid) {
+        return res.status(401).json({ error: 'Token inválido ou expirado' });
+    }
+    
+    const currentIp = getClientIp(req);
+    const dbValidation = await validateTempTokenInDb(token, currentIp);
+    
+    if (!dbValidation.valid) {
+        logEvent('security', 'temp_token', 'token_rejected', dbValidation.reason, req);
+        return res.status(401).json({ error: dbValidation.reason });
+    }
+    
+    req.session.userId = -1;
+    req.session.username = 'temp_dev_access';
+    req.session.role = 'dev';
+    req.session.tempToken = true;
+    req.session.custom_permissions = null;
+    
+    logEvent('auth', 'temp_dev_access', 'temp_token_used', `Token temporário utilizado (IP: ${currentIp})`, req);
+    
+    next();
+};
+
+function getClientIp(req) {
+    return req.headers['x-forwarded-for']?.split(',')[0].trim() || 
+           req.headers['x-real-ip'] || 
+           req.connection?.remoteAddress || 
+           req.socket?.remoteAddress ||
+           'unknown';
+}
+
+app.use(tempTokenAuthMiddleware);
 
 // --- ROTAS DE PÁGINAS ---
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'views', 'login.html')));
@@ -572,6 +724,127 @@ app.get('/logout', (req, res) => {
     }
     req.session.destroy(() => res.redirect('/login')); 
 });
+
+// =================================================================
+// ENDPOINTS DE GERENCIAMENTO DE TOKENS TEMPORÁRIOS
+// =================================================================
+
+app.post('/api/dev/generate-temp-token', requirePageLogin, requireRole(['admin', 'dev']), async (req, res) => {
+    if (!DEV_TEMP_ACCESS_ENABLED) {
+        return res.status(403).json({ 
+            error: 'Acesso temporário desabilitado',
+            message: 'Configure DEV_TEMP_ACCESS=true em ambiente de desenvolvimento'
+        });
+    }
+    
+    try {
+        const { expiresInHours = 1, ipRestricted = null } = req.body;
+        
+        if (expiresInHours < 0.1 || expiresInHours > 24) {
+            return res.status(400).json({ 
+                error: 'Validade inválida. Use entre 0.1 e 24 horas.' 
+            });
+        }
+        
+        const currentIp = getClientIp(req);
+        const { token, tokenHash } = generateTempToken(expiresInHours, ipRestricted);
+        
+        await saveTempTokenToDb(
+            tokenHash, 
+            expiresInHours, 
+            currentIp, 
+            ipRestricted, 
+            req.session.username
+        );
+        
+        logEvent('security', req.session.username, 'temp_token_generated', 
+            `Token temporário gerado (validade: ${expiresInHours}h, IP restrito: ${ipRestricted || 'não'})`, 
+            req
+        );
+        
+        res.json({
+            success: true,
+            token,
+            expiresInHours,
+            ipRestricted,
+            usage: `Authorization: Bearer ${token}`,
+            warning: 'Este token tem acesso completo de desenvolvedor. Mantenha-o seguro!'
+        });
+    } catch (error) {
+        console.error('Erro ao gerar token temporário:', error);
+        logEvent('error', req.session.username, 'temp_token_error', error.message, req);
+        res.status(500).json({ error: 'Erro ao gerar token temporário' });
+    }
+});
+
+app.delete('/api/dev/revoke-temp-token', requirePageLogin, requireRole(['admin', 'dev']), async (req, res) => {
+    if (!DEV_TEMP_ACCESS_ENABLED) {
+        return res.status(403).json({ error: 'Acesso temporário desabilitado' });
+    }
+    
+    try {
+        const { tokenId } = req.body;
+        
+        if (!tokenId) {
+            return res.status(400).json({ error: 'ID do token não fornecido' });
+        }
+        
+        db.run(
+            `UPDATE temp_tokens SET revogado = 1, revogado_em = datetime('now'), revogado_por = ? WHERE id = ?`,
+            [req.session.username, tokenId],
+            function(err) {
+                if (err) {
+                    console.error('Erro ao revogar token:', err);
+                    return res.status(500).json({ error: 'Erro ao revogar token' });
+                }
+                
+                if (this.changes === 0) {
+                    return res.status(404).json({ error: 'Token não encontrado' });
+                }
+                
+                logEvent('security', req.session.username, 'temp_token_revoked', 
+                    `Token temporário #${tokenId} revogado manualmente`, 
+                    req
+                );
+                
+                res.json({ success: true, message: 'Token revogado com sucesso' });
+            }
+        );
+    } catch (error) {
+        console.error('Erro ao revogar token:', error);
+        logEvent('error', req.session.username, 'temp_token_revoke_error', error.message, req);
+        res.status(500).json({ error: 'Erro ao revogar token' });
+    }
+});
+
+app.get('/api/dev/temp-tokens', requirePageLogin, requireRole(['admin', 'dev']), (req, res) => {
+    if (!DEV_TEMP_ACCESS_ENABLED) {
+        return res.status(403).json({ error: 'Acesso temporário desabilitado' });
+    }
+    
+    db.all(
+        `SELECT id, role, expira_em, ip_origem, ip_restrito, revogado, criado_por, criado_em, usado_em, revogado_em, revogado_por 
+         FROM temp_tokens 
+         ORDER BY criado_em DESC 
+         LIMIT 100`,
+        [],
+        (err, tokens) => {
+            if (err) {
+                console.error('Erro ao listar tokens:', err);
+                return res.status(500).json({ error: 'Erro ao listar tokens' });
+            }
+            
+            const tokensWithStatus = tokens.map(t => ({
+                ...t,
+                status: t.revogado ? 'revogado' : 
+                       (new Date(t.expira_em) < new Date() ? 'expirado' : 'ativo')
+            }));
+            
+            res.json(tokensWithStatus);
+        }
+    );
+});
+
 app.get('/api/session-info', requirePageLogin, (req, res) => { 
     // Buscar permissões customizadas do usuário
     db.get('SELECT custom_permissions FROM usuarios WHERE id = ?', [req.session.userId], (err, user) => {
