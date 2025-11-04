@@ -63,13 +63,19 @@ function initGerenciarLojas() {
             const response = await fetch('/api/lojas');
             lojasCache = await response.json();
             
-            // Carregar contagem de vendedores para cada loja
-            const vendedoresResponse = await fetch('/api/vendedores');
-            const vendedores = await vendedoresResponse.json();
-            
             if (lojasCache.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Nenhuma loja cadastrada.</td></tr>';
                 return;
+            }
+            
+            let vendedores = [];
+            try {
+                const vendedoresResponse = await fetch('/api/vendedores');
+                if (vendedoresResponse.ok) {
+                    vendedores = await vendedoresResponse.json();
+                }
+            } catch (e) {
+                console.warn('API de vendedores indisponível, continuando sem contagem');
             }
             
             tableBody.innerHTML = lojasCache.map(loja => {
@@ -77,11 +83,9 @@ function initGerenciarLojas() {
                     ? `<span class="badge bg-success">Ativo</span>` 
                     : `<span class="badge" style="background-color: #6c757d;">Inativo</span>`;
                     
-                // Contar vendedores ativos da loja
                 const vendedoresLoja = vendedores.filter(v => v.loja_id === loja.id && v.ativo === 1);
                 const totalVendedores = vendedoresLoja.length;
                 
-                // Responsável/Email (usar gerente ou numero_contato)
                 const responsavel = loja.gerente || loja.numero_contato || '-';
                 
                 return `<tr>
@@ -106,7 +110,8 @@ function initGerenciarLojas() {
                 </tr>`;
             }).join('');
         } catch (e) {
-            tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erro ao carregar.</td></tr>';
+            console.error('Erro ao carregar lojas:', e);
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erro ao carregar lojas.</td></tr>';
         }
     }
 

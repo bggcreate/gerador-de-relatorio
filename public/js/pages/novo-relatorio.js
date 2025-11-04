@@ -166,13 +166,16 @@ export function initNovoRelatorioPage() {
         
         try {
             const response = await fetch(`/api/vendedores?loja_id=${lojaSelecionada.id}`);
-            if (!response.ok) throw new Error('Falha ao carregar vendedores.');
+            if (!response.ok) {
+                console.warn('API de vendedores não disponível, usando modo manual');
+                vendedoresCache = [];
+                return;
+            }
             const todosVendedores = await response.json();
             vendedoresCache = todosVendedores.filter(v => v.ativo === 1 || v.ativo === true);
             console.log(`Vendedores carregados: ${vendedoresCache.length} vendedores ativos`);
             console.log('Vendedores:', vendedoresCache);
             
-            // Atualizar dropdowns de vendedores existentes com o novo cache
             atualizarDropdownsVendedores();
         } catch (e) {
             console.error("Erro ao carregar vendedores", e);
