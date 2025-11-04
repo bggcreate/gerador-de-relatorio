@@ -25,6 +25,15 @@
      - Arquivo .env.example com instruções
 [x] 13. Configurar secrets necessárias - DEV_TEMP_ACCESS adicionado às secrets (precisa ser 'true' para habilitar)
 
+## Card Bluve no Dashboard - Implementação Reforçada (November 4, 2025, 16:53)
+[x] 14. Reforçar implementação do card Bluve ao lado de Monitoramento - Completed:
+     - Adicionado CSS flexbox robusto no HTML para garantir layout correto
+     - Implementado JavaScript completo para forçar visibilidade do card
+     - Card possui design diferenciado: borda laranja (#ff6600), header com gradiente laranja, ícone 🏪
+     - Sistema de verificação dupla (imediato + após delay) para garantir visibilidade
+     - Layout responsivo que ajusta automaticamente quando Monitoramento está oculto
+     - Arquivos modificados: views/admin.html, public/js/pages/admin.js
+
 ## Próximos Passos
 Para habilitar o sistema de tokens temporários:
 1. Altere a secret DEV_TEMP_ACCESS de '1212' para 'true' (exatamente assim, em minúsculas)
@@ -32,3 +41,8 @@ Para habilitar o sistema de tokens temporários:
 3. Faça login com admin/admin
 4. Use POST /api/dev/generate-temp-token para gerar tokens
 5. Consulte DEV_ACCESS.md para documentação completa
+
+## Para visualizar o card Bluve:
+1. Recarregue a página com CTRL+SHIFT+R (Windows/Linux) ou CMD+SHIFT+R (Mac) para limpar o cache
+2. Faça login com admin/admin123
+3. O card Bluve aparecerá ao lado do card Monitoramento na seção "Métricas Principais"
