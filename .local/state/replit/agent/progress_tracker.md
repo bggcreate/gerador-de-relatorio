@@ -91,3 +91,15 @@ Para habilitar o sistema de tokens temporários:
      - Remover verificações de role remanescentes em admin.js, assistencia.js, etc
      - Testar navegação e CRUD de usuários completo
      - Opcional: Migração de banco de dados para remover colunas de role (pode ser feito depois)
+
+## Reinicialização do Banco de Dados (November 4, 2025, 17:35)
+[x] 16. Banco de dados reiniciado - Completed:
+     - Backup do banco anterior criado em data/database.db.backup_*
+     - Novo banco criado com estrutura simplificada
+     - Tabela usuarios criada apenas com: id, username, password, password_hashed
+     - Usuário admin criado com senha 'admin' (hash bcrypt)
+     - Servidor reiniciado e rodando na porta 5000
+     
+     CREDENCIAIS DE LOGIN:
+     Username: admin
+     Senha: admin
