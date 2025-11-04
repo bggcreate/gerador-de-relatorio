@@ -43,7 +43,12 @@ function initGerenciarLojas() {
         tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Carregando...</td></tr>';
         try {
             const response = await fetch('/api/lojas');
-            lojasCache = await response.json();
+            const lojas = await response.json();
+            // Normalizar IDs para números
+            lojasCache = lojas.map(loja => ({
+                ...loja,
+                id: Number(loja.id)
+            }));
             
             if (lojasCache.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Nenhuma loja cadastrada.</td></tr>';
@@ -54,7 +59,13 @@ function initGerenciarLojas() {
             try {
                 const vendedoresResponse = await fetch('/api/vendedores');
                 if (vendedoresResponse.ok) {
-                    vendedores = await vendedoresResponse.json();
+                    const vendedoresRaw = await vendedoresResponse.json();
+                    // Normalizar IDs para números
+                    vendedores = vendedoresRaw.map(v => ({
+                        ...v,
+                        id: Number(v.id),
+                        loja_id: Number(v.loja_id)
+                    }));
                 }
             } catch (e) {
                 console.warn('API de vendedores indisponível, continuando sem contagem');
@@ -62,8 +73,8 @@ function initGerenciarLojas() {
             
             tableBody.innerHTML = lojasCache.map(loja => {
                 const statusBadge = loja.status === 'ativa' 
-                    ? `<span class="badge bg-success">Ativo</span>` 
-                    : `<span class="badge bg-secondary">Inativo</span>`;
+                    ? `<span class="badge" style="background-color: #c3fae8; color: #087f5b;">Ativo</span>` 
+                    : `<span class="badge" style="background-color: #f1f3f5; color: #495057;">Inativo</span>`;
                     
                 const vendedoresLoja = vendedores.filter(v => v.loja_id === loja.id && v.ativo === 1);
                 const totalVendedores = vendedoresLoja.length;
@@ -74,17 +85,17 @@ function initGerenciarLojas() {
                     <td class="align-middle ps-3"><strong>${loja.nome}</strong></td>
                     <td class="align-middle">${responsavel}</td>
                     <td class="text-center align-middle">
-                        <span class="badge bg-primary">${totalVendedores}</span>
+                        <span class="badge" style="background-color: #a5d8ff; color: #1971c2;">${totalVendedores}</span>
                     </td>
                     <td class="text-center align-middle">${statusBadge}</td>
                     <td class="text-end align-middle pe-3">
-                        <button class="btn btn-sm btn-primary" data-action="detalhes" data-id="${loja.id}" title="Ver Detalhes e Vendedores">
+                        <button class="btn btn-sm" style="background-color: #d0ebff; color: #1971c2; border: 1px solid #a5d8ff;" data-action="detalhes" data-id="${loja.id}" title="Ver Detalhes e Vendedores">
                             <i class="bi bi-eye me-1"></i>Detalhes
                         </button>
-                        <button class="btn btn-sm btn-outline-secondary" data-action="editar" data-id="${loja.id}" title="Editar Loja">
+                        <button class="btn btn-sm" style="background-color: #e9ecef; color: #495057; border: 1px solid #ced4da;" data-action="editar" data-id="${loja.id}" title="Editar Loja">
                             <i class="bi bi-pencil me-1"></i>Editar
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" data-action="excluir" data-id="${loja.id}" title="Excluir Loja">
+                        <button class="btn btn-sm" style="background-color: #ffe3e3; color: #c92a2a; border: 1px solid #ffc9c9;" data-action="excluir" data-id="${loja.id}" title="Excluir Loja">
                             <i class="bi bi-trash me-1"></i>Excluir
                         </button>
                     </td>
@@ -121,8 +132,15 @@ function initGerenciarLojas() {
     }
     
     async function mostrarDetalhes(id) {
+        console.log('=== mostrarDetalhes chamado ===');
+        console.log('ID recebido:', id, 'tipo:', typeof id);
+        console.log('lojasCache:', lojasCache);
         const loja = lojasCache.find(l => l.id === id);
-        if (!loja) return;
+        console.log('Loja encontrada:', loja);
+        if (!loja) {
+            console.error('Loja não encontrada com ID:', id);
+            return;
+        }
         
         const modalDetalhes = new bootstrap.Modal(document.getElementById('modal-detalhes-loja'));
         const tabelaVendedoresDetalhes = document.getElementById('tabela-vendedores-detalhes');
@@ -134,7 +152,13 @@ function initGerenciarLojas() {
         // Carregar vendedores da loja
         try {
             const response = await fetch('/api/vendedores');
-            const vendedores = await response.json();
+            const vendedoresRaw = await response.json();
+            // Normalizar IDs para números
+            const vendedores = vendedoresRaw.map(v => ({
+                ...v,
+                id: Number(v.id),
+                loja_id: Number(v.loja_id)
+            }));
             const vendedoresLoja = vendedores.filter(v => v.loja_id === id);
             
             if (vendedoresLoja.length === 0) {
@@ -143,18 +167,23 @@ function initGerenciarLojas() {
             } else {
                 semVendedores.classList.add('d-none');
                 tabelaVendedoresDetalhes.innerHTML = vendedoresLoja.map(v => {
-                    const statusBadge = v.ativo === 1 && !v.data_demissao
-                        ? `<span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i>Ativo</span>` 
-                        : `<span class="badge bg-secondary"><i class="bi bi-x-circle-fill me-1"></i>Inativo</span>`;
+                    let statusBadge;
+                    if (v.data_demissao) {
+                        statusBadge = `<span class="badge" style="background-color: #ffe3e3; color: #c92a2a;"><i class="bi bi-x-circle-fill me-1"></i>Demitido</span>`;
+                    } else if (v.ativo === 1) {
+                        statusBadge = `<span class="badge" style="background-color: #c3fae8; color: #087f5b;"><i class="bi bi-check-circle-fill me-1"></i>Ativo</span>`;
+                    } else {
+                        statusBadge = `<span class="badge" style="background-color: #f1f3f5; color: #495057;"><i class="bi bi-x-circle-fill me-1"></i>Inativo</span>`;
+                    }
                     return `<tr>
                         <td>${v.nome}</td>
                         <td>${v.telefone || '-'}</td>
                         <td>${statusBadge}</td>
                         <td class="text-end pe-3">
-                            <button class="btn btn-sm btn-outline-primary" data-action="editar-vendedor" data-id="${v.id}" data-loja-id="${id}">
+                            <button class="btn btn-sm" style="background-color: #e9ecef; color: #495057; border: 1px solid #ced4da;" data-action="editar-vendedor" data-id="${v.id}" data-loja-id="${id}">
                                 <i class="bi bi-pencil me-1"></i>Editar
                             </button>
-                            <button class="btn btn-sm btn-outline-danger" data-action="excluir-vendedor" data-id="${v.id}" data-loja-id="${id}">
+                            <button class="btn btn-sm" style="background-color: #ffe3e3; color: #c92a2a; border: 1px solid #ffc9c9;" data-action="excluir-vendedor" data-id="${v.id}" data-loja-id="${id}">
                                 <i class="bi bi-trash me-1"></i>Excluir
                             </button>
                         </td>
@@ -231,7 +260,13 @@ function initGerenciarLojas() {
     async function editarVendedor(id, lojaId) {
         try {
             const response = await fetch('/api/vendedores');
-            const vendedores = await response.json();
+            const vendedoresRaw = await response.json();
+            // Normalizar IDs para números
+            const vendedores = vendedoresRaw.map(v => ({
+                ...v,
+                id: Number(v.id),
+                loja_id: Number(v.loja_id)
+            }));
             const vendedor = vendedores.find(v => v.id === id);
             if (!vendedor) return;
             
@@ -275,11 +310,20 @@ function initGerenciarLojas() {
     btnAdicionar.addEventListener('click', abrirModalParaAdicionar);
     tableBody.addEventListener('click', (e) => {
         const button = e.target.closest('button[data-action]');
-        if (!button) return;
+        console.log('Clique detectado:', e.target);
+        console.log('Botão encontrado:', button);
+        if (!button) {
+            console.log('Nenhum botão com data-action encontrado');
+            return;
+        }
         const id = parseInt(button.dataset.id, 10);
         const action = button.dataset.action;
+        console.log('ID:', id, 'Action:', action);
         if (action === 'editar') abrirModalParaEditar(id);
-        if (action === 'detalhes') mostrarDetalhes(id);
+        if (action === 'detalhes') {
+            console.log('Chamando mostrarDetalhes com ID:', id);
+            mostrarDetalhes(id);
+        }
         if (action === 'excluir') excluirLoja(id);
         if (action === 'adicionar-vendedor') abrirModalVendedorParaLoja(id);
     });
@@ -395,7 +439,13 @@ function initGerenciarVendedores() {
         tableBody.innerHTML = '<tr><td colspan="8" class="text-center">Carregando...</td></tr>';
         try {
             const response = await fetch(`/api/vendedores?loja_id=${lojaId}`);
-            vendedoresCache = await response.json();
+            const vendedoresRaw = await response.json();
+            // Normalizar IDs para números
+            vendedoresCache = vendedoresRaw.map(v => ({
+                ...v,
+                id: Number(v.id),
+                loja_id: Number(v.loja_id)
+            }));
             
             if (vendedoresCache.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhum vendedor cadastrado nesta loja.</td></tr>';
@@ -403,9 +453,14 @@ function initGerenciarVendedores() {
             }
             
             tableBody.innerHTML = vendedoresCache.map(v => {
-                const statusBadge = v.data_demissao ? 
-                    '<span class="badge bg-danger">Demitido</span>' : 
-                    '<span class="badge bg-success">Ativo</span>';
+                let statusBadge;
+                if (v.data_demissao) {
+                    statusBadge = '<span class="badge" style="background-color: #ffe3e3; color: #c92a2a;">Demitido</span>';
+                } else if (v.ativo === 1) {
+                    statusBadge = '<span class="badge" style="background-color: #c3fae8; color: #087f5b;">Ativo</span>';
+                } else {
+                    statusBadge = '<span class="badge" style="background-color: #f1f3f5; color: #495057;">Inativo</span>';
+                }
                 
                 return `<tr>
                     <td>${v.nome}</td>
@@ -416,8 +471,8 @@ function initGerenciarVendedores() {
                     <td>${v.previsao_saida || '-'}</td>
                     <td>${statusBadge}</td>
                     <td class="text-end pe-3">
-                        <button class="btn btn-sm btn-outline-secondary" data-action="editar" data-id="${v.id}"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" data-action="excluir" data-id="${v.id}"><i class="bi bi-trash"></i></button>
+                        <button class="btn btn-sm" style="background-color: #e9ecef; color: #495057; border: 1px solid #ced4da;" data-action="editar" data-id="${v.id}"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm" style="background-color: #ffe3e3; color: #c92a2a; border: 1px solid #ffc9c9;" data-action="excluir" data-id="${v.id}"><i class="bi bi-trash"></i></button>
                     </td>
                 </tr>`;
             }).join('');
