@@ -183,21 +183,48 @@
     <h4 class="mb-3 mt-4">Métricas Principais</h4>
     
     <style>
+        #metricas-principais-row {
+            display: flex !important;
+            flex-wrap: wrap !important;
+        }
+        
+        #monitoramento-card {
+            flex: 0 0 auto !important;
+        }
+        
         #loja-card-col {
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
+            flex: 0 0 auto !important;
         }
         
         #loja-card-col .card {
             display: block !important;
             visibility: visible !important;
         }
+        
+        @media (max-width: 1199.98px) {
+            #monitoramento-card,
+            #loja-card-col {
+                width: 100% !important;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            #monitoramento-card.visible,
+            #loja-card-col {
+                width: 50% !important;
+            }
+            #loja-card-col.full-width {
+                width: 100% !important;
+            }
+        }
     </style>
     
-    <div class="row g-3 mb-4" style="display: flex !important;">
+    <div class="row g-3 mb-4" id="metricas-principais-row" style="display: flex !important;">
         <!-- Card Monitoramento -->
-        <div class="col-12 col-xl-6" id="monitoramento-card" style="display: block !important;">
+        <div class="col-12 col-xl-6 visible" id="monitoramento-card" style="display: block !important;">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-display me-2"></i>Monitoramento</div>
                 <div class="card-body">
@@ -223,7 +250,7 @@
         </div>
         
         <!-- Card Bluve (SEMPRE VISÍVEL) -->
-        <div class="col-12 col-xl-6" id="loja-card-col" style="display: block !important; visibility: visible !important; opacity: 1 !important; min-height: 200px;">
+        <div class="col-12 col-xl-6" id="loja-card-col" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
             <div class="card h-100" style="display: block !important; border: 3px solid #ff6600; background-color: #fff;">
                 <div class="card-header" style="background: linear-gradient(135deg, #ff6600 0%, #ff8533 100%); color: white; font-weight: bold; font-size: 1.1rem;">
                     <i class="bi bi-shop me-2"></i>🏪 LOJA (BLUVE)

@@ -593,42 +593,51 @@ export function initAdminPage(currentUser) {
     const isTecnico = currentUser && currentUser.role === 'tecnico';
     const isNotAdmin = isGerente || isTecnico;
     
+    // Controlar visibilidade do card de Monitoramento
+    const monitoramentoCard = document.getElementById('monitoramento-card');
+    const lojaCardCol = document.getElementById('loja-card-col');
+    
     if (!canViewMonitoramento) {
         const comparativeSection = document.getElementById('comparative-charts-section');
         if (comparativeSection) comparativeSection.style.display = 'none';
         
-        const monitoramentoCard = document.getElementById('monitoramento-card');
-        if (monitoramentoCard) monitoramentoCard.style.display = 'none';
+        if (monitoramentoCard) {
+            monitoramentoCard.style.display = 'none';
+            monitoramentoCard.classList.remove('visible');
+        }
         
-        const lojaCardCol = document.getElementById('loja-card-col');
         if (lojaCardCol) {
-            lojaCardCol.classList.remove('col-xl-6');
-            lojaCardCol.classList.add('col-xl-12');
+            lojaCardCol.classList.add('full-width');
         }
         
         console.log(`Dashboard adaptado para ${currentUser.role} - card Monitoramento oculto (visível apenas para admin, monitoramento, dev, consultor)`);
     }
     
-    // Garantir que o card Bluve esteja sempre visível (FORÇADO)
-    const lojaCardCol = document.getElementById('loja-card-col');
+    // Garantir que o card Bluve esteja SEMPRE visível (FORÇADO)
     if (lojaCardCol) {
         lojaCardCol.style.display = 'block';
         lojaCardCol.style.visibility = 'visible';
         lojaCardCol.style.opacity = '1';
         lojaCardCol.classList.remove('d-none', 'hidden', 'invisible');
-        console.log('Card Bluve garantido como visível - display:', lojaCardCol.style.display);
+        console.log('✅ Card Bluve garantido como visível - display:', lojaCardCol.style.display);
     } else {
-        console.error('ERRO: Elemento loja-card-col não encontrado no DOM!');
+        console.error('❌ ERRO CRÍTICO: Elemento loja-card-col não encontrado no DOM!');
     }
     
-    // Verificação adicional após um pequeno delay para garantir que o card permanece visível
+    // Verificação adicional após delay para garantir que o card permanece visível
     setTimeout(() => {
         const lojaCardCheck = document.getElementById('loja-card-col');
         if (lojaCardCheck) {
             lojaCardCheck.style.display = 'block';
             lojaCardCheck.style.visibility = 'visible';
             lojaCardCheck.style.opacity = '1';
-            console.log('Card Bluve RE-verificado - visível:', window.getComputedStyle(lojaCardCheck).display);
+            const computedDisplay = window.getComputedStyle(lojaCardCheck).display;
+            console.log('✅ Card Bluve RE-verificado - computedDisplay:', computedDisplay);
+            
+            if (computedDisplay === 'none') {
+                console.error('❌ ALERTA: Card Bluve ainda está com display:none. Forçando novamente...');
+                lojaCardCheck.style.setProperty('display', 'block', 'important');
+            }
         }
     }, 100);
     
