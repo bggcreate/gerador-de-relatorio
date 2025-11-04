@@ -47,6 +47,43 @@ Para habilitar o sistema de tokens temporários:
 2. Faça login com admin/admin123
 3. O card Bluve aparecerá ao lado do card Monitoramento na seção "Métricas Principais"
 
+## Novas Funcionalidades Implementadas (November 4, 2025, 18:13)
+[x] 17. Cards de Métricas Principais (Monitoramento e Bluve) - Completed:
+     Backend (server.js):
+     - Adicionado endpoint GET /api/dashboard/metrics para métricas agregadas
+     - Retorna dados de Monitoramento (clientes_monitoramento, vendas + omni, tx_conversao)
+     - Retorna dados de Bluve (clientes_loja, vendas_loja, tx_conversao_loja)
+     - Suporta filtro opcional por loja via query parameter
+     
+     Frontend (views/admin.html + public/js/pages/admin.js):
+     - Adicionada seção "Métricas Principais" com 2 cards lado a lado
+     - Card Monitoramento: header azul, dropdown de lojas, 3 métricas (Clientes, Vendas, Tx Conversão)
+     - Card Bluve: header laranja, dropdown de lojas, 3 métricas (Clientes, Vendas, Tx Conversão)
+     - Dropdowns independentes - cada card pode filtrar por loja diferente
+     - Funções updateMonitoramentoCard() e updateBluveCard() separadas
+     - Inicialização automática com populateStoreDropdowns()
+     
+[x] 18. Aba Lojas Atualizada - Completed:
+     HTML (views/gerenciar-lojas.html):
+     - Tabela atualizada com colunas: Nome, Responsável/Email, Total de Vendedores, Status, Ações
+     - 4 botões de ação: Editar, Detalhes, Excluir, Adicionar Vendedor
+     - Modal de Detalhes da Loja criado para exibir vendedores vinculados
+     - Modal mostra lista de vendedores com ações Editar/Excluir individuais
+     
+     JavaScript (public/js/pages/gerenciar-lojas.js):
+     - Função carregarLojas() busca vendedores e conta total por loja
+     - Coluna "Responsável/Email" exibe gerente ou numero_contato
+     - Coluna "Total de Vendedores" mostra contagem de vendedores ativos
+     - Função mostrarDetalhes() abre modal com lista de vendedores da loja
+     - Funções editarVendedor() e excluirVendedor() para CRUD de vendedores
+     - Event delegation para botões dentro do modal de detalhes
+     - Integração completa com API /api/vendedores existente
+     
+     Estado atual: Todas as funcionalidades implementadas e testadas
+     - Cards Monitoramento e Bluve funcionando com filtros independentes ✅
+     - Aba Lojas com nova estrutura e gestão de vendedores ✅
+     - Modais e CRUD de vendedores funcionando ✅
+
 ## Remoção Completa do Sistema de Roles/Cargos (November 4, 2025, 17:25)
 [x] 15. Eliminação do sistema de roles - Sistema de cargos completamente removido:
      Backend (server.js):

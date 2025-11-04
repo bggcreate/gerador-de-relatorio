@@ -529,6 +529,112 @@ function updateOverviewCards(rankingData, currentData) {
     document.getElementById('overview-total-vendas').textContent = totalVendas.toLocaleString('pt-BR');
 }
 
+// Função para popular os dropdowns de loja nos cards Monitoramento e Bluve
+async function populateStoreDropdowns() {
+    try {
+        const response = await fetch('/api/lojas');
+        const lojas = await response.json();
+        
+        const filtroMonitoramento = document.getElementById('filtro-loja-monitoramento');
+        const filtroBluve = document.getElementById('filtro-loja-bluve');
+        
+        if (filtroMonitoramento && filtroBluve) {
+            // Limpar opções existentes (exceto "Geral")
+            filtroMonitoramento.innerHTML = '<option value="">Geral</option>';
+            filtroBluve.innerHTML = '<option value="">Geral</option>';
+            
+            // Adicionar lojas aos dropdowns
+            lojas.forEach(loja => {
+                const optionMonit = document.createElement('option');
+                optionMonit.value = loja.nome;
+                optionMonit.textContent = loja.nome;
+                filtroMonitoramento.appendChild(optionMonit);
+                
+                const optionBluve = document.createElement('option');
+                optionBluve.value = loja.nome;
+                optionBluve.textContent = loja.nome;
+                filtroBluve.appendChild(optionBluve);
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar lojas para dropdowns:', error);
+    }
+}
+
+// Função para atualizar apenas o card Monitoramento
+async function updateMonitoramentoCard(loja = '') {
+    try {
+        // Obter a loja selecionada no dropdown Bluve para manter seus dados
+        const filtroBluve = document.getElementById('filtro-loja-bluve');
+        const lojaBluveAtual = filtroBluve ? filtroBluve.value : '';
+        
+        const params = new URLSearchParams();
+        if (loja) params.append('loja_monitoramento', loja);
+        if (lojaBluveAtual) params.append('loja_bluve', lojaBluveAtual);
+        
+        const url = `/api/dashboard/metrics${params.toString() ? '?' + params.toString() : ''}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        // Atualizar card Monitoramento
+        document.getElementById('monitoramento-clientes').textContent = (data.monitoramento.clientes || 0).toLocaleString('pt-BR');
+        document.getElementById('monitoramento-vendas').textContent = (data.monitoramento.vendas || 0).toLocaleString('pt-BR');
+        document.getElementById('monitoramento-tx-conversao').textContent = `${data.monitoramento.tx_conversao}%`;
+    } catch (error) {
+        console.error('Erro ao carregar métricas de Monitoramento:', error);
+    }
+}
+
+// Função para atualizar apenas o card Bluve
+async function updateBluveCard(loja = '') {
+    try {
+        // Obter a loja selecionada no dropdown Monitoramento para manter seus dados
+        const filtroMonitoramento = document.getElementById('filtro-loja-monitoramento');
+        const lojaMonitoramentoAtual = filtroMonitoramento ? filtroMonitoramento.value : '';
+        
+        const params = new URLSearchParams();
+        if (lojaMonitoramentoAtual) params.append('loja_monitoramento', lojaMonitoramentoAtual);
+        if (loja) params.append('loja_bluve', loja);
+        
+        const url = `/api/dashboard/metrics${params.toString() ? '?' + params.toString() : ''}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        // Atualizar card Bluve
+        document.getElementById('bluve-clientes').textContent = (data.bluve.clientes || 0).toLocaleString('pt-BR');
+        document.getElementById('bluve-vendas').textContent = (data.bluve.vendas || 0).toLocaleString('pt-BR');
+        document.getElementById('bluve-tx-conversao').textContent = `${data.bluve.tx_conversao}%`;
+    } catch (error) {
+        console.error('Erro ao carregar métricas de Bluve:', error);
+    }
+}
+
+// Inicializar dropdowns e métricas
+function initMetricsCards() {
+    // Popular dropdowns
+    populateStoreDropdowns();
+    
+    // Carregar métricas gerais inicialmente para ambos os cards
+    updateMonitoramentoCard();
+    updateBluveCard();
+    
+    // Adicionar event listeners aos dropdowns (independentes)
+    const filtroMonitoramento = document.getElementById('filtro-loja-monitoramento');
+    const filtroBluve = document.getElementById('filtro-loja-bluve');
+    
+    if (filtroMonitoramento) {
+        filtroMonitoramento.addEventListener('change', (e) => {
+            updateMonitoramentoCard(e.target.value);
+        });
+    }
+    
+    if (filtroBluve) {
+        filtroBluve.addEventListener('change', (e) => {
+            updateBluveCard(e.target.value);
+        });
+    }
+}
+
 function updateUI(results, hideMonitData = false) {
     const [currentData, rankingData, currentChartData, comparisonData, comparisonChartData] = results;
 
@@ -787,6 +893,9 @@ export function initAdminPage(currentUser) {
         console.log('Inicializando dashboard...');
         await carregarLojas();
         console.log('Lojas carregadas');
+        
+        // Inicializar cards de Monitoramento e Bluve
+        initMetricsCards();
         
         // Inicializar seção de assistência técnica
         await populateAssistenciaLojaFilter();

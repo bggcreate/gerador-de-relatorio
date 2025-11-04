@@ -1040,6 +1040,87 @@ app.delete('/api/vendedores/:id', requirePageLogin, (req, res) => {
     });
 });
 
+// API de métricas agregadas para dashboard - suporta filtros independentes
+app.get('/api/dashboard/metrics', requirePageLogin, (req, res) => {
+    const { loja_monitoramento, loja_bluve } = req.query;
+    
+    // Query para Monitoramento
+    const queryMonit = loja_monitoramento ? `
+        SELECT 
+            SUM(clientes_monitoramento) as total_clientes_monitoramento,
+            SUM(vendas_monitoramento) as total_vendas_monitoramento,
+            SUM(quantidade_omni) as total_omni
+        FROM relatorios
+        WHERE loja = ?
+    ` : `
+        SELECT 
+            SUM(clientes_monitoramento) as total_clientes_monitoramento,
+            SUM(vendas_monitoramento) as total_vendas_monitoramento,
+            SUM(quantidade_omni) as total_omni
+        FROM relatorios
+    `;
+    const paramsMonit = loja_monitoramento ? [loja_monitoramento] : [];
+    
+    // Query para Bluve
+    const queryBluve = loja_bluve ? `
+        SELECT 
+            SUM(clientes_loja) as total_clientes_loja,
+            SUM(vendas_loja) as total_vendas_loja
+        FROM relatorios
+        WHERE loja = ?
+    ` : `
+        SELECT 
+            SUM(clientes_loja) as total_clientes_loja,
+            SUM(vendas_loja) as total_vendas_loja
+        FROM relatorios
+    `;
+    const paramsBluve = loja_bluve ? [loja_bluve] : [];
+    
+    // Executar ambas as queries
+    db.get(queryMonit, paramsMonit, (err1, rowMonit) => {
+        if (err1) {
+            console.error('Erro ao buscar métricas de Monitoramento:', err1);
+            return res.status(500).json({ error: err1.message });
+        }
+        
+        db.get(queryBluve, paramsBluve, (err2, rowBluve) => {
+            if (err2) {
+                console.error('Erro ao buscar métricas de Bluve:', err2);
+                return res.status(500).json({ error: err2.message });
+            }
+            
+            // Calcular métricas de Monitoramento
+            const clientesMonitoramento = parseInt(rowMonit.total_clientes_monitoramento) || 0;
+            const vendasMonitoramento = parseInt(rowMonit.total_vendas_monitoramento) || 0;
+            const omni = parseInt(rowMonit.total_omni) || 0;
+            const vendasMonitoramentoTotal = vendasMonitoramento + omni;
+            const txConversaoMonitoramento = clientesMonitoramento > 0 
+                ? ((vendasMonitoramentoTotal / clientesMonitoramento) * 100).toFixed(2)
+                : '0.00';
+            
+            // Calcular métricas de Bluve
+            const clientesLoja = parseInt(rowBluve.total_clientes_loja) || 0;
+            const vendasLoja = parseInt(rowBluve.total_vendas_loja) || 0;
+            const txConversaoLoja = clientesLoja > 0 
+                ? ((vendasLoja / clientesLoja) * 100).toFixed(2)
+                : '0.00';
+            
+            res.json({
+                monitoramento: {
+                    clientes: clientesMonitoramento,
+                    vendas: vendasMonitoramentoTotal,
+                    tx_conversao: txConversaoMonitoramento
+                },
+                bluve: {
+                    clientes: clientesLoja,
+                    vendas: vendasLoja,
+                    tx_conversao: txConversaoLoja
+                }
+            });
+        });
+    });
+});
+
 // APIs DE RELATÓRIOS
 const processarRelatorio = (r) => { if (!r) return null; const vendas_monitoramento_total = (parseInt(r.vendas_monitoramento, 10) || 0) + (parseInt(r.quantidade_omni, 10) || 0); const tx_conversao_monitoramento = (parseInt(r.clientes_monitoramento, 10) || 0) > 0 ? (vendas_monitoramento_total / r.clientes_monitoramento) * 100 : 0; const tx_conversao_loja = (parseInt(r.clientes_loja, 10) || 0) > 0 ? ((parseInt(r.vendas_loja, 10) || 0) / r.clientes_loja) * 100 : 0; let vendedores_processados = []; try { const vendedores = JSON.parse(r.vendedores || '[]'); vendedores_processados = vendedores.map(v => ({ ...v, tx_conversao: (v.atendimentos > 0 ? ((v.vendas / v.atendimentos) * 100) : 0).toFixed(2) })); } catch (e) {} return { ...r, vendas_monitoramento_total, tx_conversao_monitoramento: tx_conversao_monitoramento.toFixed(2), tx_conversao_loja: tx_conversao_loja.toFixed(2), vendedores_processados }; };
 app.get('/api/relatorios', requirePageLogin, (req, res) => { 

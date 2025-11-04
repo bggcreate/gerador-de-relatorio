@@ -58,20 +58,36 @@ function initGerenciarLojas() {
     }
 
     async function carregarLojas() {
-        tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Carregando...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Carregando...</td></tr>';
         try {
             const response = await fetch('/api/lojas');
             lojasCache = await response.json();
+            
+            // Carregar contagem de vendedores para cada loja
+            const vendedoresResponse = await fetch('/api/vendedores');
+            const vendedores = await vendedoresResponse.json();
+            
             if (lojasCache.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Nenhuma loja cadastrada.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Nenhuma loja cadastrada.</td></tr>';
                 return;
             }
+            
             tableBody.innerHTML = lojasCache.map(loja => {
                 const statusBadge = loja.status === 'ativa' 
                     ? `<span class="badge bg-success">Ativo</span>` 
                     : `<span class="badge" style="background-color: #6c757d;">Inativo</span>`;
+                    
+                // Contar vendedores ativos da loja
+                const vendedoresLoja = vendedores.filter(v => v.loja_id === loja.id && v.ativo === 1);
+                const totalVendedores = vendedoresLoja.length;
+                
+                // Responsável/Email (usar gerente ou numero_contato)
+                const responsavel = loja.gerente || loja.numero_contato || '-';
+                
                 return `<tr>
                     <td>${loja.nome}</td>
+                    <td>${responsavel}</td>
+                    <td class="text-center">${totalVendedores}</td>
                     <td>${statusBadge}</td>
                     <td class="text-end pe-3">
                         <button class="btn btn-sm btn-outline-secondary" data-action="editar" data-id="${loja.id}" title="Editar">
@@ -90,7 +106,7 @@ function initGerenciarLojas() {
                 </tr>`;
             }).join('');
         } catch (e) {
-            tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Erro ao carregar.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erro ao carregar.</td></tr>';
         }
     }
 
@@ -118,22 +134,59 @@ function initGerenciarLojas() {
         modal.show();
     }
     
-    function mostrarDetalhes(id) {
+    async function mostrarDetalhes(id) {
         const loja = lojasCache.find(l => l.id === id);
         if (!loja) return;
         
-        const detalhes = `
-            <strong>Nome:</strong> ${loja.nome}<br>
-            <strong>Status:</strong> ${loja.status === 'ativa' ? 'Ativo' : 'Inativo'}<br>
-            <strong>CEP:</strong> ${loja.cep || 'Não informado'}<br>
-            <strong>Número de Contato:</strong> ${loja.numero_contato || 'Não informado'}<br>
-            <strong>Gerente:</strong> ${loja.gerente || 'Não informado'}<br>
-            <strong>Função Especial:</strong> ${loja.funcao_especial || 'Nenhuma'}<br>
-            <strong>Técnico Responsável:</strong> ${loja.tecnico_username || 'Nenhum'}<br>
-            <strong>Observações:</strong> ${loja.observacoes || 'Nenhuma'}
-        `;
+        const modalDetalhes = new bootstrap.Modal(document.getElementById('modal-detalhes-loja'));
+        const tabelaVendedoresDetalhes = document.getElementById('tabela-vendedores-detalhes');
+        const semVendedores = document.getElementById('sem-vendedores');
         
-        showToast('Detalhes da Loja', detalhes, 'info', 8000);
+        // Atualizar título do modal
+        document.getElementById('modalDetalhesLojaLabel').textContent = `Detalhes da Loja - ${loja.nome}`;
+        
+        // Carregar vendedores da loja
+        try {
+            const response = await fetch('/api/vendedores');
+            const vendedores = await response.json();
+            const vendedoresLoja = vendedores.filter(v => v.loja_id === id);
+            
+            if (vendedoresLoja.length === 0) {
+                tabelaVendedoresDetalhes.innerHTML = '';
+                semVendedores.style.display = 'block';
+            } else {
+                semVendedores.style.display = 'none';
+                tabelaVendedoresDetalhes.innerHTML = vendedoresLoja.map(v => {
+                    const statusBadge = v.ativo === 1 && !v.data_demissao
+                        ? `<span class="badge bg-success">Ativo</span>` 
+                        : `<span class="badge bg-secondary">Inativo</span>`;
+                    return `<tr>
+                        <td>${v.nome}</td>
+                        <td>${v.telefone || '-'}</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-end pe-3">
+                            <button class="btn btn-sm btn-outline-secondary" data-action="editar-vendedor" data-id="${v.id}" data-loja-id="${id}">
+                                <i class="bi bi-pencil"></i> Editar
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" data-action="excluir-vendedor" data-id="${v.id}" data-loja-id="${id}">
+                                <i class="bi bi-trash"></i> Excluir
+                            </button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+            
+            // Configurar botão de adicionar vendedor
+            const btnAdicionarVendedorDetalhes = document.getElementById('btn-adicionar-vendedor-detalhes');
+            btnAdicionarVendedorDetalhes.onclick = () => {
+                modalDetalhes.hide();
+                abrirModalVendedorParaLoja(id);
+            };
+            
+            modalDetalhes.show();
+        } catch (error) {
+            showToast('Erro', 'Erro ao carregar vendedores da loja', 'danger');
+        }
     }
     
     function abrirModalVendedorParaLoja(lojaId) {
@@ -188,6 +241,50 @@ function initGerenciarLojas() {
         } catch(e) { showToast('Erro', e.message, 'danger'); }
     });
 
+    async function editarVendedor(id, lojaId) {
+        try {
+            const response = await fetch('/api/vendedores');
+            const vendedores = await response.json();
+            const vendedor = vendedores.find(v => v.id === id);
+            if (!vendedor) return;
+            
+            const modalVendedor = new bootstrap.Modal(document.getElementById('modal-vendedor'));
+            const formVendedor = document.getElementById('form-vendedor');
+            
+            document.getElementById('modalVendedorLabel').textContent = 'Editar Vendedor';
+            document.getElementById('vendedor-id').value = vendedor.id;
+            document.getElementById('vendedor-loja-id').value = vendedor.loja_id;
+            document.getElementById('vendedor-nome').value = vendedor.nome;
+            document.getElementById('vendedor-telefone').value = vendedor.telefone;
+            document.getElementById('vendedor-data-entrada').value = vendedor.data_entrada;
+            document.getElementById('vendedor-data-demissao').value = vendedor.data_demissao || '';
+            document.getElementById('vendedor-previsao-entrada').value = vendedor.previsao_entrada || '';
+            document.getElementById('vendedor-previsao-saida').value = vendedor.previsao_saida || '';
+            
+            // Fechar modal de detalhes
+            const modalDetalhes = bootstrap.Modal.getInstance(document.getElementById('modal-detalhes-loja'));
+            if (modalDetalhes) modalDetalhes.hide();
+            
+            modalVendedor.show();
+        } catch (error) {
+            showToast('Erro', 'Erro ao carregar dados do vendedor', 'danger');
+        }
+    }
+    
+    async function excluirVendedor(id, lojaId) {
+        const confirmed = await showConfirmModal('Tem certeza que deseja excluir este vendedor?');
+        if (!confirmed) return;
+        try {
+            const response = await fetch(`/api/vendedores/${id}`, { method: 'DELETE', headers: await getAuthHeaders() });
+            if (!response.ok) throw new Error('Falha ao excluir.');
+            showToast('Sucesso', 'Vendedor excluído.', 'success');
+            // Recarregar detalhes
+            mostrarDetalhes(lojaId);
+        } catch (e) {
+            showToast('Erro', 'Não foi possível excluir o vendedor.', 'danger');
+        }
+    }
+
     btnAdicionar.addEventListener('click', abrirModalParaAdicionar);
     tableBody.addEventListener('click', (e) => {
         const button = e.target.closest('button[data-action]');
@@ -199,6 +296,18 @@ function initGerenciarLojas() {
         if (action === 'excluir') excluirLoja(id);
         if (action === 'adicionar-vendedor') abrirModalVendedorParaLoja(id);
     });
+    
+    // Event listener para botões dentro do modal de detalhes
+    document.getElementById('modal-detalhes-loja').addEventListener('click', (e) => {
+        const button = e.target.closest('button[data-action]');
+        if (!button) return;
+        const id = parseInt(button.dataset.id, 10);
+        const lojaId = parseInt(button.dataset.lojaId, 10);
+        const action = button.dataset.action;
+        if (action === 'editar-vendedor') editarVendedor(id, lojaId);
+        if (action === 'excluir-vendedor') excluirVendedor(id, lojaId);
+    });
+    
     carregarTecnicos();
     carregarLojas();
 }
