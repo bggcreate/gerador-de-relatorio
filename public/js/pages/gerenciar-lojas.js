@@ -63,7 +63,7 @@ function initGerenciarLojas() {
             tableBody.innerHTML = lojasCache.map(loja => {
                 const statusBadge = loja.status === 'ativa' 
                     ? `<span class="badge bg-success">Ativo</span>` 
-                    : `<span class="badge" style="background-color: #6c757d;">Inativo</span>`;
+                    : `<span class="badge bg-secondary">Inativo</span>`;
                     
                 const vendedoresLoja = vendedores.filter(v => v.loja_id === loja.id && v.ativo === 1);
                 const totalVendedores = vendedoresLoja.length;
@@ -71,23 +71,27 @@ function initGerenciarLojas() {
                 const responsavel = loja.gerente || loja.numero_contato || '-';
                 
                 return `<tr>
-                    <td>${loja.nome}</td>
-                    <td>${responsavel}</td>
-                    <td class="text-center">${totalVendedores}</td>
-                    <td>${statusBadge}</td>
-                    <td class="text-end pe-3">
-                        <button class="btn btn-sm btn-outline-secondary" data-action="editar" data-id="${loja.id}" title="Editar">
-                            <i class="bi bi-pencil"></i> Editar
-                        </button>
-                        <button class="btn btn-sm btn-outline-info" data-action="detalhes" data-id="${loja.id}" title="Detalhes">
-                            <i class="bi bi-eye"></i> Detalhes
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" data-action="excluir" data-id="${loja.id}" title="Excluir">
-                            <i class="bi bi-trash"></i> Excluir
-                        </button>
-                        <button class="btn btn-sm btn-outline-primary" data-action="adicionar-vendedor" data-id="${loja.id}" title="Adicionar Vendedor">
-                            <i class="bi bi-person-plus"></i> Adicionar Vendedor
-                        </button>
+                    <td class="align-middle"><strong>${loja.nome}</strong></td>
+                    <td class="align-middle">${responsavel}</td>
+                    <td class="text-center align-middle">
+                        <span class="badge bg-primary">${totalVendedores}</span>
+                    </td>
+                    <td class="text-center align-middle">${statusBadge}</td>
+                    <td class="text-center align-middle">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="btn btn-outline-primary" data-action="detalhes" data-id="${loja.id}" title="Ver Detalhes e Vendedores">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary" data-action="editar" data-id="${loja.id}" title="Editar Loja">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-success" data-action="adicionar-vendedor" data-id="${loja.id}" title="Adicionar Vendedor">
+                                <i class="bi bi-person-plus"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" data-action="excluir" data-id="${loja.id}" title="Excluir Loja">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>`;
             }).join('');
