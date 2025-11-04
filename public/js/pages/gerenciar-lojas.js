@@ -71,27 +71,22 @@ function initGerenciarLojas() {
                 const responsavel = loja.gerente || loja.numero_contato || '-';
                 
                 return `<tr>
-                    <td class="align-middle"><strong>${loja.nome}</strong></td>
+                    <td class="align-middle ps-3"><strong>${loja.nome}</strong></td>
                     <td class="align-middle">${responsavel}</td>
                     <td class="text-center align-middle">
                         <span class="badge bg-primary">${totalVendedores}</span>
                     </td>
                     <td class="text-center align-middle">${statusBadge}</td>
-                    <td class="text-center align-middle">
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button class="btn btn-outline-primary" data-action="detalhes" data-id="${loja.id}" title="Ver Detalhes e Vendedores">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" data-action="editar" data-id="${loja.id}" title="Editar Loja">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-outline-success" data-action="adicionar-vendedor" data-id="${loja.id}" title="Adicionar Vendedor">
-                                <i class="bi bi-person-plus"></i>
-                            </button>
-                            <button class="btn btn-outline-danger" data-action="excluir" data-id="${loja.id}" title="Excluir Loja">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
+                    <td class="text-end align-middle pe-3">
+                        <button class="btn btn-sm btn-primary" data-action="detalhes" data-id="${loja.id}" title="Ver Detalhes e Vendedores">
+                            <i class="bi bi-eye me-1"></i>Detalhes
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" data-action="editar" data-id="${loja.id}" title="Editar Loja">
+                            <i class="bi bi-pencil me-1"></i>Editar
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" data-action="excluir" data-id="${loja.id}" title="Excluir Loja">
+                            <i class="bi bi-trash me-1"></i>Excluir
+                        </button>
                     </td>
                 </tr>`;
             }).join('');
@@ -293,9 +288,9 @@ function initGerenciarLojas() {
     document.getElementById('modal-detalhes-loja').addEventListener('click', (e) => {
         const button = e.target.closest('button[data-action]');
         if (!button) return;
-        const id = parseInt(button.dataset.id, 10);
-        const lojaId = parseInt(button.dataset.lojaId, 10);
-        const action = button.dataset.action;
+        const id = parseInt(button.getAttribute('data-id'), 10);
+        const lojaId = parseInt(button.getAttribute('data-loja-id'), 10);
+        const action = button.getAttribute('data-action');
         if (action === 'editar-vendedor') editarVendedor(id, lojaId);
         if (action === 'excluir-vendedor') excluirVendedor(id, lojaId);
     });
