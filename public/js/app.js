@@ -33,11 +33,8 @@ async function loadPage(path) {
     const pageContent = document.getElementById('page-content');
     if (!pageContent) return;
 
-    // Definir página padrão baseada no role
-    let defaultPage = 'admin';
-    if (currentUser && currentUser.role === 'tecnico') {
-        defaultPage = 'alertas-tecnico';
-    }
+    // Página padrão
+    const defaultPage = 'admin';
     
     const pageName = (path.startsWith('/') ? path.substring(1) : path).split('?')[0] || defaultPage;
     const activePage = (pageName === '' || pageName === 'index.html') ? defaultPage : pageName;
@@ -94,55 +91,26 @@ async function setupSessionAndUI() {
         if (!response.ok) { window.location.href = '/login'; return; }
         currentUser = await response.json();
         window.currentUser = currentUser; // Expor para outras páginas
-        const permissions = currentUser.permissions || {};
-        
-        // Controlar visibilidade dos itens do menu baseado nas permissões
-        const menuVisibility = {
-            'nav-alertas': permissions['alertas-tecnico'] || false,
-            'nav-dashboard': permissions.dashboard || false,
-            'nav-consulta': permissions.consulta || false,
-            'nav-novo-relatorio': permissions['novo-relatorio'] || false,
-            'nav-lojas': permissions.lojas || false,
-            'nav-demandas': permissions.demandas || false,
-            'nav-assistencia': permissions.assistencia || false,
-            'nav-configuracoes': permissions['gerenciar-usuarios'] || false,
-            'nav-logs': permissions.logs || false
-        };
-        
-        // Aplicar visibilidade
-        Object.keys(menuVisibility).forEach(menuId => {
+        // Todos os menus estão visíveis para todos os usuários
+        const menuIds = ['nav-alertas', 'nav-dashboard', 'nav-consulta', 'nav-novo-relatorio', 'nav-lojas', 'nav-demandas', 'nav-assistencia', 'nav-configuracoes', 'nav-logs'];
+        menuIds.forEach(menuId => {
             document.querySelectorAll(`#${menuId}`).forEach(el => {
-                if (menuVisibility[menuId]) {
-                    el?.classList.remove('d-none');
-                } else {
-                    el?.classList.add('d-none');
-                }
+                el?.classList.remove('d-none');
             });
         });
         
         const userInfoContainer = document.getElementById('user-info-container');
         if (userInfoContainer) {
-            let actionButtons = '';
-            
-            // Botão Novo Relatório apenas para monitoramento, admin e dev
-            if (['monitoramento', 'admin', 'dev'].includes(currentUser.role)) {
-                actionButtons += `<a href="/novo-relatorio" id="live-mode-btn" class="btn" title="Novo Relatório"><i class="bi bi-broadcast"></i></a>`;
-            }
-            
-            // Botão de configurações para admin e dev
-            if (permissions['gerenciar-usuarios']) {
-                actionButtons += `<a href="/gerenciar-usuarios" class="btn" title="Configurações"><i class="bi bi-gear-fill"></i></a>`;
-            }
-            
-            // Botão de logs apenas para dev
-            if (permissions.logs) {
-                actionButtons += `<a href="/logs" class="btn" title="Logs do Sistema"><i class="bi bi-file-earmark-text"></i></a>`;
-            }
+            // Todos os usuários têm acesso a todos os botões
+            const actionButtons = `
+                <a href="/novo-relatorio" id="live-mode-btn" class="btn" title="Novo Relatório"><i class="bi bi-broadcast"></i></a>
+                <a href="/gerenciar-usuarios" class="btn" title="Configurações"><i class="bi bi-gear-fill"></i></a>
+                <a href="/logs" class="btn" title="Logs do Sistema"><i class="bi bi-file-earmark-text"></i></a>
+            `;
 
             userInfoContainer.innerHTML = `
                 <div class="user-info">
                     <span>Olá, <strong>${currentUser.username}</strong></span>
-                    <small class="d-block user-role-${currentUser.role}">${getRoleDisplayName(currentUser.role)}</small>
                 </div>
                 <div class="user-actions">
                     ${actionButtons}
@@ -156,17 +124,6 @@ async function setupSessionAndUI() {
             }
         }
     } catch (e) { console.error("Falha na sessão:", e); window.location.href = '/login'; }
-}
-
-function getRoleDisplayName(role) {
-    const roleNames = {
-        'gerente': 'Gerente',
-        'consultor': 'Consultor',
-        'monitoramento': 'Monitoramento',
-        'admin': 'Administrador',
-        'dev': 'Desenvolvedor'
-    };
-    return roleNames[role] || role;
 }
 
 // =================================================================
@@ -220,14 +177,6 @@ async function main() {
     
     // Inicializar controle de sidebar toggle
     initSidebarToggle();
-    
-    // Redirecionar técnico para alertas se estiver na home
-    if (currentUser && currentUser.role === 'tecnico') {
-        const currentPath = location.pathname;
-        if (currentPath === '/' || currentPath === '/admin' || currentPath === '/dashboard') {
-            history.replaceState(null, '', '/alertas-tecnico');
-        }
-    }
     
     const mobileMenuModalEl = document.getElementById('mobileMenuModal');
     const mobileMenuModal = mobileMenuModalEl ? new bootstrap.Modal(mobileMenuModalEl) : null;

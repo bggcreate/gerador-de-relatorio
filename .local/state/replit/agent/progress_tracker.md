@@ -46,3 +46,48 @@ Para habilitar o sistema de tokens temporários:
 1. Recarregue a página com CTRL+SHIFT+R (Windows/Linux) ou CMD+SHIFT+R (Mac) para limpar o cache
 2. Faça login com admin/admin123
 3. O card Bluve aparecerá ao lado do card Monitoramento na seção "Métricas Principais"
+
+## Remoção Completa do Sistema de Roles/Cargos (November 4, 2025, 17:25)
+[x] 15. Eliminação do sistema de roles - Sistema de cargos completamente removido:
+     Backend (server.js):
+     - Removido middleware requireRole e requirePage, substituído por requireAuth simples
+     - Removidas todas as verificações condicionais de role nas rotas
+     - Removidos filtros de loja baseados em role (getLojaFilter)
+     - Simplificado sistema de login: apenas username e senha (sem role na sessão)
+     - Simplificada API de usuários: apenas id e username
+     - API /api/session-info retorna apenas id, username e permissions completas
+     
+     Middleware (middleware/roleAuth.js):
+     - Removidos ROLES e PERMISSIONS completamente
+     - Novo middleware requireAuth e requireAuthPage (verificação simples de autenticação)
+     - Função getPermissions retorna acesso total para todos os usuários
+     - Todos os usuários têm acesso a todas as funcionalidades
+     
+     Frontend (public/js/app.js):
+     - Removida lógica de visibilidade de menus baseada em permissions
+     - Todos os menus visíveis para todos os usuários (dashboard, consulta, novo-relatorio, lojas, demandas, assistencia, gerenciar-usuarios, logs, alertas-tecnico)
+     - Removida exibição de role/cargo na interface
+     - Todos os usuários têm acesso aos botões de ação (Novo Relatório, Configurações, Logs)
+     - Removido redirecionamento automático baseado em role
+     
+     Arquivos modificados:
+     - middleware/roleAuth.js: Simplificado drasticamente (256 linhas removidas)
+     - server.js: Grande refatoração (327 linhas removidas)
+     - public/js/app.js: Lógica de roles removida (75 linhas removidas)
+     - public/js/pages/gerenciar-usuarios.js: Verificações de role removidas (12 linhas)
+     
+     Estado atual: Backend 80% completo, servidor rodando na porta 5000
+     
+     ✅ Concluído:
+     - Middleware de autenticação simplificado (requireAuth)
+     - Rotas protegidas apenas por autenticação (sem verificação de role)
+     - Login/logout funcionando apenas com username/senha
+     - Todos os menus visíveis no frontend
+     - Filtros de loja baseados em role removidos
+     
+     ⚠️ Pendente (identificado pelo architect):
+     - Remover campos role/loja_* dos formulários HTML de usuários
+     - Limpar gerenciar-usuarios.js completamente (ainda tem selects e lógica de role)
+     - Remover verificações de role remanescentes em admin.js, assistencia.js, etc
+     - Testar navegação e CRUD de usuários completo
+     - Opcional: Migração de banco de dados para remover colunas de role (pode ser feito depois)

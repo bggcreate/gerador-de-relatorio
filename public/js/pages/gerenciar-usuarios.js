@@ -1,18 +1,8 @@
 import { showToast, showConfirmModal, getAuthHeaders } from '../utils.js';
 
 export function initGerenciarUsuariosPage(currentUser) {
-    // Ocultar aba de backup para admin
-    const backupTab = document.getElementById('backup-tab');
-    const backupPane = document.getElementById('backup');
-    if (currentUser.role === 'admin') {
-        if (backupTab) backupTab.style.display = 'none';
-        if (backupPane) backupPane.style.display = 'none';
-    }
-    
     initUsuarios(currentUser);
-    if (currentUser.role === 'dev') {
-        initBackup();
-    }
+    initBackup();
 }
 
 // --- LÓGICA DE GERENCIAMENTO DE USUÁRIOS ---
