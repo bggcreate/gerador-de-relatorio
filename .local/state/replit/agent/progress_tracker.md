@@ -104,6 +104,31 @@ Para habilitar o sistema de tokens temporários:
 Username: admin
 Senha: admin
 
+## Remoção da Aba de Alertas e Correção da Página de Lojas (November 4, 2025, 20:30)
+[x] 25. Remover aba de Alertas Técnico - Completed:
+     - Removido 'nav-alertas' do array de menuIds em public/js/app.js
+     - Removida linha de alertas do menu desktop e mobile em views/index.html
+     - Removido import de initAlertasTecnicoPage em public/js/app.js
+     - Removida referência no pageInitializers
+     - Arquivos modificados: public/js/app.js, views/index.html
+     
+[x] 26. Corrigir página de lojas que não exibia informações - Completed:
+     - Problema identificado: código ainda verificava window.currentUser.role
+     - Sistema de roles foi completamente removido anteriormente
+     - Solução: Removidas todas as verificações de role em public/js/pages/gerenciar-lojas.js
+     - Página agora sempre exibe seção de lojas para todos os usuários
+     - Removido filtro que buscava apenas técnicos (role === 'tecnico')
+     - Função carregarTecnicos() agora retorna todos os usuários
+     - Banco de dados verificado: 10 lojas cadastradas e funcionando
+     - Arquivos modificados: public/js/pages/gerenciar-lojas.js
+     - Servidor reiniciado e funcionando corretamente
+     
+     Detalhes técnicos:
+     - Função initGerenciarLojasPage() simplificada: removida verificação de role
+     - Sempre exibe secaoLojas e chama initGerenciarLojas()
+     - API /api/lojas retorna 10 lojas corretamente (verificado nos logs)
+     - Removida lógica condicional que mostrava secaoVendedores para gerentes/consultores
+
 ## Migração Final para o Ambiente Replit (November 4, 2025, 20:17)
 [x] 25. Reinstalar pacotes npm - Completed: npm install executado com sucesso, 365 pacotes instalados
 [x] 26. Reiniciar servidor - Completed: Workflow Server reiniciado e rodando na porta 5000
