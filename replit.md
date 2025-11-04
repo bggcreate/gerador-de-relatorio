@@ -18,6 +18,10 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 - **Component Styling**: Standardized buttons, cards with layered shadows, and forms with bold labels and enhanced focus states.
 - **Dashboard**: Enhanced with performance indicator cards, comparative bar charts, and a donut chart. Ranking visuals include medal icons.
 - **Navigation**: Sidebar navigation with sliding accent bars and animated icons, with a toggle for persistent state.
+- **Pastel Color Palette**: Soft, eye-friendly pastel colors throughout the interface to prevent visual fatigue:
+  - Buttons: #d0ebff (blue details), #e9ecef (grey edit), #ffe3e3 (red delete)
+  - Badges: #c3fae8 (green active), #ffe3e3 (red demitido), #f1f3f5 (grey inactive), #a5d8ff (blue counter)
+  - Three-state vendor status logic: Ativo (active), Demitido (dismissed with date), Inativo (inactive without dismissal date)
 
 ### Technical Implementations
 - **Backend**: Node.js with Express.js framework.
