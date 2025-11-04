@@ -71,6 +71,35 @@ Para habilitar o sistema de tokens temporários:
      - Tabelas criadas: vendedores, logs, assistencias, estoque_tecnico
      - Sistema funcionando normalmente
 
+## Correções de Funcionalidades (November 4, 2025, 19:45)
+[x] 22. Corrigir carregamento da aba de lojas - Completed:
+     - Problema identificado: fetch de /api/vendedores falhava e impedia renderização da tabela
+     - Solução: fetch de vendedores agora está em try/catch independente
+     - Resultado: tabela de lojas exibe normalmente mesmo se API de vendedores falhar
+     - Arquivo modificado: public/js/pages/gerenciar-lojas.js (linhas 63-119)
+
+[x] 23. Corrigir adicionar vendedor no novo relatório - Completed:
+     - Problema: carregarVendedoresDaLoja() falhava silenciosamente
+     - Solução: verificação de response.ok antes de processar JSON
+     - Se API não disponível, permite entrada manual de vendedores
+     - Arquivo modificado: public/js/pages/novo-relatorio.js (linhas 160-187)
+
+[x] 24. Corrigir todos os botões da interface - Completed:
+     - Botões não funcionavam porque tabela não renderizava
+     - Com correção #22, todos os event listeners agora funcionam:
+       * Editar loja
+       * Detalhes da loja
+       * Excluir loja
+       * Adicionar vendedor
+       * Adicionar nova loja
+
+## Status Final do Sistema:
+✅ Banco de dados restaurado com 10 lojas
+✅ Interface de lojas funcionando completamente
+✅ Todos os botões operacionais
+✅ Sistema robusto (funciona mesmo sem API de vendedores)
+✅ Novo relatório permite entrada manual de vendedores
+
 ## Credenciais de Login Atualizadas:
 Username: admin
 Senha: admin
