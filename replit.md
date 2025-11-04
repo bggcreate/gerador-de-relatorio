@@ -89,6 +89,35 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 
 ## Recent Changes
 
+### Store Management System Implementation (2025-11-04)
+- 🏪 **Aba "Lojas" - Nova Interface**:
+  - Adicionados novos campos ao formulário de cadastro de lojas:
+    - **CEP** (opcional)
+    - **Número de Contato** (opcional)
+    - **Gerente** (opcional)
+    - **Nome da Loja** (obrigatório)
+  - Tabela simplificada mostrando apenas: Nome, Status, e Ações
+  - Status exibido como badges coloridos:
+    - Verde para lojas ativas
+    - Cinza para lojas inativas
+  - Quatro botões de ação por loja:
+    - ✏️ **Editar**: Abre formulário para edição
+    - 👁️ **Detalhes**: Mostra informações completas da loja em toast
+    - 🗑️ **Excluir**: Remove a loja
+    - ➕ **Adicionar Vendedor**: Abre modal de vendedor para a loja específica
+  - Banco de dados atualizado com novas colunas: `cep`, `numero_contato`, `gerente`
+  - APIs POST e PUT atualizadas para manipular os novos campos
+
+- 📊 **Dashboard - Simplificação**:
+  - Removido card "Assistência Técnica por Loja" (tabela detalhada)
+  - Mantidos os seguintes cards:
+    - Card "Ticket de Assistências" (mostra todos os tickets e status)
+    - Card "Loja (Bluve)" (mostra Clientes, Vendas, Taxa de Conversão)
+    - Card "Métricas Principais / Monitoramento"
+
+- 🔒 **Segurança**:
+  - CSP atualizado para permitir Google Fonts (fonts.googleapis.com e fonts.gstatic.com)
+
 ### Dashboard Improvements - Assistência Técnica (2025-11-03)
 - 🛠️ **Redesign da Seção "Assistência Técnica - Visão Geral"**:
   - Simplificado para mostrar apenas 3 cards com métricas diárias:
