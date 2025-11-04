@@ -217,6 +217,15 @@ let db = new sqlite3.Database(DB_PATH, err => {
         db.run(`ALTER TABLE lojas ADD COLUMN cargo TEXT`, (err) => {
             if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar cargo:', err.message);
         });
+        db.run(`ALTER TABLE lojas ADD COLUMN cep TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar cep:', err.message);
+        });
+        db.run(`ALTER TABLE lojas ADD COLUMN numero_contato TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar numero_contato:', err.message);
+        });
+        db.run(`ALTER TABLE lojas ADD COLUMN gerente TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar gerente:', err.message);
+        });
         db.run(`ALTER TABLE estoque_tecnico ADD COLUMN loja TEXT`, (err) => {
             if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar loja em estoque_tecnico:', err.message);
         });
@@ -693,9 +702,9 @@ app.get('/api/lojas', requirePageLogin, (req, res) => {
     }); 
 });
 app.post('/api/lojas', requirePageLogin, (req, res) => { 
-    const { nome, status, funcao_especial, tecnico_username, observacoes, cargo } = req.body; 
-    db.run('INSERT INTO lojas (nome, status, funcao_especial, tecnico_username, observacoes, cargo) VALUES (?, ?, ?, ?, ?, ?)', 
-        [nome, status, funcao_especial, tecnico_username, observacoes, cargo], 
+    const { nome, status, funcao_especial, tecnico_username, observacoes, cargo, cep, numero_contato, gerente } = req.body; 
+    db.run('INSERT INTO lojas (nome, status, funcao_especial, tecnico_username, observacoes, cargo, cep, numero_contato, gerente) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+        [nome, status, funcao_especial, tecnico_username, observacoes, cargo, cep, numero_contato, gerente], 
         function (err) { 
             if (err) return res.status(500).json({ error: 'Erro ao criar loja. O nome já pode existir.' }); 
             res.status(201).json({ success: true, id: this.lastID }); 
@@ -703,9 +712,9 @@ app.post('/api/lojas', requirePageLogin, (req, res) => {
 });
 app.put('/api/lojas/:id', requirePageLogin, (req, res) => { 
     const { id } = req.params; 
-    const { nome, status, funcao_especial, tecnico_username, observacoes, cargo } = req.body; 
-    db.run('UPDATE lojas SET nome = ?, status = ?, funcao_especial = ?, tecnico_username = ?, observacoes = ?, cargo = ? WHERE id = ?', 
-        [nome, status, funcao_especial, tecnico_username, observacoes, cargo, id], 
+    const { nome, status, funcao_especial, tecnico_username, observacoes, cargo, cep, numero_contato, gerente } = req.body; 
+    db.run('UPDATE lojas SET nome = ?, status = ?, funcao_especial = ?, tecnico_username = ?, observacoes = ?, cargo = ?, cep = ?, numero_contato = ?, gerente = ? WHERE id = ?', 
+        [nome, status, funcao_especial, tecnico_username, observacoes, cargo, cep, numero_contato, gerente, id], 
         function (err) { 
             if (err) return res.status(500).json({ error: 'Erro ao atualizar loja.' }); 
             res.json({ success: true }); 

@@ -58,21 +58,39 @@ function initGerenciarLojas() {
     }
 
     async function carregarLojas() {
-        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Carregando...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Carregando...</td></tr>';
         try {
             const response = await fetch('/api/lojas');
             lojasCache = await response.json();
             if (lojasCache.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhuma loja cadastrada.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Nenhuma loja cadastrada.</td></tr>';
                 return;
             }
             tableBody.innerHTML = lojasCache.map(loja => {
-                const statusBadge = loja.status === 'ativa' ? `<span class="badge bg-success">Ativa</span>` : `<span class="badge bg-secondary">Inativa</span>`;
-                const tecnicoNome = loja.tecnico_username ? `<span class="badge bg-secondary">${loja.tecnico_username}</span>` : '-';
-                return `<tr><td>${loja.nome}</td><td>${statusBadge}</td><td>${loja.funcao_especial || '-'}</td><td>${tecnicoNome}</td><td>${loja.observacoes || '-'}</td><td class="text-end pe-3"><button class="btn btn-sm btn-outline-secondary" data-action="editar" data-id="${loja.id}"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline-danger" data-action="excluir" data-id="${loja.id}"><i class="bi bi-trash"></i></button></td></tr>`;
+                const statusBadge = loja.status === 'ativa' 
+                    ? `<span class="badge bg-success">Ativo</span>` 
+                    : `<span class="badge" style="background-color: #6c757d;">Inativo</span>`;
+                return `<tr>
+                    <td>${loja.nome}</td>
+                    <td>${statusBadge}</td>
+                    <td class="text-end pe-3">
+                        <button class="btn btn-sm btn-outline-secondary" data-action="editar" data-id="${loja.id}" title="Editar">
+                            <i class="bi bi-pencil"></i> Editar
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" data-action="detalhes" data-id="${loja.id}" title="Detalhes">
+                            <i class="bi bi-eye"></i> Detalhes
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" data-action="excluir" data-id="${loja.id}" title="Excluir">
+                            <i class="bi bi-trash"></i> Excluir
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" data-action="adicionar-vendedor" data-id="${loja.id}" title="Adicionar Vendedor">
+                            <i class="bi bi-person-plus"></i> Adicionar Vendedor
+                        </button>
+                    </td>
+                </tr>`;
             }).join('');
         } catch (e) {
-            tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Erro ao carregar.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Erro ao carregar.</td></tr>';
         }
     }
 
@@ -90,11 +108,47 @@ function initGerenciarLojas() {
         modalTitle.textContent = 'Editar Loja';
         document.getElementById('loja-id').value = loja.id;
         document.getElementById('loja-nome').value = loja.nome;
+        document.getElementById('loja-cep').value = loja.cep || '';
+        document.getElementById('loja-numero-contato').value = loja.numero_contato || '';
+        document.getElementById('loja-gerente').value = loja.gerente || '';
         document.getElementById('loja-status').value = loja.status;
         document.getElementById('loja-funcao-especial').value = loja.funcao_especial || '';
         document.getElementById('loja-tecnico').value = loja.tecnico_username || '';
         document.getElementById('loja-observacoes').value = loja.observacoes || '';
         modal.show();
+    }
+    
+    function mostrarDetalhes(id) {
+        const loja = lojasCache.find(l => l.id === id);
+        if (!loja) return;
+        
+        const detalhes = `
+            <strong>Nome:</strong> ${loja.nome}<br>
+            <strong>Status:</strong> ${loja.status === 'ativa' ? 'Ativo' : 'Inativo'}<br>
+            <strong>CEP:</strong> ${loja.cep || 'Não informado'}<br>
+            <strong>Número de Contato:</strong> ${loja.numero_contato || 'Não informado'}<br>
+            <strong>Gerente:</strong> ${loja.gerente || 'Não informado'}<br>
+            <strong>Função Especial:</strong> ${loja.funcao_especial || 'Nenhuma'}<br>
+            <strong>Técnico Responsável:</strong> ${loja.tecnico_username || 'Nenhum'}<br>
+            <strong>Observações:</strong> ${loja.observacoes || 'Nenhuma'}
+        `;
+        
+        showToast('Detalhes da Loja', detalhes, 'info', 8000);
+    }
+    
+    function abrirModalVendedorParaLoja(lojaId) {
+        const loja = lojasCache.find(l => l.id === lojaId);
+        if (!loja) return;
+        
+        const modalVendedor = bootstrap.Modal.getInstance(document.getElementById('modal-vendedor')) || new bootstrap.Modal(document.getElementById('modal-vendedor'));
+        const formVendedor = document.getElementById('form-vendedor');
+        formVendedor.reset();
+        
+        document.getElementById('modalVendedorLabel').textContent = `Adicionar Vendedor - ${loja.nome}`;
+        document.getElementById('vendedor-id').value = '';
+        document.getElementById('vendedor-loja-id').value = lojaId;
+        
+        modalVendedor.show();
     }
 
     async function excluirLoja(id) {
@@ -115,6 +169,9 @@ function initGerenciarLojas() {
         const id = document.getElementById('loja-id').value;
         const data = { 
             nome: document.getElementById('loja-nome').value, 
+            cep: document.getElementById('loja-cep').value || null,
+            numero_contato: document.getElementById('loja-numero-contato').value || null,
+            gerente: document.getElementById('loja-gerente').value || null,
             status: document.getElementById('loja-status').value, 
             funcao_especial: document.getElementById('loja-funcao-especial').value,
             tecnico_username: document.getElementById('loja-tecnico').value || null,
@@ -138,7 +195,9 @@ function initGerenciarLojas() {
         const id = parseInt(button.dataset.id, 10);
         const action = button.dataset.action;
         if (action === 'editar') abrirModalParaEditar(id);
+        if (action === 'detalhes') mostrarDetalhes(id);
         if (action === 'excluir') excluirLoja(id);
+        if (action === 'adicionar-vendedor') abrirModalVendedorParaLoja(id);
     });
     carregarTecnicos();
     carregarLojas();
