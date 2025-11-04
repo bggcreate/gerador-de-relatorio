@@ -146,6 +146,21 @@
 .badge.bg-danger { background-color: var(--color-error) !important; }
 .badge.bg-info { background-color: var(--color-info) !important; }
 
+/* Gradiente primário (laranja) */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%) !important;
+    border-bottom: none !important;
+}
+
+/* Utilitários de opacidade */
+.opacity-90 {
+    opacity: 0.9 !important;
+}
+
+.opacity-50 {
+    opacity: 0.5 !important;
+}
+
 /* Cores de tipo de usuário - apenas texto colorido */
 .user-role-consultor {
     color: #fbbf24 !important;

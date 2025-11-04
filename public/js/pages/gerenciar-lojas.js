@@ -140,23 +140,23 @@ function initGerenciarLojas() {
             
             if (vendedoresLoja.length === 0) {
                 tabelaVendedoresDetalhes.innerHTML = '';
-                semVendedores.style.display = 'block';
+                semVendedores.classList.remove('d-none');
             } else {
-                semVendedores.style.display = 'none';
+                semVendedores.classList.add('d-none');
                 tabelaVendedoresDetalhes.innerHTML = vendedoresLoja.map(v => {
                     const statusBadge = v.ativo === 1 && !v.data_demissao
-                        ? `<span class="badge bg-success">Ativo</span>` 
-                        : `<span class="badge bg-secondary">Inativo</span>`;
+                        ? `<span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i>Ativo</span>` 
+                        : `<span class="badge bg-secondary"><i class="bi bi-x-circle-fill me-1"></i>Inativo</span>`;
                     return `<tr>
                         <td>${v.nome}</td>
                         <td>${v.telefone || '-'}</td>
                         <td>${statusBadge}</td>
                         <td class="text-end pe-3">
-                            <button class="btn btn-sm btn-outline-secondary" data-action="editar-vendedor" data-id="${v.id}" data-loja-id="${id}">
-                                <i class="bi bi-pencil"></i> Editar
+                            <button class="btn btn-sm btn-outline-primary" data-action="editar-vendedor" data-id="${v.id}" data-loja-id="${id}">
+                                <i class="bi bi-pencil me-1"></i>Editar
                             </button>
                             <button class="btn btn-sm btn-outline-danger" data-action="excluir-vendedor" data-id="${v.id}" data-loja-id="${id}">
-                                <i class="bi bi-trash"></i> Excluir
+                                <i class="bi bi-trash me-1"></i>Excluir
                             </button>
                         </td>
                     </tr>`;

@@ -140,36 +140,52 @@
     <div class="modal fade" id="modal-detalhes-loja" tabindex="-1" aria-labelledby="modalDetalhesLojaLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalDetalhesLojaLabel">Detalhes da Loja</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-gradient-primary text-white">
+                    <div>
+                        <h5 class="modal-title mb-1" id="modalDetalhesLojaLabel">
+                            <i class="bi bi-shop me-2"></i>Detalhes da Loja
+                        </h5>
+                        <small class="opacity-90">Gerenciamento de vendedores</small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <h6 class="text-muted">Vendedores Vinculados</h6>
-                        <button class="btn btn-primary btn-sm mb-3" id="btn-adicionar-vendedor-detalhes">
-                            <i class="bi bi-plus-circle me-1"></i> Adicionar Vendedor
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-1">
+                                <i class="bi bi-people-fill me-2 text-primary"></i>Vendedores Vinculados
+                            </h6>
+                            <small class="text-muted">Lista de todos os vendedores cadastrados nesta loja</small>
+                        </div>
+                        <button class="btn btn-primary" id="btn-adicionar-vendedor-detalhes">
+                            <i class="bi bi-plus-circle me-2"></i>Adicionar Vendedor
                         </button>
                     </div>
+                    
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th>Nome</th>
-                                    <th>Email / Telefone</th>
-                                    <th>Status</th>
-                                    <th class="text-end pe-3">Ações</th>
+                                    <th><i class="bi bi-person me-2 text-primary"></i>Nome</th>
+                                    <th><i class="bi bi-telephone me-2 text-primary"></i>Telefone</th>
+                                    <th><i class="bi bi-check-circle me-2 text-primary"></i>Status</th>
+                                    <th class="text-end pe-3"><i class="bi bi-gear me-2 text-primary"></i>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-vendedores-detalhes"></tbody>
                         </table>
                     </div>
-                    <div id="sem-vendedores" class="text-center text-muted py-3" style="display: none;">
-                        Nenhum vendedor vinculado a esta loja.
+                    
+                    <div id="sem-vendedores" class="text-center py-5 d-none">
+                        <i class="bi bi-inbox fs-1 text-secondary opacity-50"></i>
+                        <p class="text-muted mt-3 mb-0">Nenhum vendedor vinculado a esta loja.</p>
+                        <small class="text-muted">Clique em "Adicionar Vendedor" para cadastrar</small>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>Fechar
+                    </button>
                 </div>
             </div>
         </div>
