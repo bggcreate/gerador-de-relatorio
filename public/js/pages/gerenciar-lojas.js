@@ -1,33 +1,15 @@
 import { showToast, showConfirmModal, getAuthHeaders } from '../utils.js';
 
 export function initGerenciarLojasPage() {
-    // Aguardar currentUser estar disponível
-    if (!window.currentUser) {
-        setTimeout(initGerenciarLojasPage, 100);
-        return;
-    }
-    
-    const userRole = window.currentUser.role;
-    const isAdminOrDev = ['admin', 'dev'].includes(userRole);
-    const isGerenteOrConsultor = ['gerente', 'consultor'].includes(userRole);
-    
     const secaoLojas = document.getElementById('secao-gerenciar-lojas');
-    const secaoVendedores = document.getElementById('secao-gerenciar-vendedores');
     
-    if (!secaoLojas || !secaoVendedores) {
+    if (!secaoLojas) {
         console.error('Elementos da página de lojas não encontrados');
         return;
     }
     
-    if (isAdminOrDev) {
-        secaoLojas.style.display = 'block';
-        secaoVendedores.style.display = 'none';
-        initGerenciarLojas();
-    } else if (isGerenteOrConsultor) {
-        secaoLojas.style.display = 'none';
-        secaoVendedores.style.display = 'block';
-        initGerenciarVendedores();
-    }
+    secaoLojas.style.display = 'block';
+    initGerenciarLojas();
 }
 
 function initGerenciarLojas() {
@@ -47,7 +29,7 @@ function initGerenciarLojas() {
         try {
             const response = await fetch('/api/usuarios');
             const usuarios = await response.json();
-            tecnicosCache = usuarios.filter(u => u.role === 'tecnico');
+            tecnicosCache = usuarios;
             
             const tecnicoSelect = document.getElementById('loja-tecnico');
             tecnicoSelect.innerHTML = '<option value="">Nenhum</option>' + 
