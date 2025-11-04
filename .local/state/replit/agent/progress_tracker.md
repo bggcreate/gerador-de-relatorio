@@ -9,3 +9,4 @@
 [x] 7. Fix sellers not linking to stores in novo relatório - Added debugging and ensured proper loading
 [x] 8. Review and fix store/manager/technician/seller registration system logic - Completed: Packages reinstalled, server running successfully on port 5000
 [x] 9. Fix Bluve card not appearing next to Monitoramento card - Completed: Added inline CSS with !important flags and strengthened JavaScript visibility checks to force card display
+[x] 10. Fix login issue - Completed: Reset admin password to 'admin123' (senha estava corrompida no banco de dados)
