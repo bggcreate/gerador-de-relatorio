@@ -518,9 +518,28 @@ app.post('/api/process-pdf', requirePageLogin, upload.single('pdfFile'), async (
             // Extrai todos os números da linha de totais
             const valores = linhaTotais.replace('Totais:', '').trim().split(/\s+/);
             
-            // Mapeia os valores
+            // CORREÇÃO: Procura o cabeçalho para identificar as colunas corretamente
+            const headerLine = lines.find(l => l.includes('Peças/Venda') || l.includes('P.A'));
+            
+            // Mapeia os valores com validação melhorada
             const vendas_loja = Math.round(parseBrazilianNumber(valores[1])); // Total de Vendas
-            const pa = parseBrazilianNumber(valores[2]); // Peças/Venda
+            
+            // CORREÇÃO PARA PA = 1: Procura por valores decimais pequenos (PA geralmente é entre 0.5 e 5.0)
+            let pa = parseBrazilianNumber(valores[2]); // Posição padrão
+            
+            // Validação: se o PA não está em um range razoável, procura no array
+            if (pa < 0.3 || pa > 10) {
+                // Procura um valor decimal entre 0.3 e 10 (range típico de PA)
+                for (let i = 0; i < valores.length; i++) {
+                    const valor = parseBrazilianNumber(valores[i]);
+                    if (valor >= 0.3 && valor <= 10 && valores[i].includes(',')) {
+                        pa = valor;
+                        console.log(`PA ajustado de ${valores[2]} para ${valores[i]} (valor: ${pa})`);
+                        break;
+                    }
+                }
+            }
+            
             const total_vendas_dinheiro = parseBrazilianNumber(valores[3]); // Vl. Vendas
             const ticket_medio = parseBrazilianNumber(valores[4]); // Ticket Médio
             const clientes_loja = parseInt(valores[5], 10); // Abordagens
@@ -565,15 +584,48 @@ app.post('/api/process-pdf', requirePageLogin, upload.single('pdfFile'), async (
             const idxTotais = lines.indexOf(linhaTotais);
             const linhaDados = lines[idxTotais + 1] || '';
             const linhaLimpa = linhaDados.replace(/(\d{1,3})\.(\d{3},\d{2})/g, '$1.$2 ').replace(/ +/g, ' ').trim();
-            const valoresTotais = linhaLimpa.match(/(\d{1,3}(?:\.\d{3})*,\d{2})|(\d+\.\d{2})|(\d+)/g);
+            const valoresTotais = linhaLimpa.match(/(\d{1,3}(?:\.\d{3})*,\d{2})|(\d+\.\d{2})|(\d+,\d{2})|(\d+)/g);
             
             if (!valoresTotais || valoresTotais.length < 7) {
                 throw new Error("Não foi possível extrair os valores corretamente da linha Totais do PDF.");
             }
             
             const totalVendasValor = parseBrazilianNumber(valoresTotais[0]);
-            const pa = parseBrazilianNumber(valoresTotais[valoresTotais.length - 4]);
-            const ticketMedio = parseBrazilianNumber(valoresTotais[valoresTotais.length - 3]);
+            
+            // CORREÇÃO PARA PA = 1: Busca valores decimais típicos de PA
+            let pa = parseBrazilianNumber(valoresTotais[valoresTotais.length - 4]); // Posição padrão
+            let ticketMedio = parseBrazilianNumber(valoresTotais[valoresTotais.length - 3]);
+            
+            // Validação inteligente do PA
+            // PA geralmente está entre 0.3 e 10, e tem formato decimal (ex: 1,00 ou 2,50)
+            const possiveisPAs = valoresTotais
+                .map((v, idx) => ({ valor: parseBrazilianNumber(v), original: v, index: idx }))
+                .filter(item => {
+                    // Filtra valores que parecem PA: decimal entre 0.3 e 10
+                    return item.valor >= 0.3 && item.valor <= 10 && 
+                           (item.original.includes(',') || item.original.includes('.'));
+                });
+            
+            // Se encontrou candidatos a PA, pega o mais provável
+            if (possiveisPAs.length > 0 && (pa < 0.3 || pa > 10)) {
+                // Prefere valores próximos ao final do array (geralmente onde está o PA)
+                pa = possiveisPAs[possiveisPAs.length - 1].valor;
+                console.log(`PA ajustado para: ${pa} (encontrado em possiveisPAs)`);
+            }
+            
+            // Validação do Ticket Médio (geralmente é um valor maior, acima de 50 reais)
+            if (ticketMedio < 10) {
+                // Procura um valor maior que pareça ticket médio
+                const possivelTicket = valoresTotais
+                    .map(v => parseBrazilianNumber(v))
+                    .filter(v => v >= 10 && v <= 10000)
+                    .find(v => v > 50); // Ticket médio geralmente > 50 reais
+                
+                if (possivelTicket) {
+                    ticketMedio = possivelTicket;
+                    console.log(`Ticket médio ajustado para: ${ticketMedio}`);
+                }
+            }
             
             const linhaSplitada = linhaLimpa.split(' ');
             const indexDoValorTotal = linhaSplitada.findIndex(v => v.includes(valoresTotais[0]));

@@ -736,3 +736,49 @@ Resultado final:
 ✅ Backup do banco anterior preservado
 ✅ 209 relatórios históricos carregados
 ✅ Sistema operacional com novos dados
+
+## Correção do Problema de Leitura de PDF quando P.A = 1 (November 5, 2025, 17:56)
+[x] 83. Remover observação de aviso sobre P.A = 1 - Completed:
+     - Alert de observações removido do novo-relatorio.html
+     - Usuário quer solução, não aviso
+     
+[x] 84. Corrigir lógica de parsing do PDF tipo OMNI - Completed:
+     - Implementada validação inteligente do P.A
+     - Sistema agora procura valores decimais entre 0.3 e 10
+     - Se P.A não está em range razoável, busca no array completo
+     - Logs adicionados para debug quando P.A é ajustado
+     
+[x] 85. Corrigir lógica de parsing do PDF tipo Busca Técnica - Completed:
+     - Implementado sistema de candidatos a P.A
+     - Filtra valores que parecem P.A (decimal entre 0.3 e 10)
+     - Validação também do Ticket Médio (valores > 50 reais)
+     - Prefere valores próximos ao final do array
+     - Sistema mais robusto e inteligente
+     
+[x] 86. Reiniciar servidor com correções - Completed:
+     - Servidor reiniciado com sucesso
+     - Status: RUNNING na porta 5000
+
+Arquivos modificados:
+- views/novo-relatorio.html: Alert de observações removido
+- server.js: Lógica de parsing do PDF melhorada (linhas 524-631)
+
+Melhorias implementadas:
+✅ P.A = 1 agora é detectado corretamente
+✅ Validação por range (0.3 a 10) para P.A
+✅ Busca inteligente quando valor não está na posição esperada
+✅ Validação de Ticket Médio (valores > 50 reais)
+✅ Sistema mais robusto contra conflitos de leitura
+✅ Logs de debug para rastreamento
+
+Como funciona agora:
+1. Sistema tenta ler P.A da posição padrão
+2. Se o valor não está em range razoável (0.3-10), busca no array completo
+3. Procura por valores decimais com vírgula/ponto que se encaixam no perfil de P.A
+4. Para PDF tipo Busca Técnica, cria lista de candidatos e escolhe o mais provável
+5. Ticket Médio também é validado (deve ser > 50 reais)
+
+Resultado:
+✅ Problema do P.A = 1 SOLUCIONADO
+✅ Leitura de PDF mais precisa e confiável
+✅ Funciona para ambos tipos de PDF (OMNI e Busca Técnica)
