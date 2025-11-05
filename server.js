@@ -1324,30 +1324,31 @@ function gerarRelatorioPDFProfissional(doc, r) {
     // GRÁFICO DE ROSQUINHA (Formas de Pagamento)
     const graficoX = margin + colWidth * 2 + 12;
     const graficoCenterX = graficoX + colWidth / 2;
-    const graficoCenterY = y + metricHeight / 2;
+    const graficoCenterY = y + 28;
     
     const dadosGrafico = [
         { valor: rp.vendas_cartao || 0, cor: cores.laranja, label: 'Cartão' },
-        { valor: rp.vendas_pix || 0, cor: cores.cinza, label: 'Pix' },
-        { valor: rp.vendas_dinheiro || 0, cor: cores.cinzaClaro, label: 'Dinheiro' }
+        { valor: rp.vendas_pix || 0, cor: '#60a5fa', label: 'Pix' },
+        { valor: rp.vendas_dinheiro || 0, cor: '#a78bfa', label: 'Dinheiro' }
     ];
     
-    desenharGraficoRosquinha(doc, graficoCenterX, graficoCenterY, 32, dadosGrafico, cores);
-    
-    y += metricHeight + 12;
-    
-    // Legenda do gráfico
+    // Título do gráfico
     const totalVendasQtd = (rp.vendas_cartao || 0) + (rp.vendas_pix || 0) + (rp.vendas_dinheiro || 0);
-    doc.fontSize(9).font('Helvetica-Bold').fillColor(cores.cinza).text('FORMAS DE PAGAMENTO', graficoX, y);
-    y += 14;
+    doc.fontSize(9).font('Helvetica-Bold').fillColor(cores.cinza).text('PAGAMENTOS', graficoX, y + 4);
+    
+    // Desenhar gráfico maior e mais visível
+    desenharGraficoRosquinha(doc, graficoCenterX, graficoCenterY, 24, dadosGrafico, cores);
+    
+    // Legenda compacta abaixo do gráfico
+    let legendaY = y + 52;
     dadosGrafico.forEach((item, idx) => {
-        doc.circle(graficoX + 6, y + 4, 4).fill(item.cor);
-        doc.fontSize(8).font('Helvetica').fillColor(cores.texto)
-           .text(`${item.label}: ${item.valor}`, graficoX + 16, y);
-        y += 12;
+        doc.circle(graficoX + 8, legendaY + 3, 3).fill(item.cor);
+        doc.fontSize(7).font('Helvetica').fillColor(cores.texto)
+           .text(`${item.label}: ${item.valor}`, graficoX + 16, legendaY);
+        legendaY += 10;
     });
     
-    y = 100 + metricHeight + 14;
+    y += metricHeight + 12;
     
     // === TOTAL VENDAS (card maior e destacado) ===
     doc.roundedRect(margin, y, (pageWidth - margin * 2) / 2 - 6, 65, 4).fillAndStroke(cores.cinzaClaro, cores.laranja);
