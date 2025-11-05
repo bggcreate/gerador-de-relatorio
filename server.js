@@ -65,7 +65,7 @@ app.use(helmet({
             fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com"],
             objectSrc: ["'none'"],
             mediaSrc: ["'self'"],
-            frameSrc: ["'none'"],
+            frameSrc: ["'self'", "blob:"],
         },
     },
     crossOriginEmbedderPolicy: false,
