@@ -12,6 +12,29 @@
      - Servidor reiniciado e funcionando
      - Agora os arquivos anexados aparecem corretamente na seção "ANEXOS" do modal de visualização
 
+## Sistema de PDFs de Ranking e Navegação de Anexos (November 5, 2025, 20:14)
+[x] 65. Implementar sistema completo de PDFs de ranking com navegação - Completed:
+     Backend (server.js):
+     - Criada tabela pdf_rankings no código de inicialização (linha 241-253)
+     - Endpoint POST /api/pdf/ranking modificado para salvar arquivo físico e registro no banco
+     - Novos endpoints GET /api/pdf/rankings (listar) e GET /api/pdf/rankings/:id/download
+     - PDFs salvos em data/pdfs/rankings/ com metadados no banco
+     
+     Frontend (public/js/pages/consulta.js):
+     - Função carregarAnexos() atualizada para buscar rankings e tickets em paralelo
+     - Exibição diferenciada: ícone amarelo para ranking, vermelho para ticket
+     - Função visualizarAnexo() atualizada para suportar ambos tipos
+     - Botão "Voltar ao Relatório" implementado para navegação entre anexos e relatório
+     
+     Funcionalidades:
+     - PDFs de ranking aparecem na lista de anexos junto com tickets
+     - Clique em qualquer anexo abre o PDF
+     - Botão "Voltar ao Relatório" permite retornar ao relatório principal
+     - Navegação fluida entre relatório e anexos
+     
+     Revisão: Aprovado pelo architect após correção de inicialização da tabela
+     Servidor reiniciado e funcionando completamente
+
 ## Reported Issues (November 4, 2025)
 [x] 5. Investigate Bluve card missing issue - Added explicit classList.remove('d-none') to ensure visibility
 [x] 6. Fix assistência técnica card click issue - Changed filter to show ALL active stores (not just special function)
