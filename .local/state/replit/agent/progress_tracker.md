@@ -515,3 +515,37 @@ Arquivos modificados:
 ## Credenciais de Login:
 Username: admin
 Senha: admin
+
+## Redesign da Importação de PDFs em Novo Relatório (November 5, 2025, 17:14)
+[x] 60. Tornar importação de PDFs minimalista - Completed:
+     - Removido card grande "Importar Dados de PDFs"
+     - Botões movidos para o topo da página ao lado do botão "PDF"
+     - Design limpo e profissional com 4 botões: PDF, Ranking, Ticket, Salvos
+     
+[x] 61. Alinhar lógica do Ranking Dia com botão PDF - Completed:
+     - Botão "Ranking Dia" agora funciona igual ao botão "PDF"
+     - Não requer validação de loja/data antes do upload
+     - Processamento direto e automático
+     - Dados aplicados automaticamente ao formulário
+     - Removida interface de "Dados Extraídos" e botão "Aplicar"
+     
+[x] 62. Atualizar interface dos botões - Completed:
+     - Botão PDF: btn-outline-secondary (cinza)
+     - Botão Ranking: btn-outline-primary (azul)
+     - Botão Ticket: btn-outline-success (verde)
+     - Botão Salvos: btn-outline-info (ciano)
+     - Todos com ícones descritivos e tooltips
+     
+[x] 63. Reiniciar servidor após mudanças - Completed:
+     - Servidor reiniciado com sucesso
+     - Status: RUNNING na porta 5000
+     - Sistema operacional
+
+Arquivos modificados:
+- views/novo-relatorio.html: Botões minimalistas no header, card removido
+- public/js/pages/novo-relatorio.js: Lógica simplificada do Ranking Dia
+
+✅ Interface minimalista implementada
+✅ Ranking Dia segue mesma lógica do botão PDF
+✅ UX melhorada - menos cliques, mais direto
+✅ Design consistente e profissional
