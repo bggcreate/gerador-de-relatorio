@@ -450,6 +450,34 @@ Arquivos modificados:
 ✅ TODAS as tarefas do progress tracker marcadas como [x]
 ✅ IMPORTAÇÃO PARA AMBIENTE REPLIT CONCLUÍDA COM SUCESSO
 
+## Correções dos Botões de PDF - Novo Relatório (November 5, 2025, 18:25)
+[x] 64. Corrigir botão de importar PDF que não ficava laranja - Completed:
+     - Problema: marcarBotaoSucesso() era chamada antes do bloco finally resetar innerHTML
+     - Solução: Movida chamada para DEPOIS do reset do innerHTML no bloco try
+     - Adicionado reset também no bloco catch para manter consistência
+     - Arquivos modificados: public/js/pages/novo-relatorio.js (linhas 515-525)
+     
+[x] 65. Corrigir botão de enviar ticket que não funcionava - Completed:
+     - Problema: Mesma causa - marcarBotaoSucesso() antes do finally
+     - Solução: Movida chamada para DEPOIS do reset do innerHTML
+     - Adicionado reset no bloco catch
+     - Arquivos modificados: public/js/pages/novo-relatorio.js (linhas 584-597)
+     
+[x] 66. Remover botão de verificar arquivos enviados - Completed:
+     - Removido botão do HTML (views/novo-relatorio.html)
+     - Removida declaração de btnVerPdfsSalvos
+     - Removido todo código do event listener
+     - Removida função showPdfMessage (não mais necessária)
+     - Sistema simplificado: laranja indica sucesso no envio
+     
+## Status Final das Correções (November 5, 2025, 18:25):
+✅ Botão de importar PDF agora fica laranja por 3 segundos ao enviar com sucesso
+✅ Botão de enviar ticket agora fica laranja por 3 segundos ao enviar com sucesso
+✅ Botão de verificar arquivos removido (desnecessário com indicador laranja)
+✅ Interface mais limpa e intuitiva
+✅ Código revisado e aprovado pelo architect
+✅ Servidor rodando sem erros na porta 5000
+
 ## Remoção da Aba Assistência Técnica e Novos Gráficos de Desempenho (November 5, 2025, 16:21)
 [x] 42. Remover aba Assistência Técnica do menu - Completed:
      - Removida aba de navegação em views/index.html (desktop e mobile)
