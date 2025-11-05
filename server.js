@@ -1238,7 +1238,40 @@ app.put('/api/relatorios/:id', requirePageLogin, validateCsrf, (req, res) => { c
 app.delete('/api/relatorios/:id', requirePageLogin, validateCsrf, (req, res) => { db.run("DELETE FROM relatorios WHERE id = ?", [req.params.id], function (err) { if (err) return res.status(500).json({ error: err.message }); if (this.changes === 0) return res.status(404).json({ error: "Relatório não encontrado" }); res.json({ success: true, message: "Relatório excluído." }); }); });
 const formatCurrency = (value) => { const numberValue = Number(value) || 0; return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numberValue); };
 
-// Função para gerar PDF conciso do relatório (1 página garantida)
+// Função para desenhar um gráfico de rosquinha (donut chart)
+function desenharGraficoRosquinha(doc, centerX, centerY, radius, dados, cores) {
+    const total = dados.reduce((sum, item) => sum + item.valor, 0);
+    if (total === 0) return;
+    
+    let startAngle = -Math.PI / 2;
+    const innerRadius = radius * 0.6;
+    
+    dados.forEach(item => {
+        const sliceAngle = (item.valor / total) * 2 * Math.PI;
+        const endAngle = startAngle + sliceAngle;
+        
+        doc.save();
+        doc.path('')
+           .moveTo(centerX, centerY)
+           .arc(centerX, centerY, radius, startAngle, endAngle, false)
+           .lineTo(centerX, centerY)
+           .fill(item.cor);
+        
+        doc.path('')
+           .moveTo(centerX, centerY)
+           .arc(centerX, centerY, innerRadius, startAngle, endAngle, false)
+           .lineTo(centerX, centerY)
+           .fill('#ffffff');
+        doc.restore();
+        
+        startAngle = endAngle;
+    });
+    
+    doc.fontSize(10).font('Helvetica-Bold').fillColor('#1f2937')
+       .text(`${total}`, centerX - 20, centerY - 5, { width: 40, align: 'center' });
+}
+
+// Função para gerar PDF do relatório com cores do sistema (laranja e cinza)
 function gerarRelatorioPDFProfissional(doc, r) {
     const rp = processarRelatorio(r);
     if (!rp) {
@@ -1247,116 +1280,150 @@ function gerarRelatorioPDFProfissional(doc, r) {
     }
     
     const cores = {
-        primaria: '#3b82f6',
-        secundaria: '#ff6600',
-        verde: '#10b981',
+        laranja: '#ff6600',
         cinza: '#6b7280',
         cinzaClaro: '#f3f4f6',
-        texto: '#1f2937'
+        cinzaEscuro: '#4b5563',
+        texto: '#1f2937',
+        branco: '#ffffff'
     };
     
     const pageWidth = doc.page.width;
     const pageHeight = doc.page.height;
-    const margin = 35;
-    const maxY = pageHeight - 35;
-    let y = 35;
+    const margin = 40;
+    const maxY = pageHeight - 40;
+    let y = 40;
     
-    // === CABEÇALHO COMPACTO ===
-    doc.rect(0, 0, pageWidth, 55).fill(cores.primaria);
-    doc.fontSize(16).font('Helvetica-Bold').fillColor('#ffffff')
-       .text(r.loja.toUpperCase(), margin, 16, { align: 'center', width: pageWidth - margin * 2 });
+    // === CABEÇALHO COM COR LARANJA ===
+    doc.rect(0, 0, pageWidth, 70).fill(cores.laranja);
+    doc.fontSize(20).font('Helvetica-Bold').fillColor(cores.branco)
+       .text(r.loja.toUpperCase(), margin, 20, { align: 'center', width: pageWidth - margin * 2 });
     const dataFormatada = new Date(rp.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-    doc.fontSize(9).font('Helvetica').fillColor('#ffffff')
-       .text(`Relatório de ${dataFormatada}`, margin, 37, { align: 'center', width: pageWidth - margin * 2 });
+    doc.fontSize(11).font('Helvetica').fillColor(cores.branco)
+       .text(`Relatório de ${dataFormatada}`, margin, 48, { align: 'center', width: pageWidth - margin * 2 });
     
-    y = 68;
+    y = 85;
     doc.fillColor(cores.texto);
     
-    // === MÉTRICAS PRINCIPAIS (3 colunas compactas) ===
-    const colWidth = (pageWidth - margin * 2 - 16) / 3;
-    const metricHeight = 42;
+    // === MÉTRICAS PRINCIPAIS (2 colunas maiores) + GRÁFICO ===
+    const colWidth = (pageWidth - margin * 2 - 12) / 3;
+    const metricHeight = 55;
     
-    doc.roundedRect(margin, y, colWidth, metricHeight, 3).fillAndStroke(cores.cinzaClaro, cores.primaria);
-    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text('TX. CONV. MONIT.', margin + 4, y + 4, { width: colWidth - 8 });
-    doc.fontSize(15).font('Helvetica-Bold').fillColor(cores.primaria).text(`${rp.tx_conversao_monitoramento}%`, margin + 4, y + 16);
-    doc.fontSize(6).font('Helvetica').fillColor(cores.cinza).text(`${rp.clientes_monitoramento || 0} cli | ${rp.vendas_monitoramento_total || 0} vnd`, margin + 4, y + 33);
+    // TX. CONV. MONIT.
+    doc.roundedRect(margin, y, colWidth, metricHeight, 4).fillAndStroke(cores.cinzaClaro, cores.cinza);
+    doc.fontSize(9).font('Helvetica').fillColor(cores.cinza).text('TX. CONV. MONIT.', margin + 6, y + 6, { width: colWidth - 12 });
+    doc.fontSize(18).font('Helvetica-Bold').fillColor(cores.cinza).text(`${rp.tx_conversao_monitoramento}%`, margin + 6, y + 22);
+    doc.fontSize(8).font('Helvetica').fillColor(cores.cinzaEscuro).text(`${rp.clientes_monitoramento || 0} cli | ${rp.vendas_monitoramento_total || 0} vnd`, margin + 6, y + 43);
     
-    doc.roundedRect(margin + colWidth + 8, y, colWidth, metricHeight, 3).fillAndStroke(cores.cinzaClaro, cores.secundaria);
-    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text('TX. CONV. LOJA', margin + colWidth + 12, y + 4, { width: colWidth - 8 });
-    doc.fontSize(15).font('Helvetica-Bold').fillColor(cores.secundaria).text(`${rp.tx_conversao_loja}%`, margin + colWidth + 12, y + 16);
-    doc.fontSize(6).font('Helvetica').fillColor(cores.cinza).text(`${rp.clientes_loja || 0} cli | ${rp.vendas_loja || 0} vnd`, margin + colWidth + 12, y + 33);
+    // TX. CONV. LOJA
+    doc.roundedRect(margin + colWidth + 6, y, colWidth, metricHeight, 4).fillAndStroke(cores.cinzaClaro, cores.laranja);
+    doc.fontSize(9).font('Helvetica').fillColor(cores.cinza).text('TX. CONV. LOJA', margin + colWidth + 12, y + 6, { width: colWidth - 12 });
+    doc.fontSize(18).font('Helvetica-Bold').fillColor(cores.laranja).text(`${rp.tx_conversao_loja}%`, margin + colWidth + 12, y + 22);
+    doc.fontSize(8).font('Helvetica').fillColor(cores.cinzaEscuro).text(`${rp.clientes_loja || 0} cli | ${rp.vendas_loja || 0} vnd`, margin + colWidth + 12, y + 43);
     
-    doc.roundedRect(margin + colWidth * 2 + 16, y, colWidth, metricHeight, 3).fillAndStroke(cores.cinzaClaro, cores.verde);
-    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text('TOTAL VENDAS', margin + colWidth * 2 + 20, y + 4);
-    doc.fontSize(13).font('Helvetica-Bold').fillColor(cores.verde).text(formatCurrency(rp.total_vendas_dinheiro), margin + colWidth * 2 + 20, y + 14);
-    doc.fontSize(6).font('Helvetica').fillColor(cores.cinza).text(`TM: ${rp.ticket_medio} | PA: ${rp.pa}`, margin + colWidth * 2 + 20, y + 33);
+    // GRÁFICO DE ROSQUINHA (Formas de Pagamento)
+    const graficoX = margin + colWidth * 2 + 12;
+    const graficoCenterX = graficoX + colWidth / 2;
+    const graficoCenterY = y + metricHeight / 2;
     
-    y += metricHeight + 10;
+    const dadosGrafico = [
+        { valor: rp.vendas_cartao || 0, cor: cores.laranja, label: 'Cartão' },
+        { valor: rp.vendas_pix || 0, cor: cores.cinza, label: 'Pix' },
+        { valor: rp.vendas_dinheiro || 0, cor: cores.cinzaClaro, label: 'Dinheiro' }
+    ];
     
-    // === INFORMAÇÕES OPERACIONAIS (compactas) ===
-    doc.fontSize(9).font('Helvetica-Bold').fillColor(cores.primaria).text('OPERACIONAL', margin, y);
-    y += 13;
+    desenharGraficoRosquinha(doc, graficoCenterX, graficoCenterY, 25, dadosGrafico, cores);
     
-    const infoWidth = (pageWidth - margin * 2 - 12) / 2;
+    y += metricHeight + 12;
+    
+    // Legenda do gráfico
     const totalVendasQtd = (rp.vendas_cartao || 0) + (rp.vendas_pix || 0) + (rp.vendas_dinheiro || 0);
+    doc.fontSize(8).font('Helvetica-Bold').fillColor(cores.cinza).text('FORMAS DE PAGAMENTO', graficoX, y);
+    y += 12;
+    dadosGrafico.forEach((item, idx) => {
+        doc.circle(graficoX + 5, y + 3, 3).fill(item.cor);
+        doc.fontSize(7).font('Helvetica').fillColor(cores.texto)
+           .text(`${item.label}: ${item.valor}`, graficoX + 12, y);
+        y += 10;
+    });
     
-    doc.fontSize(7).font('Helvetica').fillColor(cores.texto);
-    doc.text(`Abertura: ${rp.hora_abertura || '--:--'} - ${rp.hora_fechamento || '--:--'}`, margin, y);
-    doc.text(`Cartão: ${rp.vendas_cartao || 0} | Pix: ${rp.vendas_pix || 0} | Dinheiro: ${rp.vendas_dinheiro || 0}`, margin + infoWidth + 12, y);
-    y += 10;
-    doc.text(`Gerente: ${rp.gerente_entrada || '--:--'} - ${rp.gerente_saida || '--:--'}`, margin, y);
-    doc.text(`Trocas: ${rp.quantidade_trocas || 0} | ${rp.funcao_especial === "Omni" ? `Omni: ${rp.quantidade_omni || 0}` : rp.funcao_especial === "Busca por Assist. Tec." ? `Assist.: ${rp.quantidade_funcao_especial || 0}` : 'Total: ' + totalVendasQtd}`, margin + infoWidth + 12, y);
+    y = 85 + metricHeight + 12;
     
+    // === TOTAL VENDAS (card maior e destacado) ===
+    doc.roundedRect(margin, y, (pageWidth - margin * 2) / 2 - 6, 50, 4).fillAndStroke(cores.cinzaClaro, cores.laranja);
+    doc.fontSize(9).font('Helvetica').fillColor(cores.cinza).text('TOTAL VENDAS', margin + 8, y + 8);
+    doc.fontSize(16).font('Helvetica-Bold').fillColor(cores.laranja).text(formatCurrency(rp.total_vendas_dinheiro), margin + 8, y + 24);
+    doc.fontSize(8).font('Helvetica').fillColor(cores.cinzaEscuro).text(`TM: ${rp.ticket_medio} | PA: ${rp.pa}`, margin + 8, y + 42);
+    
+    // === INFORMAÇÕES OPERACIONAIS ===
+    const infoX = margin + (pageWidth - margin * 2) / 2 + 6;
+    doc.fontSize(9).font('Helvetica-Bold').fillColor(cores.cinza).text('OPERACIONAL', infoX, y);
+    y += 14;
+    
+    doc.fontSize(8).font('Helvetica').fillColor(cores.texto);
+    doc.text(`Abertura: ${rp.hora_abertura || '--:--'} - ${rp.hora_fechamento || '--:--'}`, infoX, y);
+    y += 11;
+    doc.text(`Gerente: ${rp.gerente_entrada || '--:--'} - ${rp.gerente_saida || '--:--'}`, infoX, y);
+    y += 11;
+    doc.text(`Trocas: ${rp.quantidade_trocas || 0} | Total: ${totalVendasQtd}`, infoX, y);
+    if (rp.funcao_especial === "Omni") {
+        y += 11;
+        doc.text(`Omni: ${rp.quantidade_omni || 0}`, infoX, y);
+    } else if (rp.funcao_especial === "Busca por Assist. Tec.") {
+        y += 11;
+        doc.text(`Assist. Tec.: ${rp.quantidade_funcao_especial || 0}`, infoX, y);
+    }
+    
+    y = 85 + metricHeight + 12 + 50 + 15;
+    
+    // === DESEMPENHO DA EQUIPE ===
+    doc.fontSize(11).font('Helvetica-Bold').fillColor(cores.laranja).text('DESEMPENHO DA EQUIPE', margin, y);
     y += 16;
     
-    // === DESEMPENHO DA EQUIPE (Tabela compacta com limite dinâmico) ===
-    doc.fontSize(9).font('Helvetica-Bold').fillColor(cores.primaria).text('DESEMPENHO DA EQUIPE', margin, y);
-    y += 13;
-    
     if (rp.vendedores_processados && rp.vendedores_processados.length > 0) {
-        const colX = [margin, margin + 190, margin + 285, margin + 360, margin + 440];
-        const headerHeight = 16;
-        const rowHeight = 13;
+        const colX = [margin, margin + 200, margin + 300, margin + 380, margin + 460];
+        const headerHeight = 20;
+        const rowHeight = 16;
         
         // Cabeçalho
-        doc.roundedRect(margin, y, pageWidth - margin * 2, headerHeight, 2).fill(cores.primaria);
-        doc.fontSize(7).font('Helvetica-Bold').fillColor('#ffffff');
-        doc.text('VENDEDOR', colX[0] + 2, y + 4, { width: 185 });
-        doc.text('ATEND.', colX[1] + 2, y + 4);
-        doc.text('VENDAS', colX[2] + 2, y + 4);
-        doc.text('TX. CONV.', colX[3] + 2, y + 4);
+        doc.roundedRect(margin, y, pageWidth - margin * 2, headerHeight, 3).fill(cores.laranja);
+        doc.fontSize(9).font('Helvetica-Bold').fillColor(cores.branco);
+        doc.text('VENDEDOR', colX[0] + 4, y + 6, { width: 195 });
+        doc.text('ATEND.', colX[1] + 4, y + 6);
+        doc.text('VENDAS', colX[2] + 4, y + 6);
+        doc.text('TX. CONV.', colX[3] + 4, y + 6);
         y += headerHeight;
         
-        // Calcular quantos vendedores cabem na página
-        const spaceLeft = maxY - y - 10;
+        // Calcular quantos vendedores cabem
+        const spaceLeft = maxY - y - 15;
         const maxRows = Math.floor(spaceLeft / rowHeight);
         const numVendedores = Math.min(rp.vendedores_processados.length, maxRows);
         
         // Renderizar vendedores
         for (let i = 0; i < numVendedores; i++) {
             const v = rp.vendedores_processados[i];
-            const bgColor = i % 2 === 0 ? '#ffffff' : cores.cinzaClaro;
+            const bgColor = i % 2 === 0 ? cores.branco : cores.cinzaClaro;
             doc.rect(margin, y, pageWidth - margin * 2, rowHeight).fill(bgColor);
-            doc.fontSize(6).font('Helvetica').fillColor(cores.texto);
-            doc.text(v.nome || 'N/A', colX[0] + 2, y + 3, { width: 185 });
-            doc.text(String(v.atendimentos || 0), colX[1] + 2, y + 3);
-            doc.text(String(v.vendas || 0), colX[2] + 2, y + 3);
-            doc.fontSize(6).font('Helvetica-Bold').fillColor(parseFloat(v.tx_conversao) >= 50 ? cores.verde : cores.secundaria);
-            doc.text(`${v.tx_conversao}%`, colX[3] + 2, y + 3);
+            doc.fontSize(8).font('Helvetica').fillColor(cores.texto);
+            doc.text(v.nome || 'N/A', colX[0] + 4, y + 4, { width: 195 });
+            doc.text(String(v.atendimentos || 0), colX[1] + 4, y + 4);
+            doc.text(String(v.vendas || 0), colX[2] + 4, y + 4);
+            doc.fontSize(8).font('Helvetica-Bold').fillColor(parseFloat(v.tx_conversao) >= 50 ? '#10b981' : cores.laranja);
+            doc.text(`${v.tx_conversao}%`, colX[3] + 4, y + 4);
             y += rowHeight;
         }
         
         if (rp.vendedores_processados.length > numVendedores) {
-            doc.fontSize(6).font('Helvetica').fillColor(cores.cinza)
-               .text(`... e mais ${rp.vendedores_processados.length - numVendedores} vendedores`, margin, y + 3);
+            doc.fontSize(7).font('Helvetica').fillColor(cores.cinza)
+               .text(`... e mais ${rp.vendedores_processados.length - numVendedores} vendedores`, margin, y + 4);
         }
     } else {
-        doc.fontSize(7).font('Helvetica').fillColor(cores.cinza)
+        doc.fontSize(9).font('Helvetica').fillColor(cores.cinza)
            .text('Nenhum vendedor registrado.', margin, y);
     }
     
     // === RODAPÉ ===
-    doc.fontSize(6).font('Helvetica').fillColor(cores.cinza)
+    doc.fontSize(8).font('Helvetica').fillColor(cores.cinza)
        .text(`Gerado em ${new Date().toLocaleDateString('pt-BR')}`, margin, maxY, { align: 'left' });
 }
 
