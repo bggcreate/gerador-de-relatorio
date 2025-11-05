@@ -148,7 +148,8 @@ export function initConsultaPage() {
             const response = await fetch(`/api/pdf/tickets?loja=${encodeURIComponent(loja)}&data=${data}`);
             if (!response.ok) throw new Error("Erro ao buscar anexos");
             
-            const tickets = await response.json();
+            const data_response = await response.json();
+            const tickets = data_response.tickets || [];
             
             if (tickets.length === 0) {
                 listaAnexos.innerHTML = '<div class="text-muted small text-center py-2"><i class="bi bi-inbox"></i> Nenhum anexo encontrado</div>';

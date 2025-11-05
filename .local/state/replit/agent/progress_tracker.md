@@ -3,6 +3,15 @@
 [x] 3. Verify the project is working using the screenshot tool - Completed: Screenshot shows login page is loading correctly (November 5, 2025, 20:01)
 [x] 4. Inform user the import is completed and they can start building - Completed: Import migration to Replit environment finished successfully (November 5, 2025, 20:01)
 
+## Correção de Anexos na Aba Consulta (November 5, 2025, 20:06)
+[x] 64. Corrigir exibição de arquivos anexados ao visualizar relatório - Completed:
+     - Problema identificado: API retorna { success: true, tickets: [...] } mas código esperava array direto
+     - Solução: Ajustado public/js/pages/consulta.js linha 154-155 para extrair corretamente o array tickets
+     - Código anterior: `const tickets = await response.json();`
+     - Código corrigido: `const data_response = await response.json(); const tickets = data_response.tickets || [];`
+     - Servidor reiniciado e funcionando
+     - Agora os arquivos anexados aparecem corretamente na seção "ANEXOS" do modal de visualização
+
 ## Reported Issues (November 4, 2025)
 [x] 5. Investigate Bluve card missing issue - Added explicit classList.remove('d-none') to ensure visibility
 [x] 6. Fix assistência técnica card click issue - Changed filter to show ALL active stores (not just special function)
