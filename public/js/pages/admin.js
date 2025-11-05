@@ -216,7 +216,7 @@ function renderStoreSalesChart(data) {
     
     const topStores = data.slice(0, 10);
     const labels = topStores.map(s => s.loja.length > 20 ? s.loja.substring(0, 20) + '...' : s.loja);
-    const values = topStores.map(s => s.total_vendas);
+    const values = topStores.map(s => s.vendas_media_dia);
     
     if (storeSalesChart) storeSalesChart.destroy();
     storeSalesChart = new Chart(ctx, {
@@ -224,7 +224,7 @@ function renderStoreSalesChart(data) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Total de Vendas',
+                label: 'Vendas Médias por Dia',
                 data: values,
                 backgroundColor: getCssVar('--accent-color'),
                 borderRadius: 6,
@@ -239,7 +239,13 @@ function renderStoreSalesChart(data) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return 'Vendas: ' + context.parsed.y.toLocaleString('pt-BR');
+                            const index = context.dataIndex;
+                            const store = topStores[index];
+                            return [
+                                'Média/dia: ' + store.vendas_media_dia.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+                                'Total: ' + store.total_vendas.toLocaleString('pt-BR'),
+                                'Relatórios: ' + store.dias_registrados
+                            ];
                         }
                     }
                 }
@@ -288,7 +294,12 @@ function renderStoreTicketChart(data) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return 'Ticket Médio: R$ ' + context.parsed.x.toFixed(2);
+                            const index = context.dataIndex;
+                            const store = topStores[index];
+                            return [
+                                'Ticket Médio: R$ ' + store.ticket_medio.toFixed(2),
+                                'Baseado em ' + store.dias_registrados + ' relatório(s)'
+                            ];
                         }
                     }
                 }
@@ -336,7 +347,12 @@ function renderStorePaChart(data) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return 'PA: ' + context.parsed.y.toFixed(2);
+                            const index = context.dataIndex;
+                            const store = topStores[index];
+                            return [
+                                'PA: ' + store.pa.toFixed(2),
+                                'Baseado em ' + store.dias_registrados + ' relatório(s)'
+                            ];
                         }
                     }
                 }

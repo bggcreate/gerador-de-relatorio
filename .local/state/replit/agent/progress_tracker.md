@@ -416,3 +416,38 @@ Arquivos modificados:
 ✅ API de desempenho funcionando corretamente
 ✅ Dashboard atualizado com métricas relevantes para análise de lojas
 ✅ Servidor rodando sem erros
+
+## Ajuste para Médias Diárias nos Gráficos (November 5, 2025, 16:31)
+[x] 49. Modificar API para calcular médias diárias - Completed:
+     - Adicionado campo vendas_media_dia = total_vendas / dias_registrados
+     - Ordenação ajustada para usar vendas_media_dia
+     - Mantidos total_vendas e dias_registrados para contexto
+     - Ticket médio e PA já são médias, mantidos como estão
+     - Formas de pagamento mantidas como totais agregados
+     
+[x] 50. Atualizar gráficos JavaScript - Completed:
+     - Gráfico de vendas agora mostra vendas_media_dia
+     - Tooltips informativos com 3 linhas:
+       * Média por dia
+       * Total acumulado
+       * Número de relatórios
+     - Tickets e PA mostram número de relatórios no tooltip
+     - Título do gráfico atualizado para "Vendas Médias por Dia"
+     
+[x] 51. Reiniciar servidor e verificar - Completed:
+     - Servidor reiniciado com sucesso
+     - Status: RUNNING sem erros
+     - Pronto para testes com dados reais
+
+## Solução Implementada - Comparação Justa de Lojas:
+📊 **Problema resolvido**: Relatórios não são diários e frequência varia entre lojas
+
+✅ **Solução aplicada**: 
+   - Vendas: Média diária calculada (total ÷ dias reportados)
+   - Ticket Médio: Mantido como média (já era correto)
+   - PA: Mantido como média (já era correto)
+   - Pagamentos: Total agregado (faz sentido manter)
+   
+✅ **Transparência**: Tooltips mostram quantos relatórios cada métrica representa
+
+✅ **Resultado**: Lojas que reportam 2x/semana são comparáveis com lojas que reportam 5x/semana

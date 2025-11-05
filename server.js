@@ -1495,19 +1495,26 @@ app.get('/api/dashboard/store-performance', requirePageLogin, (req, res) => {
             return res.status(500).json({ error: 'Erro ao buscar métricas de desempenho.' });
         }
         
-        const metrics = rows.map(row => ({
-            loja: row.loja,
-            total_vendas: row.total_vendas || 0,
-            ticket_medio: parseFloat((row.ticket_medio_avg || 0).toFixed(2)),
-            pa: parseFloat((row.pa_avg || 0).toFixed(2)),
-            formas_pagamento: {
-                cartao: row.total_vendas_cartao || 0,
-                pix: row.total_vendas_pix || 0,
-                dinheiro: row.total_vendas_dinheiro || 0
-            },
-            total_clientes: row.total_clientes || 0,
-            dias_registrados: row.dias_registrados || 0
-        }));
+        const metrics = rows.map(row => {
+            const diasRegistrados = row.dias_registrados || 1;
+            const totalVendas = row.total_vendas || 0;
+            const vendasMediaDia = totalVendas / diasRegistrados;
+            
+            return {
+                loja: row.loja,
+                vendas_media_dia: parseFloat(vendasMediaDia.toFixed(2)),
+                total_vendas: totalVendas,
+                ticket_medio: parseFloat((row.ticket_medio_avg || 0).toFixed(2)),
+                pa: parseFloat((row.pa_avg || 0).toFixed(2)),
+                formas_pagamento: {
+                    cartao: row.total_vendas_cartao || 0,
+                    pix: row.total_vendas_pix || 0,
+                    dinheiro: row.total_vendas_dinheiro || 0
+                },
+                total_clientes: row.total_clientes || 0,
+                dias_registrados: diasRegistrados
+            };
+        }).sort((a, b) => b.vendas_media_dia - a.vendas_media_dia);
         
         res.json(metrics);
     });
