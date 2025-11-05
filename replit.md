@@ -39,7 +39,11 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 - User authentication and access control.
 - Store management (cadastro e gerenciamento de lojas) with fields for CEP, contact number, and manager.
 - Sales report generation and querying.
-- PDF upload and processing (Omni and Busca Técnica).
+- **PDF Processing & Import**: 
+  - **Ranking Dia PDF**: Upload and automatic extraction of PA, Preço Médio, and Atendimento Médio metrics from totals line. Validates store name and date before processing. Uses regex pattern `\d{1,3}(?:\.\d{3})*(?:,\d+)?` to correctly capture Brazilian-formatted numbers.
+  - **Ticket Dia PDF**: Upload and storage of PDF files for future consultation with filtering by store and date.
+  - **Database table**: `pdf_tickets` stores uploaded PDFs metadata and file paths.
+  - **Endpoints**: POST `/api/pdf/ranking`, POST `/api/pdf/ticket`, GET `/api/pdf/tickets`, GET `/api/pdf/tickets/:id/download`.
 - Report export in TXT, PDF, and Excel formats.
 - Interactive dashboard with graphs and statistics.
 - Internal demand management system.
