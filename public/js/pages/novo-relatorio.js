@@ -7,6 +7,8 @@ export function initNovoRelatorioPage() {
     // --- Seleção de Elementos ---
     const btnImportarPdf = document.getElementById("btn-importar-pdf");
     const pdfFileInput = document.getElementById("pdf-file-input");
+    const btnTicketDia = document.getElementById("btn-ticket-dia");
+    const ticketPdfInput = document.getElementById("ticket-pdf-input");
     const btnSalvarTudo = document.getElementById("btn-salvar-tudo");
     const btnLimparFormulario = document.getElementById("btn-limpar-formulario");
     const btnAddVendedor = document.getElementById("btn-add-vendedor");
@@ -539,9 +541,6 @@ export function initNovoRelatorioPage() {
     });
 
     // --- Lógica dos Botões de PDF (Ticket) ---
-    const btnTicketDia = document.getElementById('btn-ticket-dia');
-    const ticketPdfInput = document.getElementById('ticket-pdf-input');
-    
     // Botão Ticket Dia
     if (btnTicketDia) {
         btnTicketDia.addEventListener('click', () => {
