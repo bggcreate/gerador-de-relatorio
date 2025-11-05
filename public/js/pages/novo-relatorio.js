@@ -486,81 +486,15 @@ export function initNovoRelatorioPage() {
             showToast("Erro na Importação", error.message, "danger");
         } finally {
             btnImportarPdf.disabled = false;
-            btnImportarPdf.innerHTML = '<i class="bi bi-file-earmark-arrow-up-fill me-2"></i>Importar de PDF';
+            btnImportarPdf.innerHTML = '<i class="bi bi-file-earmark-arrow-up-fill me-2"></i>Rank';
             pdfFileInput.value = '';
         }
     });
 
-    // --- Lógica dos Novos Botões de PDF (Ranking e Ticket Dia) ---
-    const btnRankingDia = document.getElementById('btn-ranking-dia');
+    // --- Lógica dos Botões de PDF (Ticket e Salvos) ---
     const btnTicketDia = document.getElementById('btn-ticket-dia');
     const btnVerPdfsSalvos = document.getElementById('btn-ver-pdfs-salvos');
-    const rankingPdfInput = document.getElementById('ranking-pdf-input');
     const ticketPdfInput = document.getElementById('ticket-pdf-input');
-    
-    // Botão Ranking Dia - Funciona igual ao botão PDF principal
-    if (btnRankingDia) {
-        btnRankingDia.addEventListener('click', () => rankingPdfInput.click());
-    }
-    
-    if (rankingPdfInput) {
-        rankingPdfInput.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            btnRankingDia.disabled = true;
-            btnRankingDia.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
-            
-            try {
-                const formData = new FormData();
-                formData.append('pdf', file);
-                
-                const loja = lojaSelect.value;
-                const data = dataInput.value;
-                if (loja) formData.append('loja', loja);
-                if (data) formData.append('data', data);
-                
-                const csrfToken = await getCsrfToken();
-                const response = await fetch('/api/pdf/ranking', {
-                    method: 'POST',
-                    headers: { 'x-csrf-token': csrfToken },
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(result.error || 'Erro ao processar PDF de Ranking');
-                }
-                
-                // Aplicar dados automaticamente, igual ao botão PDF principal
-                const extractedData = result.data;
-                if (extractedData.pa) paInput.value = extractedData.pa;
-                if (extractedData.loja) {
-                    const storeExists = Array.from(lojaSelect.options).some(option => 
-                        option.text.trim().toUpperCase() === extractedData.loja.trim().toUpperCase()
-                    );
-                    if (storeExists) {
-                        lojaSelect.value = Array.from(lojaSelect.options).find(option => 
-                            option.text.trim().toUpperCase() === extractedData.loja.trim().toUpperCase()
-                        ).value;
-                        await handleSelecaoDeLoja();
-                    }
-                }
-                if (extractedData.data) dataInput.value = extractedData.data;
-                
-                salvarRascunho();
-                showToast('Sucesso!', 'Dados do PDF de Ranking importados com sucesso.', 'success');
-                
-            } catch (error) {
-                showToast('Erro', error.message, 'danger');
-            } finally {
-                btnRankingDia.disabled = false;
-                btnRankingDia.innerHTML = '<i class="bi bi-trophy-fill me-2"></i>Ranking';
-                rankingPdfInput.value = '';
-            }
-        });
-    }
     
     // Botão Ticket Dia
     if (btnTicketDia) {

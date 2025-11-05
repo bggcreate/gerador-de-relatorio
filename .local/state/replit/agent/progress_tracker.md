@@ -576,3 +576,38 @@ Arquivos modificados:
 ✅ Backup do banco anterior preservado
 ✅ Servidor rodando normalmente
 ✅ Todas as funcionalidades operacionais
+
+## Reorganização dos Botões de Importação (November 5, 2025, 17:22)
+[x] 68. Mover botões para embaixo do card Métricas - Completed:
+     - Botões removidos do topo da página
+     - Adicionados após o card "Desempenho da Equipe"
+     - Melhor fluxo visual e organização
+     
+[x] 69. Remover botão Ranking duplicado - Completed:
+     - Botão "Ranking" excluído (funcionalidade duplicada)
+     - Código JavaScript limpo e otimizado
+     - Inputs file não utilizados removidos
+     
+[x] 70. Renomear botão PDF para Rank - Completed:
+     - Botão "PDF" renomeado para "Rank"
+     - Tooltip atualizado: "Importar relatório de ranking"
+     - JavaScript atualizado com novo texto
+     
+[x] 71. Reiniciar servidor após mudanças - Completed:
+     - Servidor reiniciado com sucesso
+     - Status: RUNNING na porta 5000
+     - Sistema totalmente operacional
+
+Arquivos modificados:
+- views/novo-relatorio.html: Botões reorganizados, Ranking removido, PDF→Rank
+- public/js/pages/novo-relatorio.js: Código do Ranking removido, texto atualizado
+
+Botões finais na ordem:
+1. **Rank** (cinza) - Importar relatório de ranking
+2. **Ticket** (verde) - Salvar PDF do ticket do dia
+3. **Salvos** (ciano) - Ver PDFs salvos
+
+✅ Layout reorganizado conforme solicitado
+✅ Botão duplicado removido
+✅ Nomenclatura atualizada (PDF → Rank)
+✅ Interface limpa e funcional
