@@ -672,3 +672,28 @@ Resultado final:
 ✅ Cores consistentes com padrão do sistema (outline-secondary)
 ✅ Interface mais limpa e profissional
 ✅ Tooltips informativos mantidos
+
+## Observações sobre Importação de PDF e Espaçamento (November 5, 2025, 17:37)
+[x] 76. Adicionar observações sobre problema do P.A = 1 no PDF - Completed:
+     - Adicionado alert-warning explicativo antes dos botões
+     - Texto claro sobre o problema de leitura quando P.A for 1
+     - Orientação para verificar e ajustar manualmente os valores
+     - Ícone de alerta para chamar atenção
+     
+[x] 77. Melhorar espaçamento entre card e botões - Completed:
+     - Adicionado mt-5 (margin-top) no alert de observações
+     - Melhor separação visual entre seções
+     - Estética mais agradável e organizada
+     
+[x] 78. Reiniciar servidor - Completed:
+     - Servidor reiniciado com sucesso
+     - Status: RUNNING na porta 5000
+
+Arquivos modificados:
+- views/novo-relatorio.html: Alert de observações adicionado com mt-5
+
+Resultado final:
+✅ Observações importantes sobre conflitos de leitura do PDF visíveis
+✅ Usuários alertados sobre problema do P.A = 1
+✅ Espaçamento melhorado entre cards e botões
+✅ Interface mais informativa e bem organizada
