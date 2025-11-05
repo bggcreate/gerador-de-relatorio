@@ -549,3 +549,30 @@ Arquivos modificados:
 ✅ Ranking Dia segue mesma lógica do botão PDF
 ✅ UX melhorada - menos cliques, mais direto
 ✅ Design consistente e profissional
+
+## Substituição do Banco de Dados (November 5, 2025, 17:19)
+[x] 64. Fazer backup do banco de dados atual - Completed:
+     - Backup criado: data/database_backup_20251105_171912.db (72KB)
+     - Backup preserva todos os dados anteriores
+     
+[x] 65. Substituir com novo banco de dados - Completed:
+     - Arquivo importado: backup_reports_2025-10-29_1762363118217.db
+     - Copiado para: data/database.db (32KB)
+     - Todas as tabelas presentes e funcionais
+     
+[x] 66. Reiniciar servidor com novo banco - Completed:
+     - Servidor reiniciado com sucesso
+     - Status: RUNNING na porta 5000
+     - Banco de dados carregado corretamente
+     
+[x] 67. Verificar conteúdo do novo banco - Completed:
+     - Tabelas: assistencias, logs, relatorios, vendedores, demandas, lojas, temp_tokens, estoque_tecnico, pdf_tickets, usuarios
+     - 4 lojas cadastradas: tes4, teste, teste2, teste3
+     - 1 relatório: loja "teste", data 2025-10-28
+     - 1 usuário: admin
+     - Sistema totalmente operacional
+
+✅ Banco de dados substituído com sucesso
+✅ Backup do banco anterior preservado
+✅ Servidor rodando normalmente
+✅ Todas as funcionalidades operacionais
