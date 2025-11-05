@@ -103,19 +103,114 @@ export function initConsultaPage() {
         currentReportId = id;
         const modalBody = document.getElementById('modal-body-content');
         const modalLabel = document.getElementById('modal-visualizar-label');
+        const listaAnexos = document.getElementById('lista-anexos');
+        const infoLoja = document.getElementById('info-loja');
+        const infoData = document.getElementById('info-data');
+        const infoVendas = document.getElementById('info-vendas');
+        
         modalLabel.textContent = `Carregando Relatório...`;
         modalBody.innerHTML = '<div class="d-flex justify-content-center p-5"><div class="spinner-border" role="status"></div></div>';
+        listaAnexos.innerHTML = '<div class="text-muted small text-center py-2"><i class="bi bi-file-earmark"></i> Carregando...</div>';
         modalView.show();
 
         try {
+            // Buscar dados do relatório
+            const relatorioResponse = await fetch(`/api/relatorios/${id}`);
+            if (!relatorioResponse.ok) throw new Error("Não foi possível carregar dados do relatório.");
+            const { relatorio } = await relatorioResponse.json();
+            
+            // Preencher informações do relatório
+            infoLoja.textContent = relatorio.loja || '-';
+            infoData.textContent = new Date(relatorio.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
+            infoVendas.textContent = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(relatorio.total_vendas_dinheiro || 0);
+            
+            // Carregar preview do PDF do relatório
             const response = await fetch(`/api/relatorios/${id}/pdf`);
             if (!response.ok) throw new Error("Não foi possível gerar a visualização do PDF.");
             const fileBlob = await response.blob();
             const fileURL = URL.createObjectURL(fileBlob);
             modalLabel.textContent = `Visualizar Relatório #${id}`;
             modalBody.innerHTML = `<iframe src="${fileURL}" style="width: 100%; height: 70vh; border: none;"></iframe>`;
+            
+            // Carregar anexos (tickets)
+            await carregarAnexos(id, relatorio.loja, relatorio.data);
         } catch (e) {
             modalBody.innerHTML = `<div class="p-3 text-center text-danger"><h3>Oops!</h3><p>Não foi possível carregar a visualização.</p></div>`;
+            showToast('Erro', e.message, 'danger');
+        }
+    }
+    
+    async function carregarAnexos(relatorioId, loja, data) {
+        const listaAnexos = document.getElementById('lista-anexos');
+        
+        try {
+            // Buscar PDFs de ticket associados ao relatório
+            const response = await fetch(`/api/pdf/tickets?loja=${encodeURIComponent(loja)}&data=${data}`);
+            if (!response.ok) throw new Error("Erro ao buscar anexos");
+            
+            const tickets = await response.json();
+            
+            if (tickets.length === 0) {
+                listaAnexos.innerHTML = '<div class="text-muted small text-center py-2"><i class="bi bi-inbox"></i> Nenhum anexo encontrado</div>';
+                return;
+            }
+            
+            // Renderizar lista de anexos
+            let anexosHtml = '';
+            tickets.forEach(ticket => {
+                const dataUpload = new Date(ticket.uploaded_at).toLocaleDateString('pt-BR');
+                anexosHtml += `
+                    <div class="anexo-item p-2 mb-2 border rounded bg-light" style="cursor: pointer;" data-anexo-id="${ticket.id}" data-anexo-tipo="ticket">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold small">Ticket Dia</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">${ticket.filename}</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">Enviado em ${dataUpload}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            listaAnexos.innerHTML = anexosHtml;
+            
+            // Adicionar event listeners para preview
+            document.querySelectorAll('.anexo-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const anexoId = item.dataset.anexoId;
+                    const anexoTipo = item.dataset.anexoTipo;
+                    visualizarAnexo(anexoId, anexoTipo);
+                });
+            });
+            
+        } catch (e) {
+            listaAnexos.innerHTML = '<div class="text-muted small text-center py-2"><i class="bi bi-exclamation-triangle"></i> Erro ao carregar anexos</div>';
+            console.error('Erro ao carregar anexos:', e);
+        }
+    }
+    
+    async function visualizarAnexo(anexoId, tipo) {
+        const modalBody = document.getElementById('modal-body-content');
+        
+        try {
+            modalBody.innerHTML = '<div class="d-flex justify-content-center p-5"><div class="spinner-border" role="status"></div></div>';
+            
+            let url = '';
+            if (tipo === 'ticket') {
+                url = `/api/pdf/tickets/${anexoId}/download`;
+            }
+            
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Não foi possível carregar o anexo.");
+            
+            const fileBlob = await response.blob();
+            const fileURL = URL.createObjectURL(fileBlob);
+            
+            modalBody.innerHTML = `<iframe src="${fileURL}" style="width: 100%; height: 70vh; border: none;"></iframe>`;
+            showToast('Preview', 'Anexo carregado com sucesso', 'info');
+        } catch (e) {
+            modalBody.innerHTML = `<div class="p-3 text-center text-danger"><h3>Oops!</h3><p>Não foi possível carregar o anexo.</p></div>`;
             showToast('Erro', e.message, 'danger');
         }
     }

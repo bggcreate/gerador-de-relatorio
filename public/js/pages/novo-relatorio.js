@@ -43,6 +43,12 @@ export function initNovoRelatorioPage() {
     const DRAFT_KEY = 'draftRelatorio';
     let vendedorCounter = 0;
     let previousLojaValue = null; // Track previous store to detect changes
+    
+    // Rastreamento de anexos
+    let anexos = {
+        rankingPdf: false,
+        ticketPdf: false
+    };
 
     // --- Funções de Gerenciamento de Rascunho ---
     function salvarRascunho() {
@@ -54,6 +60,7 @@ export function initNovoRelatorioPage() {
         const vendas = formData.getAll('vendedor_vendas');
         data.vendedores = nomes.map((nome, index) => ({ nome: nome.trim(), atendimentos: atendimentos[index] || 0, vendas: vendas[index] || 0 }));
         data.pdfSectionVisible = resultadosPdfContainer.style.display === 'block';
+        data.anexos = anexos; // Salvar estado dos anexos
         sessionStorage.setItem(DRAFT_KEY, JSON.stringify(data));
     }
 
@@ -64,7 +71,7 @@ export function initNovoRelatorioPage() {
         const data = JSON.parse(draft);
         for (const key in data) {
             const input = form.querySelector(`[name="${key}"]`);
-            if (input && key !== 'vendedores') input.value = data[key];
+            if (input && key !== 'vendedores' && key !== 'anexos') input.value = data[key];
         }
         if (data.vendedores && Array.isArray(data.vendedores)) {
             containerVendedores.innerHTML = '';
@@ -72,6 +79,12 @@ export function initNovoRelatorioPage() {
         }
         if (data.pdfSectionVisible && resultadosPdfContainer) {
             resultadosPdfContainer.style.display = 'block';
+        }
+        // Restaurar estado dos anexos
+        if (data.anexos) {
+            anexos = data.anexos;
+            if (anexos.rankingPdf) marcarBotaoComAnexo(btnImportarPdf);
+            if (anexos.ticketPdf) marcarBotaoComAnexo(btnTicketDia);
         }
         updateVendedoresPlaceholder();
         handleSelecaoDeLoja();
@@ -88,6 +101,10 @@ export function initNovoRelatorioPage() {
         dataInput.value = new Date(hoje.getTime() - (offset * 60 * 1000)).toISOString().split('T')[0];
         containerVendedores.innerHTML = '';
         if(resultadosPdfContainer) resultadosPdfContainer.style.display = 'none';
+        // Limpar anexos
+        anexos = { rankingPdf: false, ticketPdf: false };
+        desmarcarBotao(btnImportarPdf);
+        desmarcarBotao(btnTicketDia);
         updateVendedoresPlaceholder();
         handleSelecaoDeLoja();
         calcularEAtualizarGraficos();
@@ -432,17 +449,26 @@ export function initNovoRelatorioPage() {
         }
     }
     
-    // Função para marcar botão como sucesso (laranja)
-    function marcarBotaoSucesso(botao) {
+    // Função para marcar botão com anexo (laranja permanente)
+    function marcarBotaoComAnexo(botao) {
         botao.style.backgroundColor = '#ff6600';
         botao.style.borderColor = '#ff6600';
         botao.style.color = '#fff';
-        
-        setTimeout(() => {
-            botao.style.backgroundColor = '';
-            botao.style.borderColor = '';
-            botao.style.color = '';
-        }, 3000);
+        botao.dataset.temAnexo = 'true';
+    }
+    
+    // Função para desmarcar botão (voltar ao padrão)
+    function desmarcarBotao(botao) {
+        botao.style.backgroundColor = '';
+        botao.style.borderColor = '';
+        botao.style.color = '';
+        botao.dataset.temAnexo = 'false';
+    }
+    
+    // Função para feedback temporário de sucesso (mantém laranja)
+    function mostrarFeedbackSucesso(botao) {
+        // Mostrar um toast rápido de sucesso
+        showToast('Anexo Salvo', 'Arquivo anexado com sucesso!', 'success');
     }
     
     // --- Lógica de Importação de PDF ---
@@ -495,10 +521,13 @@ export function initNovoRelatorioPage() {
             salvarRascunho();
             showToast("Sucesso!", "Dados do PDF importados com sucesso.", "success");
             
-            // Marcar botão como sucesso DEPOIS de resetar o HTML
+            // Marcar botão como anexado
             btnImportarPdf.disabled = false;
             btnImportarPdf.innerHTML = '<i class="bi bi-file-earmark-arrow-up-fill"></i>';
-            marcarBotaoSucesso(btnImportarPdf);
+            anexos.rankingPdf = true;
+            marcarBotaoComAnexo(btnImportarPdf);
+            mostrarFeedbackSucesso(btnImportarPdf);
+            salvarRascunho(); // Salvar estado do anexo
             pdfFileInput.value = '';
 
         } catch (error) {
@@ -566,10 +595,12 @@ export function initNovoRelatorioPage() {
                 
                 showToast('Sucesso!', `PDF de Ticket salvo: ${result.data.filename}`, 'success');
                 
-                // Marcar botão como sucesso DEPOIS de resetar o HTML
+                // Marcar botão como anexado
                 btnTicketDia.disabled = false;
                 btnTicketDia.innerHTML = '<i class="bi bi-receipt"></i>';
-                marcarBotaoSucesso(btnTicketDia);
+                anexos.ticketPdf = true;
+                marcarBotaoComAnexo(btnTicketDia);
+                salvarRascunho(); // Salvar estado do anexo
                 ticketPdfInput.value = '';
                 
             } catch (error) {

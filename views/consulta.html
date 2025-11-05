@@ -79,13 +79,56 @@
 
 <!-- Modal para Visualização de Relatório -->
 <div class="modal fade" id="modal-visualizar-relatorio" tabindex="-1" aria-labelledby="modal-visualizar-label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modal-visualizar-label">Visualizar Relatório</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="modal-body-content" style="padding: 0; min-height: 70vh;">
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <!-- Coluna da Esquerda: Visão Geral -->
+                    <div class="col-md-4 border-end">
+                        <div class="p-3">
+                            <h6 class="mb-3"><i class="bi bi-info-circle me-2"></i>Visão Geral</h6>
+                            
+                            <!-- Anexos -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-muted">ANEXOS</label>
+                                <div id="lista-anexos">
+                                    <div class="text-muted small text-center py-2">
+                                        <i class="bi bi-file-earmark"></i> Carregando...
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Informações do Relatório -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-muted">INFORMAÇÕES</label>
+                                <div id="info-relatorio" class="small">
+                                    <div class="mb-2">
+                                        <i class="bi bi-shop me-1"></i>
+                                        <strong>Loja:</strong> <span id="info-loja">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="bi bi-calendar me-1"></i>
+                                        <strong>Data:</strong> <span id="info-data">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="bi bi-cash me-1"></i>
+                                        <strong>Total Vendas:</strong> <span id="info-vendas">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Coluna da Direita: Preview do Relatório -->
+                    <div class="col-md-8">
+                        <div id="modal-body-content" style="min-height: 70vh;">
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
