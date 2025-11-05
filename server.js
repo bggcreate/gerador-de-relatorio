@@ -1238,7 +1238,7 @@ app.put('/api/relatorios/:id', requirePageLogin, validateCsrf, (req, res) => { c
 app.delete('/api/relatorios/:id', requirePageLogin, validateCsrf, (req, res) => { db.run("DELETE FROM relatorios WHERE id = ?", [req.params.id], function (err) { if (err) return res.status(500).json({ error: err.message }); if (this.changes === 0) return res.status(404).json({ error: "Relatório não encontrado" }); res.json({ success: true, message: "Relatório excluído." }); }); });
 const formatCurrency = (value) => { const numberValue = Number(value) || 0; return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numberValue); };
 
-// Função para gerar PDF conciso do relatório (1 página)
+// Função para gerar PDF conciso do relatório (1 página garantida)
 function gerarRelatorioPDFProfissional(doc, r) {
     const rp = processarRelatorio(r);
     if (!rp) {
@@ -1257,108 +1257,107 @@ function gerarRelatorioPDFProfissional(doc, r) {
     
     const pageWidth = doc.page.width;
     const pageHeight = doc.page.height;
-    const margin = 40;
-    let y = 40;
+    const margin = 35;
+    const maxY = pageHeight - 35;
+    let y = 35;
     
     // === CABEÇALHO COMPACTO ===
-    doc.rect(0, 0, pageWidth, 60).fill(cores.primaria);
-    doc.fontSize(18).font('Helvetica-Bold').fillColor('#ffffff')
-       .text(r.loja.toUpperCase(), margin, 18, { align: 'center', width: pageWidth - margin * 2 });
+    doc.rect(0, 0, pageWidth, 55).fill(cores.primaria);
+    doc.fontSize(16).font('Helvetica-Bold').fillColor('#ffffff')
+       .text(r.loja.toUpperCase(), margin, 16, { align: 'center', width: pageWidth - margin * 2 });
     const dataFormatada = new Date(rp.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-    doc.fontSize(10).font('Helvetica').fillColor('#ffffff')
-       .text(`Relatório de ${dataFormatada}`, margin, 40, { align: 'center', width: pageWidth - margin * 2 });
+    doc.fontSize(9).font('Helvetica').fillColor('#ffffff')
+       .text(`Relatório de ${dataFormatada}`, margin, 37, { align: 'center', width: pageWidth - margin * 2 });
     
-    y = 75;
+    y = 68;
     doc.fillColor(cores.texto);
     
     // === MÉTRICAS PRINCIPAIS (3 colunas compactas) ===
-    const colWidth = (pageWidth - margin * 2 - 20) / 3;
-    const metricHeight = 45;
+    const colWidth = (pageWidth - margin * 2 - 16) / 3;
+    const metricHeight = 42;
     
-    // Conversão Monitoramento
     doc.roundedRect(margin, y, colWidth, metricHeight, 3).fillAndStroke(cores.cinzaClaro, cores.primaria);
-    doc.fontSize(8).font('Helvetica').fillColor(cores.cinza).text('TX. CONV. MONIT.', margin + 5, y + 5, { width: colWidth - 10 });
-    doc.fontSize(16).font('Helvetica-Bold').fillColor(cores.primaria).text(`${rp.tx_conversao_monitoramento}%`, margin + 5, y + 18);
-    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text(`${rp.clientes_monitoramento || 0} cli | ${rp.vendas_monitoramento_total || 0} vnd`, margin + 5, y + 35);
+    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text('TX. CONV. MONIT.', margin + 4, y + 4, { width: colWidth - 8 });
+    doc.fontSize(15).font('Helvetica-Bold').fillColor(cores.primaria).text(`${rp.tx_conversao_monitoramento}%`, margin + 4, y + 16);
+    doc.fontSize(6).font('Helvetica').fillColor(cores.cinza).text(`${rp.clientes_monitoramento || 0} cli | ${rp.vendas_monitoramento_total || 0} vnd`, margin + 4, y + 33);
     
-    // Conversão Loja
-    doc.roundedRect(margin + colWidth + 10, y, colWidth, metricHeight, 3).fillAndStroke(cores.cinzaClaro, cores.secundaria);
-    doc.fontSize(8).font('Helvetica').fillColor(cores.cinza).text('TX. CONV. LOJA', margin + colWidth + 15, y + 5, { width: colWidth - 10 });
-    doc.fontSize(16).font('Helvetica-Bold').fillColor(cores.secundaria).text(`${rp.tx_conversao_loja}%`, margin + colWidth + 15, y + 18);
-    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text(`${rp.clientes_loja || 0} cli | ${rp.vendas_loja || 0} vnd`, margin + colWidth + 15, y + 35);
+    doc.roundedRect(margin + colWidth + 8, y, colWidth, metricHeight, 3).fillAndStroke(cores.cinzaClaro, cores.secundaria);
+    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text('TX. CONV. LOJA', margin + colWidth + 12, y + 4, { width: colWidth - 8 });
+    doc.fontSize(15).font('Helvetica-Bold').fillColor(cores.secundaria).text(`${rp.tx_conversao_loja}%`, margin + colWidth + 12, y + 16);
+    doc.fontSize(6).font('Helvetica').fillColor(cores.cinza).text(`${rp.clientes_loja || 0} cli | ${rp.vendas_loja || 0} vnd`, margin + colWidth + 12, y + 33);
     
-    // Total Vendas
-    doc.roundedRect(margin + colWidth * 2 + 20, y, colWidth, metricHeight, 3).fillAndStroke(cores.cinzaClaro, cores.verde);
-    doc.fontSize(8).font('Helvetica').fillColor(cores.cinza).text('TOTAL VENDAS', margin + colWidth * 2 + 25, y + 5);
-    doc.fontSize(14).font('Helvetica-Bold').fillColor(cores.verde).text(formatCurrency(rp.total_vendas_dinheiro), margin + colWidth * 2 + 25, y + 16);
-    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text(`TM: ${rp.ticket_medio} | PA: ${rp.pa}`, margin + colWidth * 2 + 25, y + 35);
+    doc.roundedRect(margin + colWidth * 2 + 16, y, colWidth, metricHeight, 3).fillAndStroke(cores.cinzaClaro, cores.verde);
+    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text('TOTAL VENDAS', margin + colWidth * 2 + 20, y + 4);
+    doc.fontSize(13).font('Helvetica-Bold').fillColor(cores.verde).text(formatCurrency(rp.total_vendas_dinheiro), margin + colWidth * 2 + 20, y + 14);
+    doc.fontSize(6).font('Helvetica').fillColor(cores.cinza).text(`TM: ${rp.ticket_medio} | PA: ${rp.pa}`, margin + colWidth * 2 + 20, y + 33);
     
-    y += metricHeight + 12;
+    y += metricHeight + 10;
     
-    // === INFORMAÇÕES OPERACIONAIS (2 colunas compactas) ===
-    doc.fontSize(10).font('Helvetica-Bold').fillColor(cores.primaria).text('OPERACIONAL', margin, y);
-    y += 15;
+    // === INFORMAÇÕES OPERACIONAIS (compactas) ===
+    doc.fontSize(9).font('Helvetica-Bold').fillColor(cores.primaria).text('OPERACIONAL', margin, y);
+    y += 13;
     
-    const infoWidth = (pageWidth - margin * 2 - 15) / 2;
-    
-    // Coluna Esquerda
-    doc.fontSize(8).font('Helvetica').fillColor(cores.texto);
-    doc.text(`Abertura: ${rp.hora_abertura || '--:--'} - ${rp.hora_fechamento || '--:--'}`, margin, y);
-    y += 12;
-    doc.text(`Gerente: ${rp.gerente_entrada || '--:--'} - ${rp.gerente_saida || '--:--'}`, margin, y);
-    
-    // Coluna Direita
-    y -= 12;
+    const infoWidth = (pageWidth - margin * 2 - 12) / 2;
     const totalVendasQtd = (rp.vendas_cartao || 0) + (rp.vendas_pix || 0) + (rp.vendas_dinheiro || 0);
-    doc.text(`Cartão: ${rp.vendas_cartao || 0} | Pix: ${rp.vendas_pix || 0} | Dinheiro: ${rp.vendas_dinheiro || 0}`, margin + infoWidth + 15, y);
-    y += 12;
-    doc.text(`Trocas: ${rp.quantidade_trocas || 0} | ${rp.funcao_especial === "Omni" ? `Omni: ${rp.quantidade_omni || 0}` : rp.funcao_especial === "Busca por Assist. Tec." ? `Assist. Tec.: ${rp.quantidade_funcao_especial || 0}` : 'Total Vendas: ' + totalVendasQtd}`, margin + infoWidth + 15, y);
     
-    y += 20;
+    doc.fontSize(7).font('Helvetica').fillColor(cores.texto);
+    doc.text(`Abertura: ${rp.hora_abertura || '--:--'} - ${rp.hora_fechamento || '--:--'}`, margin, y);
+    doc.text(`Cartão: ${rp.vendas_cartao || 0} | Pix: ${rp.vendas_pix || 0} | Dinheiro: ${rp.vendas_dinheiro || 0}`, margin + infoWidth + 12, y);
+    y += 10;
+    doc.text(`Gerente: ${rp.gerente_entrada || '--:--'} - ${rp.gerente_saida || '--:--'}`, margin, y);
+    doc.text(`Trocas: ${rp.quantidade_trocas || 0} | ${rp.funcao_especial === "Omni" ? `Omni: ${rp.quantidade_omni || 0}` : rp.funcao_especial === "Busca por Assist. Tec." ? `Assist.: ${rp.quantidade_funcao_especial || 0}` : 'Total: ' + totalVendasQtd}`, margin + infoWidth + 12, y);
     
-    // === DESEMPENHO DA EQUIPE (Tabela compacta) ===
-    doc.fontSize(10).font('Helvetica-Bold').fillColor(cores.primaria).text('DESEMPENHO DA EQUIPE', margin, y);
-    y += 15;
+    y += 16;
+    
+    // === DESEMPENHO DA EQUIPE (Tabela compacta com limite dinâmico) ===
+    doc.fontSize(9).font('Helvetica-Bold').fillColor(cores.primaria).text('DESEMPENHO DA EQUIPE', margin, y);
+    y += 13;
     
     if (rp.vendedores_processados && rp.vendedores_processados.length > 0) {
-        const colX = [margin, margin + 200, margin + 300, margin + 380, margin + 460];
+        const colX = [margin, margin + 190, margin + 285, margin + 360, margin + 440];
+        const headerHeight = 16;
+        const rowHeight = 13;
         
-        // Cabeçalho compacto
-        doc.roundedRect(margin, y, pageWidth - margin * 2, 18, 2).fill(cores.primaria);
-        doc.fontSize(8).font('Helvetica-Bold').fillColor('#ffffff');
-        doc.text('VENDEDOR', colX[0] + 3, y + 5, { width: 190 });
-        doc.text('ATEND.', colX[1] + 3, y + 5);
-        doc.text('VENDAS', colX[2] + 3, y + 5);
-        doc.text('TX. CONV.', colX[3] + 3, y + 5);
-        y += 18;
+        // Cabeçalho
+        doc.roundedRect(margin, y, pageWidth - margin * 2, headerHeight, 2).fill(cores.primaria);
+        doc.fontSize(7).font('Helvetica-Bold').fillColor('#ffffff');
+        doc.text('VENDEDOR', colX[0] + 2, y + 4, { width: 185 });
+        doc.text('ATEND.', colX[1] + 2, y + 4);
+        doc.text('VENDAS', colX[2] + 2, y + 4);
+        doc.text('TX. CONV.', colX[3] + 2, y + 4);
+        y += headerHeight;
         
-        // Linhas compactas
-        const maxVendedores = Math.min(rp.vendedores_processados.length, 15);
-        for (let i = 0; i < maxVendedores; i++) {
+        // Calcular quantos vendedores cabem na página
+        const spaceLeft = maxY - y - 10;
+        const maxRows = Math.floor(spaceLeft / rowHeight);
+        const numVendedores = Math.min(rp.vendedores_processados.length, maxRows);
+        
+        // Renderizar vendedores
+        for (let i = 0; i < numVendedores; i++) {
             const v = rp.vendedores_processados[i];
             const bgColor = i % 2 === 0 ? '#ffffff' : cores.cinzaClaro;
-            doc.rect(margin, y, pageWidth - margin * 2, 15).fill(bgColor);
-            doc.fontSize(7).font('Helvetica').fillColor(cores.texto);
-            doc.text(v.nome || 'N/A', colX[0] + 3, y + 4, { width: 190 });
-            doc.text(String(v.atendimentos || 0), colX[1] + 3, y + 4);
-            doc.text(String(v.vendas || 0), colX[2] + 3, y + 4);
-            doc.fontSize(7).font('Helvetica-Bold').fillColor(parseFloat(v.tx_conversao) >= 50 ? cores.verde : cores.secundaria);
-            doc.text(`${v.tx_conversao}%`, colX[3] + 3, y + 4);
-            y += 15;
+            doc.rect(margin, y, pageWidth - margin * 2, rowHeight).fill(bgColor);
+            doc.fontSize(6).font('Helvetica').fillColor(cores.texto);
+            doc.text(v.nome || 'N/A', colX[0] + 2, y + 3, { width: 185 });
+            doc.text(String(v.atendimentos || 0), colX[1] + 2, y + 3);
+            doc.text(String(v.vendas || 0), colX[2] + 2, y + 3);
+            doc.fontSize(6).font('Helvetica-Bold').fillColor(parseFloat(v.tx_conversao) >= 50 ? cores.verde : cores.secundaria);
+            doc.text(`${v.tx_conversao}%`, colX[3] + 2, y + 3);
+            y += rowHeight;
         }
         
-        if (rp.vendedores_processados.length > maxVendedores) {
-            doc.fontSize(7).font('Helvetica').fillColor(cores.cinza)
-               .text(`... e mais ${rp.vendedores_processados.length - maxVendedores} vendedores`, margin, y + 5);
+        if (rp.vendedores_processados.length > numVendedores) {
+            doc.fontSize(6).font('Helvetica').fillColor(cores.cinza)
+               .text(`... e mais ${rp.vendedores_processados.length - numVendedores} vendedores`, margin, y + 3);
         }
     } else {
-        doc.fontSize(8).font('Helvetica').fillColor(cores.cinza)
+        doc.fontSize(7).font('Helvetica').fillColor(cores.cinza)
            .text('Nenhum vendedor registrado.', margin, y);
     }
     
     // === RODAPÉ ===
-    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza)
-       .text(`Gerado em ${new Date().toLocaleDateString('pt-BR')}`, margin, pageHeight - 30, { align: 'left' });
+    doc.fontSize(6).font('Helvetica').fillColor(cores.cinza)
+       .text(`Gerado em ${new Date().toLocaleDateString('pt-BR')}`, margin, maxY, { align: 'left' });
 }
 
 const formatarRelatorioTexto = (r) => { const rp = processarRelatorio(r); if (!rp) return "Erro ao processar relatório."; let equipeInfo = 'Nenhum vendedor registrado.\n'; if (rp.vendedores_processados && rp.vendedores_processados.length > 0) { equipeInfo = rp.vendedores_processados.map(v => { return `${v.nome}: ${v.atendimentos} Atendimentos / ${v.vendas} Vendas / ${v.tx_conversao}%`; }).join('\n'); } let funcaoEspecialInfo = ''; if (rp.funcao_especial === "Omni") { funcaoEspecialInfo = `Omni: ${rp.quantidade_omni || 0}\n`; } else if (rp.funcao_especial === "Busca por Assist. Tec.") { funcaoEspecialInfo = `Busca por assist tec: ${rp.quantidade_funcao_especial || 0}\n`; } const totalVendasQuantidade = (rp.vendas_cartao || 0) + (rp.vendas_pix || 0) + (rp.vendas_dinheiro || 0); const content = ` DATA: ${new Date(rp.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} \n\nClientes: ${rp.clientes_monitoramento || 0}\nBluve: ${rp.clientes_loja || 0}\nVendas / Monitoramento: ${rp.vendas_monitoramento_total || 0}\nVendas / Loja: ${rp.vendas_loja || 0}\nTaxa de conversão da loja: ${rp.tx_conversao_loja || '0.00'}%\nTaxa de conversão do monitoramento: ${rp.tx_conversao_monitoramento || '0.00'}%\n\nAbertura: ${rp.hora_abertura || '--:--'} - ${rp.hora_fechamento || '--:--'}\nGerente: ${rp.gerente_entrada || '--:--'} - ${rp.gerente_saida || '--:--'}\nVendas em Cartão: ${rp.vendas_cartao || 0}\nVendas em Pix: ${rp.vendas_pix || 0}\nVendas em Dinheiro: ${rp.vendas_dinheiro || 0}\n${funcaoEspecialInfo}Total vendas: ${totalVendasQuantidade}\nTroca/Devolução: ${rp.quantidade_trocas || 0}\n\nDesempenho Equipe:\n\n${equipeInfo}\n\nTM: ${rp.ticket_medio || 'R$ 0,00'} / P.A: ${rp.pa || '0.00'} / Total: ${formatCurrency(rp.total_vendas_dinheiro)} / `; return content.trim(); };
