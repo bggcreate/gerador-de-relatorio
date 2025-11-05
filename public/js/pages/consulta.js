@@ -144,20 +144,44 @@ export function initConsultaPage() {
         const listaAnexos = document.getElementById('lista-anexos');
         
         try {
-            // Buscar PDFs de ticket associados ao relatório
-            const response = await fetch(`/api/pdf/tickets?loja=${encodeURIComponent(loja)}&data=${data}`);
-            if (!response.ok) throw new Error("Erro ao buscar anexos");
+            // Buscar PDFs de ticket e ranking associados ao relatório
+            const [ticketsResponse, rankingsResponse] = await Promise.all([
+                fetch(`/api/pdf/tickets?loja=${encodeURIComponent(loja)}&data=${data}`),
+                fetch(`/api/pdf/rankings?loja=${encodeURIComponent(loja)}&data=${data}`)
+            ]);
             
-            const data_response = await response.json();
-            const tickets = data_response.tickets || [];
+            const ticketsData = await ticketsResponse.json();
+            const rankingsData = await rankingsResponse.json();
             
-            if (tickets.length === 0) {
+            const tickets = ticketsData.tickets || [];
+            const rankings = rankingsData.rankings || [];
+            
+            if (tickets.length === 0 && rankings.length === 0) {
                 listaAnexos.innerHTML = '<div class="text-muted small text-center py-2"><i class="bi bi-inbox"></i> Nenhum anexo encontrado</div>';
                 return;
             }
             
             // Renderizar lista de anexos
             let anexosHtml = '';
+            
+            // Adicionar rankings
+            rankings.forEach(ranking => {
+                const dataUpload = new Date(ranking.uploaded_at).toLocaleDateString('pt-BR');
+                anexosHtml += `
+                    <div class="anexo-item p-2 mb-2 border rounded bg-light" style="cursor: pointer;" data-anexo-id="${ranking.id}" data-anexo-tipo="ranking">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-file-earmark-pdf text-warning fs-4 me-2"></i>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold small">PDF Ranking</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">${ranking.filename}</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">Enviado em ${dataUpload}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Adicionar tickets
             tickets.forEach(ticket => {
                 const dataUpload = new Date(ticket.uploaded_at).toLocaleDateString('pt-BR');
                 anexosHtml += `
@@ -200,6 +224,8 @@ export function initConsultaPage() {
             let url = '';
             if (tipo === 'ticket') {
                 url = `/api/pdf/tickets/${anexoId}/download`;
+            } else if (tipo === 'ranking') {
+                url = `/api/pdf/rankings/${anexoId}/download`;
             }
             
             const response = await fetch(url);
@@ -208,7 +234,21 @@ export function initConsultaPage() {
             const fileBlob = await response.blob();
             const fileURL = URL.createObjectURL(fileBlob);
             
-            modalBody.innerHTML = `<iframe src="${fileURL}" style="width: 100%; height: 70vh; border: none;"></iframe>`;
+            // Adicionar botão "Voltar ao Relatório" e iframe
+            modalBody.innerHTML = `
+                <div class="p-2 border-bottom bg-light">
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="btn-voltar-relatorio">
+                        <i class="bi bi-arrow-left"></i> Voltar ao Relatório
+                    </button>
+                </div>
+                <iframe src="${fileURL}" style="width: 100%; height: calc(70vh - 50px); border: none;"></iframe>
+            `;
+            
+            // Adicionar event listener para voltar ao relatório
+            document.getElementById('btn-voltar-relatorio').addEventListener('click', () => {
+                visualizarRelatorio(currentReportId);
+            });
+            
             showToast('Preview', 'Anexo carregado com sucesso', 'info');
         } catch (e) {
             modalBody.innerHTML = `<div class="p-3 text-center text-danger"><h3>Oops!</h3><p>Não foi possível carregar o anexo.</p></div>`;

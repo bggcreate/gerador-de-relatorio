@@ -1473,7 +1473,7 @@ function extractRankingData(pdfText) {
     };
 }
 
-// POST /api/pdf/ranking - Processa PDF de ranking
+// POST /api/pdf/ranking - Processa e salva PDF de ranking
 app.post('/api/pdf/ranking', requirePageLogin, pdfUpload.single('pdf'), async (req, res) => {
     try {
         if (!req.file) {
@@ -1519,16 +1519,47 @@ app.post('/api/pdf/ranking', requirePageLogin, pdfUpload.single('pdf'), async (r
             });
         }
         
-        // Retornar dados extraídos
-        res.json({
-            success: true,
-            data: {
-                pa: extractedData.pa,
-                preco_medio: extractedData.preco_medio,
-                atendimento_medio: extractedData.atendimento_medio,
-                loja: extractedData.loja,
-                data: extractedData.data
+        // Criar diretório se não existir
+        const rankingsDir = path.join(__dirname, 'data', 'pdfs', 'rankings');
+        if (!fs.existsSync(rankingsDir)) {
+            fs.mkdirSync(rankingsDir, { recursive: true });
+        }
+        
+        // Gerar nome do arquivo
+        const timestamp = Date.now();
+        const lojaSafe = loja.replace(/[^a-zA-Z0-9]/g, '_');
+        const filename = `ranking_${lojaSafe}_${data}_${timestamp}.pdf`;
+        const filepath = path.join(rankingsDir, filename);
+        
+        // Salvar arquivo
+        fs.writeFileSync(filepath, req.file.buffer);
+        
+        // Registrar no banco de dados
+        const sql = `INSERT INTO pdf_rankings (loja, data, filename, filepath, pa, preco_medio, atendimento_medio, uploaded_by, uploaded_at) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`;
+        
+        db.run(sql, [loja, data, filename, filepath, extractedData.pa, extractedData.preco_medio, extractedData.atendimento_medio, req.session.username], function(err) {
+            if (err) {
+                console.error('Erro ao registrar PDF no banco:', err);
+                try {
+                    fs.unlinkSync(filepath);
+                } catch (e) {}
+                return res.status(500).json({ error: 'Erro ao salvar registro do PDF' });
             }
+            
+            res.json({
+                success: true,
+                message: 'PDF de ranking salvo com sucesso',
+                data: {
+                    id: this.lastID,
+                    filename: filename,
+                    loja: loja,
+                    data: data,
+                    pa: extractedData.pa,
+                    preco_medio: extractedData.preco_medio,
+                    atendimento_medio: extractedData.atendimento_medio
+                }
+            });
         });
         
     } catch (error) {
@@ -1634,6 +1665,59 @@ app.get('/api/pdf/tickets', requirePageLogin, (req, res) => {
 // GET /api/pdf/tickets/:id/download - Download de PDF de ticket
 app.get('/api/pdf/tickets/:id/download', requirePageLogin, (req, res) => {
     const sql = 'SELECT * FROM pdf_tickets WHERE id = ?';
+    
+    db.get(sql, [req.params.id], (err, row) => {
+        if (err || !row) {
+            return res.status(404).json({ error: 'PDF não encontrado' });
+        }
+        
+        if (!fs.existsSync(row.filepath)) {
+            return res.status(404).json({ error: 'Arquivo PDF não encontrado no servidor' });
+        }
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${row.filename}"`);
+        fs.createReadStream(row.filepath).pipe(res);
+    });
+});
+
+// GET /api/pdf/rankings - Lista PDFs de ranking salvos
+app.get('/api/pdf/rankings', requirePageLogin, (req, res) => {
+    const { loja, data } = req.query;
+    
+    let sql = 'SELECT id, loja, data, filename, pa, preco_medio, atendimento_medio, uploaded_by, uploaded_at FROM pdf_rankings';
+    const params = [];
+    const whereClauses = [];
+    
+    if (loja) {
+        whereClauses.push('loja = ?');
+        params.push(loja);
+    }
+    
+    if (data) {
+        whereClauses.push('data = ?');
+        params.push(data);
+    }
+    
+    if (whereClauses.length > 0) {
+        sql += ' WHERE ' + whereClauses.join(' AND ');
+    }
+    
+    sql += ' ORDER BY uploaded_at DESC';
+    
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            console.error('Erro ao listar PDFs de ranking:', err);
+            return res.status(500).json({ error: 'Erro ao listar PDFs de ranking' });
+        }
+        
+        res.json({ success: true, rankings: rows || [] });
+    });
+});
+
+// GET /api/pdf/rankings/:id/download - Download de PDF de ranking
+app.get('/api/pdf/rankings/:id/download', requirePageLogin, (req, res) => {
+    const sql = 'SELECT * FROM pdf_rankings WHERE id = ?';
     
     db.get(sql, [req.params.id], (err, row) => {
         if (err || !row) {
