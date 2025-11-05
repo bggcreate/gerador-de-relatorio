@@ -142,6 +142,8 @@ export function initConsultaPage() {
     
     async function carregarAnexos(relatorioId, loja, data) {
         const listaAnexos = document.getElementById('lista-anexos');
+        const tabsList = document.getElementById('tabs-visualizacao');
+        const tabsContent = document.getElementById('tabs-visualizacao-content');
         
         try {
             // Buscar PDFs de ticket e ranking associados ao relatório
@@ -156,19 +158,29 @@ export function initConsultaPage() {
             const tickets = ticketsData.tickets || [];
             const rankings = rankingsData.rankings || [];
             
+            // Limpar abas antigas (exceto a do relatório)
+            const existingTabs = tabsList.querySelectorAll('li:not(:first-child)');
+            existingTabs.forEach(tab => tab.remove());
+            
+            const existingPanes = tabsContent.querySelectorAll('.tab-pane:not(#tab-relatorio)');
+            existingPanes.forEach(pane => pane.remove());
+            
             if (tickets.length === 0 && rankings.length === 0) {
                 listaAnexos.innerHTML = '<div class="text-muted small text-center py-2"><i class="bi bi-inbox"></i> Nenhum anexo encontrado</div>';
                 return;
             }
             
-            // Renderizar lista de anexos
+            // Renderizar lista de anexos na sidebar
             let anexosHtml = '';
+            let tabIndex = 1;
             
             // Adicionar rankings
             rankings.forEach(ranking => {
                 const dataUpload = new Date(ranking.uploaded_at).toLocaleDateString('pt-BR');
+                const tabId = `tab-ranking-${ranking.id}`;
+                
                 anexosHtml += `
-                    <div class="anexo-item p-2 mb-2 border rounded bg-light" style="cursor: pointer;" data-anexo-id="${ranking.id}" data-anexo-tipo="ranking">
+                    <div class="anexo-item p-2 mb-2 border rounded bg-light" style="cursor: pointer;" data-tab-target="#${tabId}">
                         <div class="d-flex align-items-center">
                             <i class="bi bi-file-earmark-pdf text-warning fs-4 me-2"></i>
                             <div class="flex-grow-1">
@@ -179,13 +191,52 @@ export function initConsultaPage() {
                         </div>
                     </div>
                 `;
+                
+                // Criar aba para o ranking
+                tabsList.insertAdjacentHTML('beforeend', `
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="${tabId}-btn" data-bs-toggle="tab" data-bs-target="#${tabId}" type="button" role="tab">
+                            <i class="bi bi-file-earmark-pdf text-warning me-1"></i> Ranking
+                        </button>
+                    </li>
+                `);
+                
+                // Criar conteúdo da aba com iframe
+                tabsContent.insertAdjacentHTML('beforeend', `
+                    <div class="tab-pane fade" id="${tabId}" role="tabpanel" style="min-height: 70vh;">
+                        <div class="d-flex justify-content-center align-items-center" style="height: 70vh;">
+                            <div class="spinner-border" role="status"></div>
+                        </div>
+                    </div>
+                `);
+                
+                // Carregar PDF quando a aba for ativada
+                document.getElementById(`${tabId}-btn`).addEventListener('shown.bs.tab', async () => {
+                    const pane = document.getElementById(tabId);
+                    if (!pane.dataset.loaded) {
+                        try {
+                            const response = await fetch(`/api/pdf/rankings/${ranking.id}/download`);
+                            if (!response.ok) throw new Error("Erro ao carregar PDF");
+                            const blob = await response.blob();
+                            const url = URL.createObjectURL(blob);
+                            pane.innerHTML = `<iframe src="${url}" style="width: 100%; height: 70vh; border: none;"></iframe>`;
+                            pane.dataset.loaded = 'true';
+                        } catch (e) {
+                            pane.innerHTML = `<div class="p-3 text-center text-danger"><h3>Erro</h3><p>Não foi possível carregar o PDF.</p></div>`;
+                        }
+                    }
+                });
+                
+                tabIndex++;
             });
             
             // Adicionar tickets
             tickets.forEach(ticket => {
                 const dataUpload = new Date(ticket.uploaded_at).toLocaleDateString('pt-BR');
+                const tabId = `tab-ticket-${ticket.id}`;
+                
                 anexosHtml += `
-                    <div class="anexo-item p-2 mb-2 border rounded bg-light" style="cursor: pointer;" data-anexo-id="${ticket.id}" data-anexo-tipo="ticket">
+                    <div class="anexo-item p-2 mb-2 border rounded bg-light" style="cursor: pointer;" data-tab-target="#${tabId}">
                         <div class="d-flex align-items-center">
                             <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
                             <div class="flex-grow-1">
@@ -196,63 +247,62 @@ export function initConsultaPage() {
                         </div>
                     </div>
                 `;
+                
+                // Criar aba para o ticket
+                tabsList.insertAdjacentHTML('beforeend', `
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="${tabId}-btn" data-bs-toggle="tab" data-bs-target="#${tabId}" type="button" role="tab">
+                            <i class="bi bi-file-earmark-pdf text-danger me-1"></i> Ticket
+                        </button>
+                    </li>
+                `);
+                
+                // Criar conteúdo da aba com iframe
+                tabsContent.insertAdjacentHTML('beforeend', `
+                    <div class="tab-pane fade" id="${tabId}" role="tabpanel" style="min-height: 70vh;">
+                        <div class="d-flex justify-content-center align-items-center" style="height: 70vh;">
+                            <div class="spinner-border" role="status"></div>
+                        </div>
+                    </div>
+                `);
+                
+                // Carregar PDF quando a aba for ativada
+                document.getElementById(`${tabId}-btn`).addEventListener('shown.bs.tab', async () => {
+                    const pane = document.getElementById(tabId);
+                    if (!pane.dataset.loaded) {
+                        try {
+                            const response = await fetch(`/api/pdf/tickets/${ticket.id}/download`);
+                            if (!response.ok) throw new Error("Erro ao carregar PDF");
+                            const blob = await response.blob();
+                            const url = URL.createObjectURL(blob);
+                            pane.innerHTML = `<iframe src="${url}" style="width: 100%; height: 70vh; border: none;"></iframe>`;
+                            pane.dataset.loaded = 'true';
+                        } catch (e) {
+                            pane.innerHTML = `<div class="p-3 text-center text-danger"><h3>Erro</h3><p>Não foi possível carregar o PDF.</p></div>`;
+                        }
+                    }
+                });
+                
+                tabIndex++;
             });
             
             listaAnexos.innerHTML = anexosHtml;
             
-            // Adicionar event listeners para preview
+            // Adicionar event listeners para abrir aba ao clicar no anexo
             document.querySelectorAll('.anexo-item').forEach(item => {
                 item.addEventListener('click', () => {
-                    const anexoId = item.dataset.anexoId;
-                    const anexoTipo = item.dataset.anexoTipo;
-                    visualizarAnexo(anexoId, anexoTipo);
+                    const tabTarget = item.dataset.tabTarget;
+                    const tabButton = document.querySelector(`[data-bs-target="${tabTarget}"]`);
+                    if (tabButton) {
+                        const tab = new bootstrap.Tab(tabButton);
+                        tab.show();
+                    }
                 });
             });
             
         } catch (e) {
             listaAnexos.innerHTML = '<div class="text-muted small text-center py-2"><i class="bi bi-exclamation-triangle"></i> Erro ao carregar anexos</div>';
             console.error('Erro ao carregar anexos:', e);
-        }
-    }
-    
-    async function visualizarAnexo(anexoId, tipo) {
-        const modalBody = document.getElementById('modal-body-content');
-        
-        try {
-            modalBody.innerHTML = '<div class="d-flex justify-content-center p-5"><div class="spinner-border" role="status"></div></div>';
-            
-            let url = '';
-            if (tipo === 'ticket') {
-                url = `/api/pdf/tickets/${anexoId}/download`;
-            } else if (tipo === 'ranking') {
-                url = `/api/pdf/rankings/${anexoId}/download`;
-            }
-            
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("Não foi possível carregar o anexo.");
-            
-            const fileBlob = await response.blob();
-            const fileURL = URL.createObjectURL(fileBlob);
-            
-            // Adicionar botão "Voltar ao Relatório" e iframe
-            modalBody.innerHTML = `
-                <div class="p-2 border-bottom bg-light">
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="btn-voltar-relatorio">
-                        <i class="bi bi-arrow-left"></i> Voltar ao Relatório
-                    </button>
-                </div>
-                <iframe src="${fileURL}" style="width: 100%; height: calc(70vh - 50px); border: none;"></iframe>
-            `;
-            
-            // Adicionar event listener para voltar ao relatório
-            document.getElementById('btn-voltar-relatorio').addEventListener('click', () => {
-                visualizarRelatorio(currentReportId);
-            });
-            
-            showToast('Preview', 'Anexo carregado com sucesso', 'info');
-        } catch (e) {
-            modalBody.innerHTML = `<div class="p-3 text-center text-danger"><h3>Oops!</h3><p>Não foi possível carregar o anexo.</p></div>`;
-            showToast('Erro', e.message, 'danger');
         }
     }
 

@@ -1238,7 +1238,7 @@ app.put('/api/relatorios/:id', requirePageLogin, validateCsrf, (req, res) => { c
 app.delete('/api/relatorios/:id', requirePageLogin, validateCsrf, (req, res) => { db.run("DELETE FROM relatorios WHERE id = ?", [req.params.id], function (err) { if (err) return res.status(500).json({ error: err.message }); if (this.changes === 0) return res.status(404).json({ error: "Relatório não encontrado" }); res.json({ success: true, message: "Relatório excluído." }); }); });
 const formatCurrency = (value) => { const numberValue = Number(value) || 0; return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numberValue); };
 
-// Função para gerar PDF profissional do relatório
+// Função para gerar PDF conciso do relatório (1 página)
 function gerarRelatorioPDFProfissional(doc, r) {
     const rp = processarRelatorio(r);
     if (!rp) {
@@ -1247,141 +1247,118 @@ function gerarRelatorioPDFProfissional(doc, r) {
     }
     
     const cores = {
-        primaria: '#3b82f6',    // Azul
-        secundaria: '#ff6600',   // Laranja
-        verde: '#10b981',        // Verde
-        cinza: '#6b7280',        // Cinza médio
-        cinzaClaro: '#f3f4f6',   // Cinza claro
-        texto: '#1f2937'         // Texto escuro
+        primaria: '#3b82f6',
+        secundaria: '#ff6600',
+        verde: '#10b981',
+        cinza: '#6b7280',
+        cinzaClaro: '#f3f4f6',
+        texto: '#1f2937'
     };
     
     const pageWidth = doc.page.width;
     const pageHeight = doc.page.height;
-    const margin = 50;
-    let y = 50;
+    const margin = 40;
+    let y = 40;
     
-    // === CABEÇALHO COLORIDO ===
-    doc.rect(0, 0, pageWidth, 80).fill(cores.primaria);
+    // === CABEÇALHO COMPACTO ===
+    doc.rect(0, 0, pageWidth, 60).fill(cores.primaria);
+    doc.fontSize(18).font('Helvetica-Bold').fillColor('#ffffff')
+       .text(r.loja.toUpperCase(), margin, 18, { align: 'center', width: pageWidth - margin * 2 });
+    const dataFormatada = new Date(rp.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+    doc.fontSize(10).font('Helvetica').fillColor('#ffffff')
+       .text(`Relatório de ${dataFormatada}`, margin, 40, { align: 'center', width: pageWidth - margin * 2 });
     
-    // Nome da Loja em branco
-    doc.fontSize(24).font('Helvetica-Bold').fillColor('#ffffff')
-       .text(r.loja.toUpperCase(), margin, 25, { align: 'center', width: pageWidth - margin * 2 });
-    
-    // Data
-    const dataFormatada = new Date(rp.data).toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: 'long', year: 'numeric' });
-    doc.fontSize(12).font('Helvetica').fillColor('#ffffff')
-       .text(`Relatório de ${dataFormatada}`, margin, 55, { align: 'center', width: pageWidth - margin * 2 });
-    
-    y = 100;
+    y = 75;
     doc.fillColor(cores.texto);
     
-    // === SEÇÃO: MÉTRICAS PRINCIPAIS ===
-    y += 10;
-    doc.fontSize(14).font('Helvetica-Bold').fillColor(cores.primaria).text('MÉTRICAS PRINCIPAIS', margin, y);
-    y += 25;
+    // === MÉTRICAS PRINCIPAIS (3 colunas compactas) ===
+    const colWidth = (pageWidth - margin * 2 - 20) / 3;
+    const metricHeight = 45;
     
-    // Cards de métricas em grid 2x2
-    const cardWidth = (pageWidth - margin * 2 - 20) / 2;
-    const cardHeight = 70;
+    // Conversão Monitoramento
+    doc.roundedRect(margin, y, colWidth, metricHeight, 3).fillAndStroke(cores.cinzaClaro, cores.primaria);
+    doc.fontSize(8).font('Helvetica').fillColor(cores.cinza).text('TX. CONV. MONIT.', margin + 5, y + 5, { width: colWidth - 10 });
+    doc.fontSize(16).font('Helvetica-Bold').fillColor(cores.primaria).text(`${rp.tx_conversao_monitoramento}%`, margin + 5, y + 18);
+    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text(`${rp.clientes_monitoramento || 0} cli | ${rp.vendas_monitoramento_total || 0} vnd`, margin + 5, y + 35);
     
-    // Card 1: Taxa de Conversão Monitoramento
-    doc.roundedRect(margin, y, cardWidth, cardHeight, 5).fillAndStroke(cores.cinzaClaro, cores.primaria);
-    doc.fontSize(10).font('Helvetica').fillColor(cores.cinza).text('TX. CONVERSÃO MONITORAMENTO', margin + 10, y + 10, { width: cardWidth - 20 });
-    doc.fontSize(24).font('Helvetica-Bold').fillColor(cores.primaria).text(`${rp.tx_conversao_monitoramento}%`, margin + 10, y + 30);
-    doc.fontSize(9).font('Helvetica').fillColor(cores.cinza).text(`${rp.clientes_monitoramento || 0} clientes | ${rp.vendas_monitoramento_total || 0} vendas`, margin + 10, y + 55, { width: cardWidth - 20 });
+    // Conversão Loja
+    doc.roundedRect(margin + colWidth + 10, y, colWidth, metricHeight, 3).fillAndStroke(cores.cinzaClaro, cores.secundaria);
+    doc.fontSize(8).font('Helvetica').fillColor(cores.cinza).text('TX. CONV. LOJA', margin + colWidth + 15, y + 5, { width: colWidth - 10 });
+    doc.fontSize(16).font('Helvetica-Bold').fillColor(cores.secundaria).text(`${rp.tx_conversao_loja}%`, margin + colWidth + 15, y + 18);
+    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text(`${rp.clientes_loja || 0} cli | ${rp.vendas_loja || 0} vnd`, margin + colWidth + 15, y + 35);
     
-    // Card 2: Taxa de Conversão Loja
-    doc.roundedRect(margin + cardWidth + 20, y, cardWidth, cardHeight, 5).fillAndStroke(cores.cinzaClaro, cores.secundaria);
-    doc.fontSize(10).font('Helvetica').fillColor(cores.cinza).text('TX. CONVERSÃO LOJA (BLUVE)', margin + cardWidth + 30, y + 10, { width: cardWidth - 20 });
-    doc.fontSize(24).font('Helvetica-Bold').fillColor(cores.secundaria).text(`${rp.tx_conversao_loja}%`, margin + cardWidth + 30, y + 30);
-    doc.fontSize(9).font('Helvetica').fillColor(cores.cinza).text(`${rp.clientes_loja || 0} clientes | ${rp.vendas_loja || 0} vendas`, margin + cardWidth + 30, y + 55, { width: cardWidth - 20 });
+    // Total Vendas
+    doc.roundedRect(margin + colWidth * 2 + 20, y, colWidth, metricHeight, 3).fillAndStroke(cores.cinzaClaro, cores.verde);
+    doc.fontSize(8).font('Helvetica').fillColor(cores.cinza).text('TOTAL VENDAS', margin + colWidth * 2 + 25, y + 5);
+    doc.fontSize(14).font('Helvetica-Bold').fillColor(cores.verde).text(formatCurrency(rp.total_vendas_dinheiro), margin + colWidth * 2 + 25, y + 16);
+    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza).text(`TM: ${rp.ticket_medio} | PA: ${rp.pa}`, margin + colWidth * 2 + 25, y + 35);
     
-    y += cardHeight + 15;
+    y += metricHeight + 12;
     
-    // Card 3: Total de Vendas
-    doc.roundedRect(margin, y, cardWidth, cardHeight, 5).fillAndStroke(cores.cinzaClaro, cores.verde);
-    doc.fontSize(10).font('Helvetica').fillColor(cores.cinza).text('TOTAL DE VENDAS', margin + 10, y + 10);
-    doc.fontSize(22).font('Helvetica-Bold').fillColor(cores.verde).text(formatCurrency(rp.total_vendas_dinheiro), margin + 10, y + 28);
-    doc.fontSize(9).font('Helvetica').fillColor(cores.cinza).text(`TM: ${rp.ticket_medio || 'R$ 0,00'} | P.A: ${rp.pa || '0.00'}`, margin + 10, y + 55);
+    // === INFORMAÇÕES OPERACIONAIS (2 colunas compactas) ===
+    doc.fontSize(10).font('Helvetica-Bold').fillColor(cores.primaria).text('OPERACIONAL', margin, y);
+    y += 15;
     
-    // Card 4: Vendas por Tipo
+    const infoWidth = (pageWidth - margin * 2 - 15) / 2;
+    
+    // Coluna Esquerda
+    doc.fontSize(8).font('Helvetica').fillColor(cores.texto);
+    doc.text(`Abertura: ${rp.hora_abertura || '--:--'} - ${rp.hora_fechamento || '--:--'}`, margin, y);
+    y += 12;
+    doc.text(`Gerente: ${rp.gerente_entrada || '--:--'} - ${rp.gerente_saida || '--:--'}`, margin, y);
+    
+    // Coluna Direita
+    y -= 12;
     const totalVendasQtd = (rp.vendas_cartao || 0) + (rp.vendas_pix || 0) + (rp.vendas_dinheiro || 0);
-    doc.roundedRect(margin + cardWidth + 20, y, cardWidth, cardHeight, 5).fillAndStroke(cores.cinzaClaro, cores.cinza);
-    doc.fontSize(10).font('Helvetica').fillColor(cores.cinza).text('VENDAS POR TIPO', margin + cardWidth + 30, y + 10);
-    doc.fontSize(9).font('Helvetica').fillColor(cores.texto).text(`Cartão: ${rp.vendas_cartao || 0} | Pix: ${rp.vendas_pix || 0}`, margin + cardWidth + 30, y + 30);
-    doc.fontSize(9).fillColor(cores.texto).text(`Dinheiro: ${rp.vendas_dinheiro || 0} | Total: ${totalVendasQtd}`, margin + cardWidth + 30, y + 45);
+    doc.text(`Cartão: ${rp.vendas_cartao || 0} | Pix: ${rp.vendas_pix || 0} | Dinheiro: ${rp.vendas_dinheiro || 0}`, margin + infoWidth + 15, y);
+    y += 12;
+    doc.text(`Trocas: ${rp.quantidade_trocas || 0} | ${rp.funcao_especial === "Omni" ? `Omni: ${rp.quantidade_omni || 0}` : rp.funcao_especial === "Busca por Assist. Tec." ? `Assist. Tec.: ${rp.quantidade_funcao_especial || 0}` : 'Total Vendas: ' + totalVendasQtd}`, margin + infoWidth + 15, y);
     
-    y += cardHeight + 30;
-    
-    // === SEÇÃO: INFORMAÇÕES OPERACIONAIS ===
-    doc.fontSize(14).font('Helvetica-Bold').fillColor(cores.primaria).text('INFORMAÇÕES OPERACIONAIS', margin, y);
-    y += 25;
-    
-    // Background para seção
-    doc.roundedRect(margin, y, pageWidth - margin * 2, 90, 5).fillAndStroke(cores.cinzaClaro, cores.primaria);
-    y += 10;
-    
-    // Horários
-    doc.fontSize(10).font('Helvetica-Bold').fillColor(cores.texto).text('Horário da Loja:', margin + 10, y);
-    doc.fontSize(10).font('Helvetica').text(`${rp.hora_abertura || '--:--'} às ${rp.hora_fechamento || '--:--'}`, margin + 140, y);
     y += 20;
     
-    doc.fontSize(10).font('Helvetica-Bold').fillColor(cores.texto).text('Horário Gerente:', margin + 10, y);
-    doc.fontSize(10).font('Helvetica').text(`${rp.gerente_entrada || '--:--'} às ${rp.gerente_saida || '--:--'}`, margin + 140, y);
-    y += 20;
-    
-    // Outras informações
-    doc.fontSize(10).font('Helvetica-Bold').fillColor(cores.texto).text('Trocas/Devoluções:', margin + 10, y);
-    doc.fontSize(10).font('Helvetica').text(`${rp.quantidade_trocas || 0}`, margin + 140, y);
-    
-    if (rp.funcao_especial === "Omni") {
-        doc.fontSize(10).font('Helvetica-Bold').fillColor(cores.texto).text('Omni:', margin + 300, y);
-        doc.fontSize(10).font('Helvetica').text(`${rp.quantidade_omni || 0}`, margin + 360, y);
-    } else if (rp.funcao_especial === "Busca por Assist. Tec.") {
-        doc.fontSize(10).font('Helvetica-Bold').fillColor(cores.texto).text('Busca Assist. Tec.:', margin + 300, y);
-        doc.fontSize(10).font('Helvetica').text(`${rp.quantidade_funcao_especial || 0}`, margin + 420, y);
-    }
-    
-    y += 40;
-    
-    // === SEÇÃO: DESEMPENHO DA EQUIPE ===
-    doc.fontSize(14).font('Helvetica-Bold').fillColor(cores.primaria).text('DESEMPENHO DA EQUIPE', margin, y);
-    y += 25;
+    // === DESEMPENHO DA EQUIPE (Tabela compacta) ===
+    doc.fontSize(10).font('Helvetica-Bold').fillColor(cores.primaria).text('DESEMPENHO DA EQUIPE', margin, y);
+    y += 15;
     
     if (rp.vendedores_processados && rp.vendedores_processados.length > 0) {
-        // Cabeçalho da tabela
-        const colX = [margin, margin + 180, margin + 280, margin + 360, margin + 450];
-        doc.roundedRect(margin, y, pageWidth - margin * 2, 25, 3).fill(cores.primaria);
-        doc.fontSize(9).font('Helvetica-Bold').fillColor('#ffffff');
-        doc.text('VENDEDOR', colX[0] + 5, y + 8, { width: 170 });
-        doc.text('ATEND.', colX[1] + 5, y + 8, { width: 90 });
-        doc.text('VENDAS', colX[2] + 5, y + 8, { width: 70 });
-        doc.text('TX. CONV.', colX[3] + 5, y + 8, { width: 80 });
-        y += 25;
+        const colX = [margin, margin + 200, margin + 300, margin + 380, margin + 460];
         
-        // Linhas da tabela
-        rp.vendedores_processados.forEach((v, index) => {
-            const bgColor = index % 2 === 0 ? '#ffffff' : cores.cinzaClaro;
-            doc.rect(margin, y, pageWidth - margin * 2, 20).fill(bgColor);
-            doc.fontSize(9).font('Helvetica').fillColor(cores.texto);
-            doc.text(v.nome || 'N/A', colX[0] + 5, y + 5, { width: 170 });
-            doc.text(String(v.atendimentos || 0), colX[1] + 5, y + 5);
-            doc.text(String(v.vendas || 0), colX[2] + 5, y + 5);
-            doc.fontSize(9).font('Helvetica-Bold').fillColor(parseFloat(v.tx_conversao) >= 50 ? cores.verde : cores.secundaria);
-            doc.text(`${v.tx_conversao}%`, colX[3] + 5, y + 5);
-            y += 20;
-        });
+        // Cabeçalho compacto
+        doc.roundedRect(margin, y, pageWidth - margin * 2, 18, 2).fill(cores.primaria);
+        doc.fontSize(8).font('Helvetica-Bold').fillColor('#ffffff');
+        doc.text('VENDEDOR', colX[0] + 3, y + 5, { width: 190 });
+        doc.text('ATEND.', colX[1] + 3, y + 5);
+        doc.text('VENDAS', colX[2] + 3, y + 5);
+        doc.text('TX. CONV.', colX[3] + 3, y + 5);
+        y += 18;
+        
+        // Linhas compactas
+        const maxVendedores = Math.min(rp.vendedores_processados.length, 15);
+        for (let i = 0; i < maxVendedores; i++) {
+            const v = rp.vendedores_processados[i];
+            const bgColor = i % 2 === 0 ? '#ffffff' : cores.cinzaClaro;
+            doc.rect(margin, y, pageWidth - margin * 2, 15).fill(bgColor);
+            doc.fontSize(7).font('Helvetica').fillColor(cores.texto);
+            doc.text(v.nome || 'N/A', colX[0] + 3, y + 4, { width: 190 });
+            doc.text(String(v.atendimentos || 0), colX[1] + 3, y + 4);
+            doc.text(String(v.vendas || 0), colX[2] + 3, y + 4);
+            doc.fontSize(7).font('Helvetica-Bold').fillColor(parseFloat(v.tx_conversao) >= 50 ? cores.verde : cores.secundaria);
+            doc.text(`${v.tx_conversao}%`, colX[3] + 3, y + 4);
+            y += 15;
+        }
+        
+        if (rp.vendedores_processados.length > maxVendedores) {
+            doc.fontSize(7).font('Helvetica').fillColor(cores.cinza)
+               .text(`... e mais ${rp.vendedores_processados.length - maxVendedores} vendedores`, margin, y + 5);
+        }
     } else {
-        doc.fontSize(10).font('Helvetica').fillColor(cores.cinza)
-           .text('Nenhum vendedor registrado neste relatório.', margin, y);
-        y += 25;
+        doc.fontSize(8).font('Helvetica').fillColor(cores.cinza)
+           .text('Nenhum vendedor registrado.', margin, y);
     }
     
     // === RODAPÉ ===
-    const footerY = pageHeight - 40;
-    doc.fontSize(8).font('Helvetica').fillColor(cores.cinza)
-       .text(`Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, margin, footerY, { align: 'left' });
-    doc.text(`Página 1`, margin, footerY, { align: 'right', width: pageWidth - margin * 2 });
+    doc.fontSize(7).font('Helvetica').fillColor(cores.cinza)
+       .text(`Gerado em ${new Date().toLocaleDateString('pt-BR')}`, margin, pageHeight - 30, { align: 'left' });
 }
 
 const formatarRelatorioTexto = (r) => { const rp = processarRelatorio(r); if (!rp) return "Erro ao processar relatório."; let equipeInfo = 'Nenhum vendedor registrado.\n'; if (rp.vendedores_processados && rp.vendedores_processados.length > 0) { equipeInfo = rp.vendedores_processados.map(v => { return `${v.nome}: ${v.atendimentos} Atendimentos / ${v.vendas} Vendas / ${v.tx_conversao}%`; }).join('\n'); } let funcaoEspecialInfo = ''; if (rp.funcao_especial === "Omni") { funcaoEspecialInfo = `Omni: ${rp.quantidade_omni || 0}\n`; } else if (rp.funcao_especial === "Busca por Assist. Tec.") { funcaoEspecialInfo = `Busca por assist tec: ${rp.quantidade_funcao_especial || 0}\n`; } const totalVendasQuantidade = (rp.vendas_cartao || 0) + (rp.vendas_pix || 0) + (rp.vendas_dinheiro || 0); const content = ` DATA: ${new Date(rp.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} \n\nClientes: ${rp.clientes_monitoramento || 0}\nBluve: ${rp.clientes_loja || 0}\nVendas / Monitoramento: ${rp.vendas_monitoramento_total || 0}\nVendas / Loja: ${rp.vendas_loja || 0}\nTaxa de conversão da loja: ${rp.tx_conversao_loja || '0.00'}%\nTaxa de conversão do monitoramento: ${rp.tx_conversao_monitoramento || '0.00'}%\n\nAbertura: ${rp.hora_abertura || '--:--'} - ${rp.hora_fechamento || '--:--'}\nGerente: ${rp.gerente_entrada || '--:--'} - ${rp.gerente_saida || '--:--'}\nVendas em Cartão: ${rp.vendas_cartao || 0}\nVendas em Pix: ${rp.vendas_pix || 0}\nVendas em Dinheiro: ${rp.vendas_dinheiro || 0}\n${funcaoEspecialInfo}Total vendas: ${totalVendasQuantidade}\nTroca/Devolução: ${rp.quantidade_trocas || 0}\n\nDesempenho Equipe:\n\n${equipeInfo}\n\nTM: ${rp.ticket_medio || 'R$ 0,00'} / P.A: ${rp.pa || '0.00'} / Total: ${formatCurrency(rp.total_vendas_dinheiro)} / `; return content.trim(); };

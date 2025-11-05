@@ -123,9 +123,23 @@
                         </div>
                     </div>
                     
-                    <!-- Coluna da Direita: Preview do Relatório -->
+                    <!-- Coluna da Direita: Preview do Relatório com Abas -->
                     <div class="col-md-8">
-                        <div id="modal-body-content" style="min-height: 70vh;">
+                        <!-- Navegação por Abas -->
+                        <ul class="nav nav-tabs px-3 pt-2" id="tabs-visualizacao" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="tab-relatorio-btn" data-bs-toggle="tab" data-bs-target="#tab-relatorio" type="button" role="tab">
+                                    <i class="bi bi-file-earmark-text me-1"></i> Relatório
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <!-- Conteúdo das Abas -->
+                        <div class="tab-content" id="tabs-visualizacao-content">
+                            <div class="tab-pane fade show active" id="tab-relatorio" role="tabpanel" style="min-height: 70vh;">
+                                <div id="modal-body-content" style="min-height: 70vh;">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
