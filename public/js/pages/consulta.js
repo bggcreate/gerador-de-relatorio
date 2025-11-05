@@ -101,15 +101,15 @@ export function initConsultaPage() {
 
     async function visualizarRelatorio(id) {
         currentReportId = id;
-        const modalBody = document.getElementById('modal-body-content');
         const modalLabel = document.getElementById('modal-visualizar-label');
         const listaAnexos = document.getElementById('lista-anexos');
         const infoLoja = document.getElementById('info-loja');
         const infoData = document.getElementById('info-data');
         const infoVendas = document.getElementById('info-vendas');
+        const tabRelatorio = document.getElementById('tab-relatorio');
         
         modalLabel.textContent = `Carregando Relatório...`;
-        modalBody.innerHTML = '<div class="d-flex justify-content-center p-5"><div class="spinner-border" role="status"></div></div>';
+        tabRelatorio.innerHTML = '<div class="d-flex justify-content-center align-items-center" style="height: 70vh;"><div class="spinner-border" role="status"></div></div>';
         listaAnexos.innerHTML = '<div class="text-muted small text-center py-2"><i class="bi bi-file-earmark"></i> Carregando...</div>';
         modalView.show();
 
@@ -124,18 +124,18 @@ export function initConsultaPage() {
             infoData.textContent = new Date(relatorio.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
             infoVendas.textContent = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(relatorio.total_vendas_dinheiro || 0);
             
-            // Carregar preview do PDF do relatório
+            // Carregar preview do PDF do relatório na aba correta
             const response = await fetch(`/api/relatorios/${id}/pdf`);
             if (!response.ok) throw new Error("Não foi possível gerar a visualização do PDF.");
             const fileBlob = await response.blob();
             const fileURL = URL.createObjectURL(fileBlob);
             modalLabel.textContent = `Visualizar Relatório #${id}`;
-            modalBody.innerHTML = `<iframe src="${fileURL}" style="width: 100%; height: 70vh; border: none;"></iframe>`;
+            tabRelatorio.innerHTML = `<iframe src="${fileURL}" style="width: 100%; height: 70vh; border: none;"></iframe>`;
             
-            // Carregar anexos (tickets)
+            // Carregar anexos (tickets e rankings)
             await carregarAnexos(id, relatorio.loja, relatorio.data);
         } catch (e) {
-            modalBody.innerHTML = `<div class="p-3 text-center text-danger"><h3>Oops!</h3><p>Não foi possível carregar a visualização.</p></div>`;
+            tabRelatorio.innerHTML = `<div class="p-3 text-center text-danger"><h3>Oops!</h3><p>Não foi possível carregar a visualização.</p></div>`;
             showToast('Erro', e.message, 'danger');
         }
     }
