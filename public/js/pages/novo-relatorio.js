@@ -486,7 +486,7 @@ export function initNovoRelatorioPage() {
             showToast("Erro na Importação", error.message, "danger");
         } finally {
             btnImportarPdf.disabled = false;
-            btnImportarPdf.innerHTML = '<i class="bi bi-file-earmark-arrow-up-fill me-2"></i>Rank';
+            btnImportarPdf.innerHTML = '<i class="bi bi-file-earmark-arrow-up-fill"></i>';
             pdfFileInput.value = '';
         }
     });
@@ -553,7 +553,7 @@ export function initNovoRelatorioPage() {
                 showToast('Erro', error.message, 'danger');
             } finally {
                 btnTicketDia.disabled = false;
-                btnTicketDia.innerHTML = '<i class="bi bi-receipt me-2"></i>Ticket';
+                btnTicketDia.innerHTML = '<i class="bi bi-receipt"></i>';
                 ticketPdfInput.value = '';
             }
         });
@@ -602,7 +602,7 @@ export function initNovoRelatorioPage() {
                 showToast('Erro', error.message, 'danger');
             } finally {
                 btnVerPdfsSalvos.disabled = false;
-                btnVerPdfsSalvos.innerHTML = '<i class="bi bi-folder2-open me-2"></i>PDFs Salvos';
+                btnVerPdfsSalvos.innerHTML = '<i class="bi bi-folder2-open"></i>';
             }
         });
     }

@@ -611,3 +611,34 @@ Botões finais na ordem:
 ✅ Botão duplicado removido
 ✅ Nomenclatura atualizada (PDF → Rank)
 ✅ Interface limpa e funcional
+
+## Ajuste dos Botões - Apenas Ícones (November 5, 2025, 17:25)
+[x] 72. Remover texto dos botões - Completed:
+     - Botão Rank: apenas ícone de upload
+     - Botão Ticket: apenas ícone de recibo
+     - Botão Salvos: apenas ícone de pasta
+     - Tooltips mantidos para clareza
+     
+[x] 73. Usar cores padrão do sistema - Completed:
+     - Todos os 3 botões: btn-outline-secondary (cinza padrão)
+     - Consistente com resto do sistema
+     - Design minimalista e limpo
+     
+[x] 74. Atualizar JavaScript - Completed:
+     - Removido texto dos estados de loading
+     - Apenas ícones nos estados normal e processando
+     - Código otimizado e consistente
+     
+[x] 75. Reiniciar servidor - Completed:
+     - Servidor reiniciado com sucesso
+     - Status: RUNNING na porta 5000
+
+Arquivos modificados:
+- views/novo-relatorio.html: Removido texto dos botões, apenas ícones
+- public/js/pages/novo-relatorio.js: Atualizado innerHTML dos 3 botões
+
+Resultado final:
+✅ Botões minimalistas com apenas ícones
+✅ Cores consistentes com padrão do sistema (outline-secondary)
+✅ Interface mais limpa e profissional
+✅ Tooltips informativos mantidos
