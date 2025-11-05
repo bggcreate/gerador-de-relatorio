@@ -1447,6 +1447,72 @@ app.get('/api/dashboard/chart-data', requirePageLogin, (req, res) => {
         res.json({ labels, txConversaoLoja, txConversaoMonitoramento });
     });
 });
+
+app.get('/api/dashboard/store-performance', requirePageLogin, (req, res) => {
+    const { data_inicio, data_fim } = req.query;
+    let whereClauses = [];
+    let params = [];
+    
+    if (data_inicio) {
+        whereClauses.push('data >= ?');
+        params.push(data_inicio);
+    }
+    if (data_fim) {
+        whereClauses.push('data <= ?');
+        params.push(data_fim);
+    }
+    
+    if (!data_inicio && !data_fim) {
+        const date = new Date();
+        date.setDate(date.getDate() - 30);
+        const startDate = date.toISOString().slice(0, 10);
+        whereClauses.push('data >= ?');
+        params.push(startDate);
+    }
+    
+    const whereString = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    
+    const sql = `
+        SELECT 
+            loja,
+            SUM(vendas_loja) as total_vendas,
+            AVG(ticket_medio) as ticket_medio_avg,
+            AVG(pa) as pa_avg,
+            SUM(vendas_cartao) as total_vendas_cartao,
+            SUM(vendas_pix) as total_vendas_pix,
+            SUM(vendas_dinheiro) as total_vendas_dinheiro,
+            SUM(clientes_loja) as total_clientes,
+            COUNT(*) as dias_registrados
+        FROM relatorios 
+        ${whereString}
+        GROUP BY loja
+        ORDER BY total_vendas DESC
+    `;
+    
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            console.error('Erro ao buscar métricas de desempenho:', err);
+            return res.status(500).json({ error: 'Erro ao buscar métricas de desempenho.' });
+        }
+        
+        const metrics = rows.map(row => ({
+            loja: row.loja,
+            total_vendas: row.total_vendas || 0,
+            ticket_medio: parseFloat((row.ticket_medio_avg || 0).toFixed(2)),
+            pa: parseFloat((row.pa_avg || 0).toFixed(2)),
+            formas_pagamento: {
+                cartao: row.total_vendas_cartao || 0,
+                pix: row.total_vendas_pix || 0,
+                dinheiro: row.total_vendas_dinheiro || 0
+            },
+            total_clientes: row.total_clientes || 0,
+            dias_registrados: row.dias_registrados || 0
+        }));
+        
+        res.json(metrics);
+    });
+});
+
 app.post('/api/demandas', requirePageLogin, (req, res) => { const { loja_nome, descricao, tag } = req.body; db.run('INSERT INTO demandas (loja_nome, descricao, tag, criado_por_usuario) VALUES (?, ?, ?, ?)', [loja_nome, descricao, tag, req.session.username], function (err) { if (err) return res.status(500).json({ error: 'Falha ao salvar demanda.' }); res.status(201).json({ success: true, id: this.lastID }); }); });
 app.get('/api/demandas/:status', requirePageLogin, (req, res) => { 
     const status = req.params.status === 'pendentes' ? 'pendente' : 'concluido'; 

@@ -5,13 +5,17 @@ let dashboardLineChart = null;
 let dashboardBarChart = null;
 let dashboardDonutChart = null;
 let lastRankingData = [];
+let storeSalesChart = null;
+let storeTicketChart = null;
+let storePaChart = null;
+let paymentDistributionChart = null;
 
 // --- Funções Auxiliares ---
 const getCssVar = (varName) => getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
 const toISODateString = (date) => date.toISOString().split('T')[0];
 
 function setLoadingState(isLoading) {
-    const kpiElements = document.querySelectorAll('[id^="geral-"], [id^="loja-"], [id^="overview-"], [id^="assist-"]');
+    const kpiElements = document.querySelectorAll('[id^="geral-"], [id^="loja-"], [id^="overview-"]');
     const chartCanvases = ['dashboard-line-chart', 'dashboard-bar-chart', 'dashboard-donut-chart'];
 
     if (isLoading) {
@@ -184,146 +188,216 @@ function renderDonutChart(rankingData) {
     });
 }
 
-async function loadDailyAssistenciaStats(loja = 'todas') {
+async function loadStorePerformance(dataInicio, dataFim) {
     try {
-        const url = `/api/assistencias/stats-daily?loja=${encodeURIComponent(loja)}`;
-        const response = await fetch(url);
+        const params = new URLSearchParams();
+        if (dataInicio) params.append('data_inicio', dataInicio);
+        if (dataFim) params.append('data_fim', dataFim);
+        
+        const response = await fetch(`/api/dashboard/store-performance?${params.toString()}`);
         if (!response.ok) {
-            console.error('Erro ao carregar estatísticas diárias de assistência técnica');
-            setDefaultDailyValues();
+            console.error('Erro ao carregar desempenho das lojas');
             return;
         }
         const data = await response.json();
         
-        const concluidasEl = document.getElementById('assist-concluidas-diarias');
-        const faturamentoEl = document.getElementById('assist-faturamento-diario');
-        const andamentoEl = document.getElementById('assist-em-andamento-diarias');
-        
-        if (concluidasEl) concluidasEl.textContent = data.concluidas_hoje || 0;
-        if (faturamentoEl) {
-            const faturamento = data.faturamento_hoje || 0;
-            faturamentoEl.textContent = 'R$ ' + faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-        if (andamentoEl) andamentoEl.textContent = data.em_andamento || 0;
+        renderStoreSalesChart(data);
+        renderStoreTicketChart(data);
+        renderStorePaChart(data);
+        renderPaymentDistributionChart(data);
     } catch (error) {
-        console.error('Erro ao carregar estatísticas diárias de assistência técnica:', error);
-        setDefaultDailyValues();
+        console.error('Erro ao carregar desempenho das lojas:', error);
     }
 }
 
-function setDefaultDailyValues() {
-    const concluidasEl = document.getElementById('assist-concluidas-diarias');
-    const faturamentoEl = document.getElementById('assist-faturamento-diario');
-    const andamentoEl = document.getElementById('assist-em-andamento-diarias');
+function renderStoreSalesChart(data) {
+    const ctx = document.getElementById('store-sales-chart')?.getContext('2d');
+    if (!ctx) return;
     
-    if (concluidasEl) concluidasEl.textContent = '0';
-    if (faturamentoEl) faturamentoEl.textContent = 'R$ 0,00';
-    if (andamentoEl) andamentoEl.textContent = '0';
-}
-
-async function loadAssistenciaTickets(loja = 'todas') {
-    const container = document.getElementById('assist-tickets-container');
-    if (!container) return;
+    const topStores = data.slice(0, 10);
+    const labels = topStores.map(s => s.loja.length > 20 ? s.loja.substring(0, 20) + '...' : s.loja);
+    const values = topStores.map(s => s.total_vendas);
     
-    try {
-        const url = `/api/assistencias/tickets?loja=${encodeURIComponent(loja)}`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('Erro ao carregar tickets');
+    if (storeSalesChart) storeSalesChart.destroy();
+    storeSalesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total de Vendas',
+                data: values,
+                backgroundColor: getCssVar('--accent-color'),
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Vendas: ' + context.parsed.y.toLocaleString('pt-BR');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString('pt-BR');
+                        }
+                    }
+                }
+            }
         }
-        const tickets = await response.json();
-        
-        if (tickets.length === 0) {
-            container.innerHTML = `
-                <div class="text-center text-muted py-5">
-                    <i class="bi bi-check-circle fs-1"></i>
-                    <p class="mb-0 mt-2">Nenhum ticket em andamento</p>
-                </div>
-            `;
-            return;
-        }
-        
-        container.innerHTML = tickets.map(ticket => {
-            const statusColors = {
-                'Em andamento': 'warning',
-                'Aguardando peças': 'info',
-                'Concluído': 'success'
-            };
-            const statusColor = statusColors[ticket.status] || 'secondary';
-            const dataEntrada = new Date(ticket.data_entrada).toLocaleDateString('pt-BR');
-            const valorTotal = (ticket.valor_peca_loja || 0) + (ticket.valor_servico_cliente || 0);
-            
-            return `
-                <div class="card mb-3 border-start border-${statusColor} border-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <h6 class="mb-1">
-                                    <i class="bi bi-person me-1"></i>${ticket.cliente_nome}
-                                </h6>
-                                <small class="text-muted">CPF: ${ticket.cliente_cpf || '-'}</small>
-                            </div>
-                            <span class="badge bg-${statusColor}">${ticket.status}</span>
-                        </div>
-                        <div class="row g-2 small">
-                            <div class="col-6">
-                                <i class="bi bi-phone me-1"></i><strong>Aparelho:</strong> ${ticket.aparelho || '-'}
-                            </div>
-                            <div class="col-6">
-                                <i class="bi bi-shop me-1"></i><strong>Loja:</strong> ${ticket.loja || '-'}
-                            </div>
-                            <div class="col-6">
-                                <i class="bi bi-calendar me-1"></i><strong>Entrada:</strong> ${dataEntrada}
-                            </div>
-                            <div class="col-6">
-                                <i class="bi bi-person-gear me-1"></i><strong>Técnico:</strong> ${ticket.tecnico_responsavel || '-'}
-                            </div>
-                            ${ticket.numero_pedido ? `
-                            <div class="col-6">
-                                <i class="bi bi-hash me-1"></i><strong>Pedido:</strong> ${ticket.numero_pedido}
-                            </div>` : ''}
-                            ${ticket.defeito_reclamado ? `
-                            <div class="col-12">
-                                <i class="bi bi-exclamation-circle me-1"></i><strong>Defeito:</strong> ${ticket.defeito_reclamado}
-                            </div>` : ''}
-                            <div class="col-12 mt-2">
-                                <strong class="text-success">Valor Total: R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    } catch (error) {
-        console.error('Erro ao carregar tickets de assistência:', error);
-        container.innerHTML = `
-            <div class="text-center text-danger py-5">
-                <i class="bi bi-exclamation-triangle"></i>
-                <p class="mb-0 mt-2 small">Erro ao carregar tickets</p>
-            </div>
-        `;
-    }
+    });
 }
 
-async function populateAssistenciaLojaFilter() {
-    try {
-        const response = await fetch('/api/lojas/ativas');
-        if (!response.ok) return;
-        const lojas = await response.json();
-        
-        const select = document.getElementById('filtro-loja-assistencia');
-        if (!select) return;
-        
-        select.innerHTML = '<option value="todas" selected>Todas as Lojas</option>';
-        lojas.forEach(loja => {
-            const option = document.createElement('option');
-            option.value = loja.nome;
-            option.textContent = loja.nome;
-            select.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Erro ao carregar lojas para filtro de assistência:', error);
-    }
+function renderStoreTicketChart(data) {
+    const ctx = document.getElementById('store-ticket-chart')?.getContext('2d');
+    if (!ctx) return;
+    
+    const topStores = [...data].sort((a, b) => b.ticket_medio - a.ticket_medio).slice(0, 10);
+    const labels = topStores.map(s => s.loja.length > 20 ? s.loja.substring(0, 20) + '...' : s.loja);
+    const values = topStores.map(s => s.ticket_medio);
+    
+    if (storeTicketChart) storeTicketChart.destroy();
+    storeTicketChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Ticket Médio (R$)',
+                data: values,
+                backgroundColor: '#10b981',
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Ticket Médio: R$ ' + context.parsed.x.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + value.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderStorePaChart(data) {
+    const ctx = document.getElementById('store-pa-chart')?.getContext('2d');
+    if (!ctx) return;
+    
+    const topStores = [...data].sort((a, b) => b.pa - a.pa).slice(0, 10);
+    const labels = topStores.map(s => s.loja.length > 20 ? s.loja.substring(0, 20) + '...' : s.loja);
+    const values = topStores.map(s => s.pa);
+    
+    if (storePaChart) storePaChart.destroy();
+    storePaChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Peças por Venda (PA)',
+                data: values,
+                backgroundColor: '#f59e0b',
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'PA: ' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toFixed(1);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderPaymentDistributionChart(data) {
+    const ctx = document.getElementById('payment-distribution-chart')?.getContext('2d');
+    if (!ctx) return;
+    
+    const totalCartao = data.reduce((sum, s) => sum + s.formas_pagamento.cartao, 0);
+    const totalPix = data.reduce((sum, s) => sum + s.formas_pagamento.pix, 0);
+    const totalDinheiro = data.reduce((sum, s) => sum + s.formas_pagamento.dinheiro, 0);
+    
+    if (paymentDistributionChart) paymentDistributionChart.destroy();
+    paymentDistributionChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Cartão', 'PIX', 'Dinheiro'],
+            datasets: [{
+                data: [totalCartao, totalPix, totalDinheiro],
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
+                borderWidth: 2,
+                borderColor: getCssVar('--main-bg')
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = totalCartao + totalPix + totalDinheiro;
+                            const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                            return context.label + ': ' + context.parsed.toLocaleString('pt-BR') + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
 async function loadDemandas() {
@@ -393,52 +467,6 @@ async function loadDemandas() {
                 <p class="mb-0 mt-2 small">Erro ao carregar demandas</p>
             </div>
         `;
-    }
-}
-
-async function loadAssistenciasPorLoja() {
-    try {
-        const response = await fetch('/api/assistencias/por-loja');
-        if (!response.ok) {
-            console.error('Erro ao carregar assistências por loja');
-            return;
-        }
-        const data = await response.json();
-        
-        const tbody = document.getElementById('assist-por-loja-tbody');
-        if (!tbody) return;
-        
-        if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center p-4">Nenhuma assistência técnica registrada</td></tr>';
-            return;
-        }
-        
-        tbody.innerHTML = data.map(loja => {
-            const taxaConclusao = loja.total > 0 ? ((loja.concluidas / loja.total) * 100).toFixed(1) : '0.0';
-            const valorFormatado = (loja.valor_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            
-            return `
-                <tr>
-                    <td class="ps-3"><strong>${loja.loja}</strong></td>
-                    <td>${loja.total}</td>
-                    <td class="text-success"><strong>${loja.concluidas || 0}</strong></td>
-                    <td class="text-warning"><strong>${loja.em_andamento || 0}</strong></td>
-                    <td>R$ ${valorFormatado}</td>
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="progress" style="width: 100px; height: 20px;">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: ${taxaConclusao}%" 
-                                     aria-valuenow="${taxaConclusao}" aria-valuemin="0" aria-valuemax="100">
-                                </div>
-                            </div>
-                            <span class="small">${taxaConclusao}%</span>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    } catch (error) {
-        console.error('Erro ao carregar assistências por loja:', error);
     }
 }
 
@@ -673,9 +701,6 @@ function updateUI(results, hideMonitData = false) {
     renderLineChart(currentChartData, comparisonChartData, hideMonitData);
     renderBarChart(rankingData);
     renderDonutChart(rankingData);
-    
-    // Carregar estatísticas de assistência técnica (diárias)
-    loadAssistenciasPorLoja();
 
     // Ativar tooltips
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -833,6 +858,9 @@ export function initAdminPage(currentUser) {
             const results = await Promise.all(responses.map(res => res.json()));
 
             updateUI(results, isNotAdmin);
+            
+            // Atualizar gráficos de desempenho das lojas com o mesmo período
+            loadStorePerformance(dataInicio, dataFim);
         } catch (error) {
             console.error("Erro ao analisar dados:", error.message, error.stack);
             showToast("Erro", "Não foi possível carregar os dados do dashboard.", "danger");
@@ -860,34 +888,6 @@ export function initAdminPage(currentUser) {
         });
     }
 
-    // Event listener para botão de atualizar assistências por loja
-    const btnRefreshAssistLoja = document.getElementById('btn-refresh-assist-loja');
-    if (btnRefreshAssistLoja) {
-        btnRefreshAssistLoja.addEventListener('click', () => {
-            loadAssistenciasPorLoja();
-            showToast('Atualizado', 'Dados de assistência por loja atualizados', 'success');
-        });
-    }
-
-    // Event listeners para seção de assistência técnica diária
-    const filtroLojaAssistencia = document.getElementById('filtro-loja-assistencia');
-    if (filtroLojaAssistencia) {
-        filtroLojaAssistencia.addEventListener('change', (e) => {
-            const lojaSelecionada = e.target.value;
-            loadDailyAssistenciaStats(lojaSelecionada);
-            loadAssistenciaTickets(lojaSelecionada);
-        });
-    }
-
-    const btnRefreshAssistTickets = document.getElementById('btn-refresh-assist-tickets');
-    if (btnRefreshAssistTickets) {
-        btnRefreshAssistTickets.addEventListener('click', () => {
-            const lojaSelecionada = filtroLojaAssistencia ? filtroLojaAssistencia.value : 'todas';
-            loadAssistenciaTickets(lojaSelecionada);
-            showToast('Atualizado', 'Tickets de assistência atualizados', 'success');
-        });
-    }
-
     // Inicialização
     async function inicializar() {
         console.log('Inicializando dashboard...');
@@ -897,12 +897,14 @@ export function initAdminPage(currentUser) {
         // Inicializar cards de Monitoramento e Bluve
         initMetricsCards();
         
-        // Inicializar seção de assistência técnica
-        await populateAssistenciaLojaFilter();
-        loadDailyAssistenciaStats('todas');
-        loadAssistenciaTickets('todas');
-        
         loadDemandas(); // Carregar demandas pendentes
+        
+        // Carregar desempenho das lojas (últimos 30 dias por padrão)
+        const hoje = new Date();
+        const inicioMes = new Date(hoje);
+        inicioMes.setDate(hoje.getDate() - 30);
+        loadStorePerformance(toISODateString(inicioMes), toISODateString(hoje));
+        
         console.log('Configurando período de 7 dias');
         setDateRange('7d');
         const initialActiveButton = document.querySelector('[data-period="7d"]');

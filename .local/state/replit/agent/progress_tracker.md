@@ -359,3 +359,60 @@ Arquivos modificados:
 ✅ Sistema totalmente operacional
 ✅ Todas as tarefas do progress tracker marcadas como [x]
 ✅ Migração para ambiente Replit verificada e concluída
+
+## Remoção da Aba Assistência Técnica e Novos Gráficos de Desempenho (November 5, 2025, 16:21)
+[x] 42. Remover aba Assistência Técnica do menu - Completed:
+     - Removida aba de navegação em views/index.html (desktop e mobile)
+     - Removido import e referências em public/js/app.js
+     - Aba completamente eliminada do sistema
+     
+[x] 43. Remover código de assistência técnica do dashboard - Completed:
+     - Removidas funções: loadDailyAssistenciaStats, setDefaultDailyValues, 
+       loadAssistenciaTickets, populateAssistenciaLojaFilter, loadAssistenciasPorLoja
+     - Removidos event listeners relacionados
+     - Removidas referências na inicialização
+     - Código limpo e otimizado
+     
+[x] 44. Remover elementos HTML de assistência técnica - Completed:
+     - Removida seção "Assistência Técnica - Visão Geral" do admin.html
+     - Removidos cards de estatísticas diárias
+     - Removida seção de tickets de assistências
+     - HTML limpo e organizado
+     
+[x] 45. Criar endpoint de API para desempenho das lojas - Completed:
+     - Novo endpoint: GET /api/dashboard/store-performance
+     - Retorna métricas agregadas: vendas, ticket médio, PA, formas de pagamento
+     - Suporta filtros por data (data_inicio e data_fim)
+     - Dados ordenados por total de vendas
+     
+[x] 46. Criar HTML para novos gráficos - Completed:
+     - Adicionada seção "Desempenho das Lojas" no admin.html
+     - 4 novos gráficos:
+       * Top 10 Lojas por Vendas (barra vertical)
+       * Ticket Médio por Loja (barra horizontal)
+       * Peças por Venda (PA) por Loja (barra vertical)
+       * Distribuição de Formas de Pagamento (donut)
+     
+[x] 47. Implementar JavaScript dos gráficos - Completed:
+     - Adicionadas variáveis globais para os 4 novos charts
+     - Função loadStorePerformance() para buscar dados da API
+     - Funções de renderização:
+       * renderStoreSalesChart() - gráfico de vendas
+       * renderStoreTicketChart() - ticket médio horizontal
+       * renderStorePaChart() - PA por loja
+       * renderPaymentDistributionChart() - distribuição de pagamentos
+     - Gráficos sincronizados com filtros de data do dashboard
+     - Carregamento automático na inicialização (últimos 30 dias)
+     
+[x] 48. Reiniciar servidor e verificar funcionamento - Completed:
+     - Servidor reiniciado com sucesso na porta 5000
+     - Status: RUNNING
+     - Sistema operacional sem erros
+
+## Status Final das Alterações (November 5, 2025, 16:21):
+✅ Aba Assistência Técnica completamente removida
+✅ Código relacionado a assistência técnica removido do dashboard
+✅ Novos gráficos de desempenho das lojas implementados
+✅ API de desempenho funcionando corretamente
+✅ Dashboard atualizado com métricas relevantes para análise de lojas
+✅ Servidor rodando sem erros

@@ -5,7 +5,6 @@ import { initAdminPage } from './pages/admin.js';
 import { initConsultaPage } from './pages/consulta.js';
 import { initGerenciarLojasPage } from './pages/gerenciar-lojas.js';
 import { initDemandasPage } from './pages/demandas.js';
-import { initAssistenciaPage } from './pages/assistencia.js';
 import { initNovoRelatorioPage } from './pages/novo-relatorio.js';
 import { initGerenciarUsuariosPage } from './pages/gerenciar-usuarios.js';
 import { initLogsPage } from './pages/logs.js';
@@ -16,7 +15,6 @@ const pageInitializers = {
     'consulta': initConsultaPage,
     'gerenciar-lojas': initGerenciarLojasPage,
     'demandas': initDemandasPage,
-    'assistencia': initAssistenciaPage,
     'novo-relatorio': initNovoRelatorioPage,
     'gerenciar-usuarios': initGerenciarUsuariosPage,
     'logs': initLogsPage
@@ -90,7 +88,7 @@ async function setupSessionAndUI() {
         currentUser = await response.json();
         window.currentUser = currentUser; // Expor para outras páginas
         // Todos os menus estão visíveis para todos os usuários
-        const menuIds = ['nav-dashboard', 'nav-consulta', 'nav-novo-relatorio', 'nav-lojas', 'nav-demandas', 'nav-assistencia', 'nav-configuracoes', 'nav-logs'];
+        const menuIds = ['nav-dashboard', 'nav-consulta', 'nav-novo-relatorio', 'nav-lojas', 'nav-demandas', 'nav-configuracoes', 'nav-logs'];
         menuIds.forEach(menuId => {
             document.querySelectorAll(`#${menuId}`).forEach(el => {
                 el?.classList.remove('d-none');

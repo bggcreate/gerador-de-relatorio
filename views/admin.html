@@ -296,66 +296,50 @@
         </div>
     </div>
 
-    <!-- ASSISTÊNCIA TÉCNICA -->
+    <!-- DESEMPENHO DAS LOJAS -->
     <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
-        <h4 class="mb-0"><i class="bi bi-tools"></i> Assistência Técnica - Visão Geral</h4>
-        <select id="filtro-loja-assistencia" class="form-select form-select-sm" style="width: 200px;">
-            <option value="todas" selected>Todas as Lojas</option>
-        </select>
-    </div>
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-sm-6 col-lg-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                        <i class="bi bi-check-circle fs-2" style="color: var(--color-success);"></i>
-                    </div>
-                    <h3 class="mb-1" id="assist-concluidas-diarias">0</h3>
-                    <small class="text-muted">Assistências Concluídas (Hoje)</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                        <i class="bi bi-cash-coin fs-2" style="color: var(--accent-color);"></i>
-                    </div>
-                    <h3 class="mb-1" id="assist-faturamento-diario">R$ 0,00</h3>
-                    <small class="text-muted">Faturamento (Hoje)</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                        <i class="bi bi-hourglass-split fs-2" style="color: var(--color-warning);"></i>
-                    </div>
-                    <h3 class="mb-1" id="assist-em-andamento-diarias">0</h3>
-                    <small class="text-muted">Assistências em Andamento (Hoje)</small>
-                </div>
-            </div>
-        </div>
+        <h4 class="mb-0"><i class="bi bi-graph-up me-2"></i>Desempenho das Lojas</h4>
     </div>
     
-    <!-- TICKET DE ASSISTÊNCIAS -->
     <div class="row g-3 mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-ticket-perforated me-2"></i>Ticket de Assistências</span>
-                    <button id="btn-refresh-assist-tickets" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-arrow-clockwise"></i> Atualizar
-                    </button>
+        <!-- Top 10 Lojas por Vendas -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-trophy me-2"></i>Top 10 Lojas por Vendas</div>
+                <div class="card-body" style="height: 400px; position: relative;">
+                    <canvas id="store-sales-chart"></canvas>
                 </div>
-                <div class="card-body p-0" style="height: 400px; overflow-y: auto;">
-                    <div id="assist-tickets-container" class="p-3">
-                        <div class="text-center text-muted py-5">
-                            <div class="spinner-border spinner-border-sm" role="status"></div>
-                            <p class="mb-0 mt-2 small">Carregando tickets...</p>
-                        </div>
-                    </div>
+            </div>
+        </div>
+
+        <!-- Ticket Médio por Loja -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-receipt me-2"></i>Ticket Médio por Loja</div>
+                <div class="card-body" style="height: 400px; position: relative;">
+                    <canvas id="store-ticket-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <!-- PA (Peças por Venda) por Loja -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-boxes me-2"></i>Peças por Venda (PA) por Loja</div>
+                <div class="card-body" style="height: 400px; position: relative;">
+                    <canvas id="store-pa-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribuição de Formas de Pagamento -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-credit-card me-2"></i>Distribuição de Formas de Pagamento</div>
+                <div class="card-body" style="height: 400px; position: relative;">
+                    <canvas id="payment-distribution-chart"></canvas>
                 </div>
             </div>
         </div>
