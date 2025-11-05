@@ -1280,7 +1280,7 @@ function gerarRelatorioPDFProfissional(doc, r) {
     }
     
     const cores = {
-        laranja: '#ff6600',
+        laranja: '#ff9966',
         cinza: '#6b7280',
         cinzaClaro: '#f3f4f6',
         cinzaEscuro: '#4b5563',

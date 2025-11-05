@@ -523,6 +523,32 @@ export function initNovoRelatorioPage() {
             salvarRascunho();
             showToast("Sucesso!", "Dados do PDF importados com sucesso.", "success");
             
+            // SALVAR PDF DE RANKING FISICAMENTE NO SERVIDOR
+            const loja = lojaSelect.value;
+            const data = dataInput.value;
+            
+            if (loja && data) {
+                try {
+                    const saveFormData = new FormData();
+                    saveFormData.append('pdf', file);
+                    saveFormData.append('loja', loja);
+                    saveFormData.append('data', data);
+                    
+                    const saveResponse = await fetch('/api/pdf/ranking', {
+                        method: 'POST',
+                        headers: { 'x-csrf-token': csrfToken },
+                        body: saveFormData
+                    });
+                    
+                    if (saveResponse.ok) {
+                        const saveResult = await saveResponse.json();
+                        console.log('PDF de Ranking salvo:', saveResult);
+                    }
+                } catch (saveError) {
+                    console.error('Erro ao salvar PDF de Ranking:', saveError);
+                }
+            }
+            
             // Marcar botão como anexado
             btnImportarPdf.disabled = false;
             btnImportarPdf.innerHTML = '<i class="bi bi-file-earmark-arrow-up-fill"></i>';
