@@ -432,20 +432,6 @@ export function initNovoRelatorioPage() {
         }
     }
     
-    // Função para exibir mensagens de PDF
-    function showPdfMessage(message, type = 'info') {
-        const container = document.getElementById('pdf-message-container');
-        if (!container) return;
-        
-        container.className = `alert alert-${type} mb-4`;
-        container.innerHTML = message;
-        container.classList.remove('d-none');
-        
-        setTimeout(() => {
-            container.classList.add('d-none');
-        }, 10000);
-    }
-    
     // Função para marcar botão como sucesso (laranja)
     function marcarBotaoSucesso(botao) {
         botao.style.backgroundColor = '#ff6600';
@@ -508,20 +494,23 @@ export function initNovoRelatorioPage() {
             calcularEAtualizarGraficos();
             salvarRascunho();
             showToast("Sucesso!", "Dados do PDF importados com sucesso.", "success");
+            
+            // Marcar botão como sucesso DEPOIS de resetar o HTML
+            btnImportarPdf.disabled = false;
+            btnImportarPdf.innerHTML = '<i class="bi bi-file-earmark-arrow-up-fill"></i>';
             marcarBotaoSucesso(btnImportarPdf);
+            pdfFileInput.value = '';
 
         } catch (error) {
             showToast("Erro na Importação", error.message, "danger");
-        } finally {
             btnImportarPdf.disabled = false;
             btnImportarPdf.innerHTML = '<i class="bi bi-file-earmark-arrow-up-fill"></i>';
             pdfFileInput.value = '';
         }
     });
 
-    // --- Lógica dos Botões de PDF (Ticket e Salvos) ---
+    // --- Lógica dos Botões de PDF (Ticket) ---
     const btnTicketDia = document.getElementById('btn-ticket-dia');
-    const btnVerPdfsSalvos = document.getElementById('btn-ver-pdfs-salvos');
     const ticketPdfInput = document.getElementById('ticket-pdf-input');
     
     // Botão Ticket Dia
@@ -576,62 +565,18 @@ export function initNovoRelatorioPage() {
                 }
                 
                 showToast('Sucesso!', `PDF de Ticket salvo: ${result.data.filename}`, 'success');
+                
+                // Marcar botão como sucesso DEPOIS de resetar o HTML
+                btnTicketDia.disabled = false;
+                btnTicketDia.innerHTML = '<i class="bi bi-receipt"></i>';
                 marcarBotaoSucesso(btnTicketDia);
+                ticketPdfInput.value = '';
                 
             } catch (error) {
                 showToast('Erro', error.message, 'danger');
-            } finally {
                 btnTicketDia.disabled = false;
                 btnTicketDia.innerHTML = '<i class="bi bi-receipt"></i>';
                 ticketPdfInput.value = '';
-            }
-        });
-    }
-    
-    // Botão Ver PDFs Salvos
-    if (btnVerPdfsSalvos) {
-        btnVerPdfsSalvos.addEventListener('click', async () => {
-            const loja = lojaSelect.value;
-            const data = dataInput.value;
-            
-            btnVerPdfsSalvos.disabled = true;
-            btnVerPdfsSalvos.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Carregando...';
-            
-            try {
-                let url = '/api/pdf/tickets';
-                const params = new URLSearchParams();
-                if (loja) params.append('loja', loja);
-                if (data) params.append('data', data);
-                if (params.toString()) url += `?${params.toString()}`;
-                
-                const response = await fetch(url, {
-                    headers: await getAuthHeaders()
-                });
-                
-                const result = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(result.error || 'Erro ao listar PDFs');
-                }
-                
-                if (result.tickets.length === 0) {
-                    showPdfMessage('Nenhum PDF de Ticket foi encontrado para os filtros selecionados.', 'info');
-                } else {
-                    let message = `<strong>PDFs de Ticket Salvos (${result.tickets.length}):</strong><ul class="mt-2 mb-0">`;
-                    result.tickets.forEach(ticket => {
-                        const dataFormatada = new Date(ticket.data).toLocaleDateString('pt-BR');
-                        message += `<li><a href="/api/pdf/tickets/${ticket.id}/download" target="_blank">${ticket.filename}</a> - ${ticket.loja} - ${dataFormatada} (por ${ticket.uploaded_by})</li>`;
-                    });
-                    message += '</ul>';
-                    showPdfMessage(message, 'info');
-                }
-                
-            } catch (error) {
-                showPdfMessage(error.message, 'danger');
-                showToast('Erro', error.message, 'danger');
-            } finally {
-                btnVerPdfsSalvos.disabled = false;
-                btnVerPdfsSalvos.innerHTML = '<i class="bi bi-folder2-open"></i>';
             }
         });
     }
