@@ -28,6 +28,31 @@
      
      Funcionalidades:
      - PDFs de ranking aparecem na lista de anexos junto com tickets
+
+## Melhorias na Aba Consulta - PDF Conciso e Navegação por Abas (November 5, 2025, 20:31)
+[x] 66. Refatorar geração de PDF do relatório para ser conciso e caber em uma página - Completed:
+     Backend (server.js, função gerarRelatorioPDFProfissional):
+     - Reduzidas margens para 35px (antes 40-50px)
+     - Cabeçalho compacto de 55px (antes 60-80px)
+     - Métricas em 3 colunas com altura de 42px (antes 45-50px)
+     - Fontes reduzidas para 6pt-16pt (antes 8pt-24pt)
+     - Implementado cálculo dinâmico de espaço vertical:
+       * maxY = pageHeight - 35
+       * spaceLeft = maxY - y - 10
+       * maxRows = Math.floor(spaceLeft / rowHeight)
+     - Renderiza apenas vendedores que cabem no espaço disponível
+     - Rodapé posicionado exatamente em maxY
+     - Garantia: PDF sempre em uma única página
+
+[x] 67. Implementar sistema de abas para navegação entre relatório e anexos - Completed:
+     Frontend (views/consulta.html e public/js/pages/consulta.js):
+     - Substituída visualização única por sistema de abas Bootstrap
+     - Aba "Relatório" sempre visível mostrando PDF do relatório
+     - Abas dinâmicas criadas para cada anexo (tickets e rankings)
+     - Implementado lazy loading: PDFs só carregam quando aba é clicada
+     - Event listeners na sidebar (linhas 295-304) permitem clicar nos itens para ativar abas
+     - Código: `new bootstrap.Tab(tabButton).show()` para navegação
+     - Layout clean e profissional com navegação intuitiva
      - Clique em qualquer anexo abre o PDF
      - Botão "Voltar ao Relatório" permite retornar ao relatório principal
      - Navegação fluida entre relatório e anexos
