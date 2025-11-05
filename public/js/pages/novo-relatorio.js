@@ -491,6 +491,249 @@ export function initNovoRelatorioPage() {
         }
     });
 
+    // --- Lógica dos Novos Botões de PDF (Ranking e Ticket Dia) ---
+    const btnRankingDia = document.getElementById('btn-ranking-dia');
+    const btnTicketDia = document.getElementById('btn-ticket-dia');
+    const btnVerPdfsSalvos = document.getElementById('btn-ver-pdfs-salvos');
+    const rankingPdfInput = document.getElementById('ranking-pdf-input');
+    const ticketPdfInput = document.getElementById('ticket-pdf-input');
+    const pdfStatusMessage = document.getElementById('pdf-status-message');
+    const pdfExtractedData = document.getElementById('pdf-extracted-data');
+    const pdfPaValue = document.getElementById('pdf-pa-value');
+    const pdfPrecoMedioValue = document.getElementById('pdf-preco-medio-value');
+    const pdfAtendimentoMedioValue = document.getElementById('pdf-atendimento-medio-value');
+    const btnAplicarDadosPdf = document.getElementById('btn-aplicar-dados-pdf');
+    
+    let extractedPdfData = null;
+    
+    function showPdfMessage(message, type = 'info') {
+        pdfStatusMessage.style.display = 'block';
+        pdfStatusMessage.className = `alert alert-${type} mt-3`;
+        pdfStatusMessage.innerHTML = `<i class="bi bi-${type === 'danger' ? 'x-circle' : type === 'success' ? 'check-circle' : 'info-circle'}-fill me-2"></i>${message}`;
+    }
+    
+    function hidePdfMessage() {
+        pdfStatusMessage.style.display = 'none';
+    }
+    
+    function showExtractedData(data) {
+        extractedPdfData = data;
+        pdfPaValue.value = data.pa || '';
+        pdfPrecoMedioValue.value = `R$ ${data.preco_medio || '0,00'}`;
+        // Atendimento Médio não é moeda, é valor monetário por atendimento
+        pdfAtendimentoMedioValue.value = `R$ ${data.atendimento_medio || '0,00'}`;
+        pdfExtractedData.style.display = 'block';
+    }
+    
+    function hideExtractedData() {
+        pdfExtractedData.style.display = 'none';
+        extractedPdfData = null;
+    }
+    
+    // Botão Ranking Dia
+    if (btnRankingDia) {
+        btnRankingDia.addEventListener('click', () => {
+            const loja = lojaSelect.value;
+            const data = dataInput.value;
+            
+            if (!loja || !data) {
+                showPdfMessage('Por favor, selecione a loja e a data antes de carregar o PDF de Ranking.', 'warning');
+                return;
+            }
+            
+            rankingPdfInput.click();
+        });
+    }
+    
+    if (rankingPdfInput) {
+        rankingPdfInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const loja = lojaSelect.value;
+            const data = dataInput.value;
+            
+            if (!loja || !data) {
+                showPdfMessage('Por favor, selecione a loja e a data antes de carregar o PDF.', 'warning');
+                rankingPdfInput.value = '';
+                return;
+            }
+            
+            hidePdfMessage();
+            hideExtractedData();
+            btnRankingDia.disabled = true;
+            btnRankingDia.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('pdf', file);
+                formData.append('loja', loja);
+                formData.append('data', data);
+                
+                const csrfToken = await getCsrfToken();
+                const response = await fetch('/api/pdf/ranking', {
+                    method: 'POST',
+                    headers: { 'x-csrf-token': csrfToken },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Erro ao processar PDF de Ranking');
+                }
+                
+                showExtractedData(result.data);
+                showPdfMessage('PDF de Ranking processado com sucesso! Clique em "Aplicar Dados ao Relatório" para usar os valores.', 'success');
+                showToast('Sucesso!', 'Dados extraídos do PDF de Ranking', 'success');
+                
+            } catch (error) {
+                showPdfMessage(error.message, 'danger');
+                showToast('Erro', error.message, 'danger');
+            } finally {
+                btnRankingDia.disabled = false;
+                btnRankingDia.innerHTML = '<i class="bi bi-trophy-fill me-2"></i>Ranking Dia';
+                rankingPdfInput.value = '';
+            }
+        });
+    }
+    
+    // Botão Ticket Dia
+    if (btnTicketDia) {
+        btnTicketDia.addEventListener('click', () => {
+            const loja = lojaSelect.value;
+            const data = dataInput.value;
+            
+            if (!loja || !data) {
+                showPdfMessage('Por favor, selecione a loja e a data antes de salvar o PDF de Ticket.', 'warning');
+                return;
+            }
+            
+            ticketPdfInput.click();
+        });
+    }
+    
+    if (ticketPdfInput) {
+        ticketPdfInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const loja = lojaSelect.value;
+            const data = dataInput.value;
+            
+            if (!loja || !data) {
+                showPdfMessage('Por favor, selecione a loja e a data antes de salvar o PDF.', 'warning');
+                ticketPdfInput.value = '';
+                return;
+            }
+            
+            hidePdfMessage();
+            btnTicketDia.disabled = true;
+            btnTicketDia.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvando...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('pdf', file);
+                formData.append('loja', loja);
+                formData.append('data', data);
+                
+                const csrfToken = await getCsrfToken();
+                const response = await fetch('/api/pdf/ticket', {
+                    method: 'POST',
+                    headers: { 'x-csrf-token': csrfToken },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Erro ao salvar PDF de Ticket');
+                }
+                
+                showPdfMessage(`PDF de Ticket salvo com sucesso! Nome do arquivo: ${result.data.filename}`, 'success');
+                showToast('Sucesso!', 'PDF de Ticket Dia armazenado', 'success');
+                
+            } catch (error) {
+                showPdfMessage(error.message, 'danger');
+                showToast('Erro', error.message, 'danger');
+            } finally {
+                btnTicketDia.disabled = false;
+                btnTicketDia.innerHTML = '<i class="bi bi-receipt me-2"></i>Ticket Dia';
+                ticketPdfInput.value = '';
+            }
+        });
+    }
+    
+    // Botão Aplicar Dados do PDF
+    if (btnAplicarDadosPdf) {
+        btnAplicarDadosPdf.addEventListener('click', () => {
+            if (!extractedPdfData) {
+                showToast('Aviso', 'Nenhum dado foi extraído do PDF', 'warning');
+                return;
+            }
+            
+            // Aplicar os dados extraídos aos campos do relatório
+            // O PA já está sendo usado no relatório, então vamos apenas garantir que está preenchido
+            if (extractedPdfData.pa) {
+                paInput.value = extractedPdfData.pa;
+            }
+            
+            // Ticket médio e atendimento médio podem ser usados para outros campos ou apenas mostrados
+            showToast('Dados Aplicados', 'Os dados do PDF foram aplicados ao relatório', 'success');
+            hideExtractedData();
+            hidePdfMessage();
+            salvarRascunho();
+        });
+    }
+    
+    // Botão Ver PDFs Salvos
+    if (btnVerPdfsSalvos) {
+        btnVerPdfsSalvos.addEventListener('click', async () => {
+            const loja = lojaSelect.value;
+            const data = dataInput.value;
+            
+            btnVerPdfsSalvos.disabled = true;
+            btnVerPdfsSalvos.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Carregando...';
+            
+            try {
+                let url = '/api/pdf/tickets';
+                const params = new URLSearchParams();
+                if (loja) params.append('loja', loja);
+                if (data) params.append('data', data);
+                if (params.toString()) url += `?${params.toString()}`;
+                
+                const response = await fetch(url, {
+                    headers: await getAuthHeaders()
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'Erro ao listar PDFs');
+                }
+                
+                if (result.tickets.length === 0) {
+                    showPdfMessage('Nenhum PDF de Ticket foi encontrado para os filtros selecionados.', 'info');
+                } else {
+                    let message = `<strong>PDFs de Ticket Salvos (${result.tickets.length}):</strong><ul class="mt-2 mb-0">`;
+                    result.tickets.forEach(ticket => {
+                        const dataFormatada = new Date(ticket.data).toLocaleDateString('pt-BR');
+                        message += `<li><a href="/api/pdf/tickets/${ticket.id}/download" target="_blank">${ticket.filename}</a> - ${ticket.loja} - ${dataFormatada} (por ${ticket.uploaded_by})</li>`;
+                    });
+                    message += '</ul>';
+                    showPdfMessage(message, 'info');
+                }
+                
+            } catch (error) {
+                showPdfMessage(error.message, 'danger');
+                showToast('Erro', error.message, 'danger');
+            } finally {
+                btnVerPdfsSalvos.disabled = false;
+                btnVerPdfsSalvos.innerHTML = '<i class="bi bi-folder2-open me-2"></i>PDFs Salvos';
+            }
+        });
+    }
+
     // --- Inicialização dos Event Listeners ---
     btnAddVendedor.addEventListener("click", () => adicionarVendedor());
     btnAddVendedorManual.addEventListener("click", (e) => {

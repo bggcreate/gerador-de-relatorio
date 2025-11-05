@@ -224,6 +224,17 @@ let db = new sqlite3.Database(DB_PATH, err => {
             FOREIGN KEY (peca_id) REFERENCES estoque_tecnico(id)
         )`);
         
+        // Tabela para armazenar PDFs de Ticket Dia
+        db.run(`CREATE TABLE IF NOT EXISTS pdf_tickets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            loja TEXT NOT NULL,
+            data TEXT NOT NULL,
+            filename TEXT NOT NULL,
+            filepath TEXT NOT NULL,
+            uploaded_by TEXT NOT NULL,
+            uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        
         // Adicionar colunas caso não existam (migração)
         db.run(`ALTER TABLE usuarios ADD COLUMN loja_gerente TEXT`, (err) => {
             if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar loja_gerente:', err.message);
@@ -1164,6 +1175,274 @@ const formatarRelatorioTexto = (r) => { const rp = processarRelatorio(r); if (!r
 app.get('/api/relatorios/:id/txt', requirePageLogin, (req, res) => { const sql = ` SELECT r.*, l.funcao_especial FROM relatorios r LEFT JOIN lojas l ON r.loja = l.nome WHERE r.id = ? `; db.get(sql, [req.params.id], (err, r) => { if (err || !r) return res.status(404).send('Relatório não encontrado'); res.setHeader('Content-disposition', `attachment; filename=relatorio_${r.loja.replace(/ /g, '_')}_${r.data}.txt`); res.setHeader('Content-type', 'text/plain; charset=utf-8'); res.send(formatarRelatorioTexto(r)); }); });
 app.get('/api/relatorios/:id/pdf', requirePageLogin, (req, res) => { const sql = ` SELECT r.*, l.funcao_especial FROM relatorios r LEFT JOIN lojas l ON r.loja = l.nome WHERE r.id = ? `; db.get(sql, [req.params.id], (err, r) => { if (err || !r) return res.status(404).send('Relatório não encontrado'); const doc = new PDFDocument({ margin: 50, size: 'A4' }); res.setHeader('Content-disposition', `inline; filename="relatorio_${r.loja.replace(/ /g, '_')}_${r.data}.pdf"`); res.setHeader('Content-type', 'application/pdf'); doc.pipe(res); doc.fontSize(18).font('Helvetica-Bold').text(r.loja.toUpperCase(), { align: 'center' }).moveDown(1); doc.fontSize(11).font('Helvetica').text(formatarRelatorioTexto(r), { align: 'left' }); doc.end(); }); });
 
+// =================================================================
+// ROTAS DE PROCESSAMENTO DE PDF
+// =================================================================
+
+// Configuração do multer para upload de PDFs
+const pdfStorage = multer.memoryStorage();
+const pdfUpload = multer({
+    storage: pdfStorage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'application/pdf') {
+            cb(null, true);
+        } else {
+            cb(new Error('Apenas arquivos PDF são permitidos'));
+        }
+    }
+});
+
+// Função auxiliar para extrair dados do PDF de Ranking
+function extractRankingData(pdfText) {
+    const lines = pdfText.split('\n').map(l => l.trim()).filter(l => l);
+    
+    // Extrair nome da loja (formato: "103 - LOFT ITAGUAÇU STORE")
+    let lojaMatch = null;
+    for (const line of lines) {
+        const match = line.match(/^\d+\s*-\s*(.+?)(?:\s+Emissão:|\s+Ranking)/);
+        if (match) {
+            lojaMatch = match[1].trim();
+            break;
+        }
+    }
+    
+    // Extrair período/data (formato: "Período de 04/11/2025 a 04/11/2025")
+    let dataMatch = null;
+    for (const line of lines) {
+        const match = line.match(/Período de (\d{2}\/\d{2}\/\d{4})/);
+        if (match) {
+            const [dia, mes, ano] = match[1].split('/');
+            dataMatch = `${ano}-${mes}-${dia}`; // Formato ISO
+            break;
+        }
+    }
+    
+    // Procurar linha de "Totais:" e extrair valores
+    // No PDF real, a linha é: "     Totais:\n1.109,00       0,00         0,00 %       3,33 %      1.109,00      10         4          2,50         110,90   277,25"
+    let pa = null, precoMedio = null, atendimentoMedio = null;
+    
+    for (let i = 0; i < lines.length; i++) {
+        // Procurar linha que contém "Totais:"
+        if (lines[i].includes('Totais:')) {
+            // Verificar se os valores estão na mesma linha ou na linha seguinte
+            let dataLine = lines[i];
+            
+            // Se a linha só tem "Totais:", pegar a próxima linha
+            if (dataLine.trim() === 'Totais:') {
+                dataLine = lines[i + 1] || '';
+            }
+            
+            // Extrair todos os números no formato brasileiro
+            // Formato: \d{1,3}(?:\.\d{3})*(?:,\d+)? captura números como 1.109,00 ou 2,50 ou 10
+            // Ex: "1.109,00 0,00 0,00 % 3,33 % 1.109,00 10 4 2,50 110,90 277,25"
+            const numberPattern = /\d{1,3}(?:\.\d{3})*(?:,\d+)?/g;
+            const numbers = dataLine.match(numberPattern);
+            
+            if (numbers && numbers.length >= 3) {
+                // Os últimos 3 valores são: PA, Preço Médio, Atendimento Médio
+                // Converter formato brasileiro (1.000,50) para formato padrão (1000.50)
+                const convertBrazilianNumber = (num) => {
+                    return num.replace(/\./g, '').replace(',', '.');
+                };
+                
+                pa = convertBrazilianNumber(numbers[numbers.length - 3]);
+                precoMedio = convertBrazilianNumber(numbers[numbers.length - 2]);
+                atendimentoMedio = convertBrazilianNumber(numbers[numbers.length - 1]);
+            }
+            break;
+        }
+    }
+    
+    return {
+        loja: lojaMatch,
+        data: dataMatch,
+        pa: pa,
+        preco_medio: precoMedio,
+        atendimento_medio: atendimentoMedio
+    };
+}
+
+// POST /api/pdf/ranking - Processa PDF de ranking
+app.post('/api/pdf/ranking', requirePageLogin, pdfUpload.single('pdf'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo PDF foi enviado' });
+        }
+        
+        const { loja, data } = req.body;
+        
+        if (!loja || !data) {
+            return res.status(400).json({ error: 'Loja e data são obrigatórios' });
+        }
+        
+        // Extrair texto do PDF
+        const pdfData = await pdf(req.file.buffer);
+        const pdfText = pdfData.text;
+        
+        // Extrair dados do PDF
+        const extractedData = extractRankingData(pdfText);
+        
+        // Validar se a loja corresponde
+        if (extractedData.loja && !loja.includes(extractedData.loja) && !extractedData.loja.includes(loja)) {
+            return res.status(400).json({
+                error: 'O PDF selecionado não corresponde à loja atual.',
+                pdfLoja: extractedData.loja,
+                lojaAtual: loja
+            });
+        }
+        
+        // Validar se a data corresponde
+        if (extractedData.data && extractedData.data !== data) {
+            return res.status(400).json({
+                error: 'O PDF selecionado não corresponde à data atual.',
+                pdfData: extractedData.data,
+                dataAtual: data
+            });
+        }
+        
+        // Verificar se conseguiu extrair os valores
+        if (!extractedData.pa || !extractedData.preco_medio || !extractedData.atendimento_medio) {
+            return res.status(400).json({
+                error: 'Não foi possível extrair os dados do PDF. Verifique se o arquivo está no formato correto.',
+                extracted: extractedData
+            });
+        }
+        
+        // Retornar dados extraídos
+        res.json({
+            success: true,
+            data: {
+                pa: extractedData.pa,
+                preco_medio: extractedData.preco_medio,
+                atendimento_medio: extractedData.atendimento_medio,
+                loja: extractedData.loja,
+                data: extractedData.data
+            }
+        });
+        
+    } catch (error) {
+        console.error('Erro ao processar PDF de ranking:', error);
+        res.status(500).json({ error: 'Erro ao processar o PDF: ' + error.message });
+    }
+});
+
+// POST /api/pdf/ticket - Armazena PDF de ticket
+app.post('/api/pdf/ticket', requirePageLogin, pdfUpload.single('pdf'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo PDF foi enviado' });
+        }
+        
+        const { loja, data } = req.body;
+        
+        if (!loja || !data) {
+            return res.status(400).json({ error: 'Loja e data são obrigatórios' });
+        }
+        
+        // Criar diretório se não existir
+        const ticketsDir = path.join(__dirname, 'data', 'pdfs', 'tickets');
+        if (!fs.existsSync(ticketsDir)) {
+            fs.mkdirSync(ticketsDir, { recursive: true });
+        }
+        
+        // Gerar nome do arquivo
+        const timestamp = Date.now();
+        const lojaSafe = loja.replace(/[^a-zA-Z0-9]/g, '_');
+        const filename = `ticket_${lojaSafe}_${data}_${timestamp}.pdf`;
+        const filepath = path.join(ticketsDir, filename);
+        
+        // Salvar arquivo
+        fs.writeFileSync(filepath, req.file.buffer);
+        
+        // Registrar no banco de dados
+        const sql = `INSERT INTO pdf_tickets (loja, data, filename, filepath, uploaded_by, uploaded_at) 
+                     VALUES (?, ?, ?, ?, ?, datetime('now'))`;
+        
+        db.run(sql, [loja, data, filename, filepath, req.session.username], function(err) {
+            if (err) {
+                console.error('Erro ao registrar PDF no banco:', err);
+                // Tentar remover o arquivo salvo
+                try {
+                    fs.unlinkSync(filepath);
+                } catch (e) {}
+                return res.status(500).json({ error: 'Erro ao salvar registro do PDF' });
+            }
+            
+            res.json({
+                success: true,
+                message: 'PDF salvo com sucesso',
+                data: {
+                    id: this.lastID,
+                    filename: filename,
+                    loja: loja,
+                    data: data
+                }
+            });
+        });
+        
+    } catch (error) {
+        console.error('Erro ao salvar PDF de ticket:', error);
+        res.status(500).json({ error: 'Erro ao salvar o PDF: ' + error.message });
+    }
+});
+
+// GET /api/pdf/tickets - Lista PDFs de ticket salvos
+app.get('/api/pdf/tickets', requirePageLogin, (req, res) => {
+    const { loja, data } = req.query;
+    
+    let sql = 'SELECT id, loja, data, filename, uploaded_by, uploaded_at FROM pdf_tickets';
+    const params = [];
+    const whereClauses = [];
+    
+    if (loja) {
+        whereClauses.push('loja = ?');
+        params.push(loja);
+    }
+    
+    if (data) {
+        whereClauses.push('data = ?');
+        params.push(data);
+    }
+    
+    if (whereClauses.length > 0) {
+        sql += ' WHERE ' + whereClauses.join(' AND ');
+    }
+    
+    sql += ' ORDER BY uploaded_at DESC';
+    
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            console.error('Erro ao listar PDFs:', err);
+            return res.status(500).json({ error: 'Erro ao listar PDFs' });
+        }
+        
+        res.json({ success: true, tickets: rows || [] });
+    });
+});
+
+// GET /api/pdf/tickets/:id/download - Download de PDF de ticket
+app.get('/api/pdf/tickets/:id/download', requirePageLogin, (req, res) => {
+    const sql = 'SELECT * FROM pdf_tickets WHERE id = ?';
+    
+    db.get(sql, [req.params.id], (err, row) => {
+        if (err || !row) {
+            return res.status(404).json({ error: 'PDF não encontrado' });
+        }
+        
+        if (!fs.existsSync(row.filepath)) {
+            return res.status(404).json({ error: 'Arquivo PDF não encontrado no servidor' });
+        }
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${row.filename}"`);
+        fs.createReadStream(row.filepath).pipe(res);
+    });
+});
+
+// =================================================================
+// FIM DAS ROTAS DE PROCESSAMENTO DE PDF
+// =================================================================
 
 // ROTA DE EXPORTAÇÃO PARA EXCEL 
 app.get('/api/export/excel', requirePageLogin, async (req, res) => { const { month, year } = req.query; if (!month || !year) { return res.status(400).json({ error: 'Mês e ano são obrigatórios.' }); } const monthFormatted = month.toString().padStart(2, '0'); const sql = ` SELECT r.*, l.funcao_especial FROM relatorios r LEFT JOIN lojas l ON r.loja = l.nome WHERE strftime('%Y-%m', r.data) = ? ORDER BY r.loja, r.data `; db.all(sql, [`${year}-${monthFormatted}`], async (err, rows) => { if (err) { console.error("Erro ao buscar relatórios para Excel:", err); return res.status(500).json({ error: 'Erro ao buscar relatórios.' }); } if (rows.length === 0) { return res.status(404).json({ error: 'Nenhum relatório encontrado para o período.' }); } const workbook = new ExcelJS.Workbook(); const safeParseFloat = (value) => { if (typeof value === 'number') { return value; } if (typeof value === 'string') { const cleaned = value.replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.'); const num = parseFloat(cleaned); return isNaN(num) ? 0 : num; } return 0; }; const relatoriosPorLoja = rows.reduce((acc, row) => { const loja = row.loja; if (!acc[loja]) { acc[loja] = { funcao_especial: row.funcao_especial || 'Não definido', relatorios: [] }; } acc[loja].relatorios.push(processarRelatorio(row)); return acc; }, {}); for (const lojaNome in relatoriosPorLoja) { const lojaData = relatoriosPorLoja[lojaNome]; const worksheet = workbook.addWorksheet(lojaNome.substring(0, 30)); worksheet.mergeCells('A1:M1'); const tituloCell = worksheet.getCell('A1'); tituloCell.value = lojaNome.toUpperCase(); tituloCell.font = { name: 'Arial Black', size: 16, bold: true, color: { argb: 'FF44546A' } }; tituloCell.alignment = { vertical: 'middle', horizontal: 'center' }; worksheet.getRow(1).height = 30; const headers = [ 'DATA', 'BLUVE', 'VENDAS (L)', 'TX DE CONVERSÃO (L)', 'CLIENTES (M)', 'VENDAS (M)', 'TX DE CONVERSÃO (M)', 'P.A', 'TM', 'VALOR TOTAL', 'TROCAS' ]; let funcaoEspecialHeader = 'FUNÇÃO ESPECIAL'; if (lojaData.funcao_especial === 'Omni') { funcaoEspecialHeader = 'OMNI'; } else if (lojaData.funcao_especial === 'Busca por Assist. Tec.') { funcaoEspecialHeader = 'BUSCA P/ ASSIST. TEC.'; } headers.push(funcaoEspecialHeader); headers.push('ENVIADO POR'); const headerRow = worksheet.getRow(3); headerRow.values = headers; headerRow.height = 35; headerRow.eachCell(cell => { cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 }; cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } }; cell.border = { top: { style: 'thin', color: { argb: 'FFBFBFBF' } }, left: { style: 'thin', color: { argb: 'FFBFBFBF' } }, bottom: { style: 'thin', color: { argb: 'FFBFBFBF' } }, right: { style: 'thin', color: { argb: 'FFBFBFBF' } } }; }); lojaData.relatorios.forEach(r => { const rowData = [ new Date(r.data + 'T00:00:00'), parseInt(r.clientes_loja, 10) || 0, parseInt(r.vendas_loja, 10) || 0, parseFloat(r.tx_conversao_loja) / 100, parseInt(r.clientes_monitoramento, 10) || 0, parseInt(r.vendas_monitoramento_total, 10) || 0, parseFloat(r.tx_conversao_monitoramento) / 100, parseFloat(String(r.pa).replace(',', '.')) || 0, safeParseFloat(r.ticket_medio), r.total_vendas_dinheiro, parseInt(r.quantidade_trocas, 10) || 0 ]; if (lojaData.funcao_especial === 'Omni') { rowData.push(parseInt(r.quantidade_omni, 10) || 0); } else if (lojaData.funcao_especial === 'Busca por Assist. Tec.') { rowData.push(parseInt(r.quantidade_funcao_especial, 10) || 0); } else { rowData.push(0); } rowData.push(r.enviado_por_usuario || '-'); const row = worksheet.addRow(rowData); row.getCell(1).numFmt = 'DD/MM/YYYY'; row.getCell(4).numFmt = '0.00%'; row.getCell(7).numFmt = '0.00%'; row.getCell(8).numFmt = '0.00'; row.getCell(9).numFmt = 'R$ #,##0.00'; row.getCell(10).numFmt = 'R$ #,##0.00'; row.eachCell(cell => { cell.alignment = { vertical: 'middle', horizontal: 'center' }; }); }); worksheet.columns.forEach(column => { let maxLength = 0; column.eachCell({ includeEmpty: true }, cell => { const length = cell.value ? cell.value.toString().length : 10; if (length > maxLength) { maxLength = length; } }); column.width = Math.max(12, maxLength + 3); }); worksheet.getColumn(4).width = 20; worksheet.getColumn(7).width = 20; worksheet.getColumn(12).width = 22; } res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); res.setHeader('Content-Disposition', `attachment; filename="Relatorios_${year}-${monthFormatted}.xlsx"`); await workbook.xlsx.write(res); res.end(); }); });
