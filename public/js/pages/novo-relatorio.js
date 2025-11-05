@@ -432,6 +432,33 @@ export function initNovoRelatorioPage() {
         }
     }
     
+    // Função para exibir mensagens de PDF
+    function showPdfMessage(message, type = 'info') {
+        const container = document.getElementById('pdf-message-container');
+        if (!container) return;
+        
+        container.className = `alert alert-${type} mb-4`;
+        container.innerHTML = message;
+        container.classList.remove('d-none');
+        
+        setTimeout(() => {
+            container.classList.add('d-none');
+        }, 10000);
+    }
+    
+    // Função para marcar botão como sucesso (laranja)
+    function marcarBotaoSucesso(botao) {
+        botao.style.backgroundColor = '#ff6600';
+        botao.style.borderColor = '#ff6600';
+        botao.style.color = '#fff';
+        
+        setTimeout(() => {
+            botao.style.backgroundColor = '';
+            botao.style.borderColor = '';
+            botao.style.color = '';
+        }, 3000);
+    }
+    
     // --- Lógica de Importação de PDF ---
     btnImportarPdf.addEventListener('click', () => pdfFileInput.click());
     pdfFileInput.addEventListener('change', async (event) => {
@@ -481,6 +508,7 @@ export function initNovoRelatorioPage() {
             calcularEAtualizarGraficos();
             salvarRascunho();
             showToast("Sucesso!", "Dados do PDF importados com sucesso.", "success");
+            marcarBotaoSucesso(btnImportarPdf);
 
         } catch (error) {
             showToast("Erro na Importação", error.message, "danger");
@@ -548,6 +576,7 @@ export function initNovoRelatorioPage() {
                 }
                 
                 showToast('Sucesso!', `PDF de Ticket salvo: ${result.data.filename}`, 'success');
+                marcarBotaoSucesso(btnTicketDia);
                 
             } catch (error) {
                 showToast('Erro', error.message, 'danger');
