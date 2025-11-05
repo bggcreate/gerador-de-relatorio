@@ -235,6 +235,20 @@ let db = new sqlite3.Database(DB_PATH, err => {
             uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
         
+        // Tabela para armazenar PDFs de Ranking
+        db.run(`CREATE TABLE IF NOT EXISTS pdf_rankings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            loja TEXT NOT NULL,
+            data TEXT NOT NULL,
+            filename TEXT NOT NULL,
+            filepath TEXT NOT NULL,
+            pa TEXT,
+            preco_medio TEXT,
+            atendimento_medio TEXT,
+            uploaded_by TEXT,
+            uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        
         // Adicionar colunas caso não existam (migração)
         db.run(`ALTER TABLE usuarios ADD COLUMN loja_gerente TEXT`, (err) => {
             if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar loja_gerente:', err.message);
