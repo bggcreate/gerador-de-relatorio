@@ -16,6 +16,13 @@
      - Inserido PDF de exemplo de ranking para loja "020 QSQ ESTAÇÃO " data 2025-08-06
      - Banco de dados agora contém 1 ticket e 1 ranking para demonstração
 
+[x] 70. Criar PDFs para o relatório #212 especificamente - Completed:
+     - Relatório #212: loja "119 QSQ AERO RJ", data "2025-11-04"
+     - Criado PDF de ticket: ticket_119_QSQ_AERO_RJ_2025-11-04_demo.pdf
+     - Criado PDF de ranking: ranking_119_QSQ_AERO_RJ_2025-11-04_demo.pdf
+     - Total de PDFs no sistema: 2 tickets e 2 rankings
+     - PDFs prontos para visualização no relatório #212
+
 ## Correção de Anexos na Aba Consulta (November 5, 2025, 20:06)
 [x] 64. Corrigir exibição de arquivos anexados ao visualizar relatório - Completed:
      - Problema identificado: API retorna { success: true, tickets: [...] } mas código esperava array direto

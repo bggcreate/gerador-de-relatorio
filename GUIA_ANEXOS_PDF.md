@@ -55,23 +55,30 @@ Os PDFs serão associados a essa loja e data.
   - 🧾 Ticket (se houver PDF de ticket)
 - Navegue entre as abas clicando nelas
 
-## Exemplo Prático
+## Exemplos Práticos
 
-Já foi criado um exemplo para você testar:
+Foram criados PDFs de exemplo para você testar:
 
-**Relatório de Exemplo:**
-- Loja: "020 QSQ ESTAÇÃO"
-- Data: 06/08/2025
+### Exemplo 1 - Relatório #212
+**Seu relatório mais recente:**
+- Loja: "119 QSQ AERO RJ"
+- Data: 04/11/2025
 - Anexos: 1 PDF de Ranking + 1 PDF de Ticket
 
 **Como visualizar:**
 1. Faça login (admin/admin)
 2. Vá para "Consulta"
-3. Busque relatórios de agosto/2025
-4. Encontre o relatório da loja "020 QSQ ESTAÇÃO" de 06/08/2025
-5. Clique em "Visualizar"
-6. Na sidebar "ANEXOS", você verá os PDFs de Ranking e Ticket
-7. Clique neles para visualizar
+3. Busque pelo relatório #212 ou filtre por novembro/2025
+4. Clique em "Visualizar" no relatório da loja "119 QSQ AERO RJ" de 04/11/2025
+5. Na sidebar "ANEXOS", você verá os 2 PDFs
+6. Clique neles para abrir em abas separadas
+
+### Exemplo 2 - Relatório Antigo
+- Loja: "020 QSQ ESTAÇÃO"
+- Data: 06/08/2025  
+- Anexos: 1 PDF de Ranking + 1 PDF de Ticket
+
+**Como visualizar:** (mesmo processo do exemplo 1)
 
 ## Observações Importantes
 
