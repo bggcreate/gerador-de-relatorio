@@ -3,6 +3,19 @@
 [x] 3. Verify the project is working using the screenshot tool - Completed: Screenshot shows login page is loading correctly (November 6, 2025, 12:09)
 [x] 4. Inform user the import is completed and they can start building - Completed: Import migration to Replit environment finished successfully (November 6, 2025, 12:09)
 
+## Sistema de Anexos PDF na Aba Consulta (November 6, 2025, 12:10)
+[x] 68. Investigar problema de anexos não aparecendo - Completed:
+     - Identificado: Tabelas pdf_tickets e pdf_rankings existem mas estavam vazias
+     - Sistema de anexos já está completamente implementado e funcional
+     - APIs funcionando: GET /api/pdf/tickets, GET /api/pdf/rankings, POST /api/pdf/ticket, POST /api/pdf/ranking
+     - Frontend completo com navegação por abas em consulta.js
+     
+[x] 69. Criar PDFs de exemplo para demonstração - Completed:
+     - Criados diretórios: data/pdfs/tickets/ e data/pdfs/rankings/
+     - Inserido PDF de exemplo de ticket para loja "020 QSQ ESTAÇÃO " data 2025-08-06
+     - Inserido PDF de exemplo de ranking para loja "020 QSQ ESTAÇÃO " data 2025-08-06
+     - Banco de dados agora contém 1 ticket e 1 ranking para demonstração
+
 ## Correção de Anexos na Aba Consulta (November 5, 2025, 20:06)
 [x] 64. Corrigir exibição de arquivos anexados ao visualizar relatório - Completed:
      - Problema identificado: API retorna { success: true, tickets: [...] } mas código esperava array direto
