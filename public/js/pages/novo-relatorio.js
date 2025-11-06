@@ -509,8 +509,10 @@ export function initNovoRelatorioPage() {
                     showToast("Atenção", `A loja "${extractedData.loja}" do PDF não foi encontrada no sistema.`, "danger");
                 }
             }
-            containerVendedores.innerHTML = '';
+            
+            // Só limpar vendedores se o PDF trouxer vendedores novos
             if (extractedData.vendedores && extractedData.vendedores.length > 0) {
+                containerVendedores.innerHTML = '';
                 extractedData.vendedores.forEach(vendedor => adicionarVendedor(vendedor));
             }
             
