@@ -51,16 +51,18 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
 - Database backup and restoration.
 - Technical assistance module with stock management and restricted technician views.
 - Temporary JWT token system for development with configurable validity, IP restriction, and revocation.
-- **DVR/NVR Monitoring Module**:
+- **DVR/NVR Monitoring Module** (✅ Fully Implemented and Functional):
   - **Device Management**: Register and manage Intelbras DVR/NVR devices with IP, port, credentials, and location details.
   - **Log System**: Collect and filter device logs with timestamps, event types, and descriptions.
   - **File Management**: Upload and download files (recordings, screenshots, XML/JSON reports) with metadata tracking.
   - **Database tables**: `dvr_dispositivos` (devices), `dvr_logs` (event logs), `dvr_arquivos` (uploaded files with metadata).
-  - **Service Layer**: `services/dvrService.js` provides CRUD operations with parameterized SQL queries.
-  - **Storage**: Dedicated multer instance with diskStorage (not memoryStorage) saving files to `data/dvr_files/<dvrId>/`.
+  - **Storage**: Dedicated multer instance with diskStorage (not memoryStorage) saving files to `data/dvr_files/`.
   - **Security**: File size limit (500MB), MIME type filtering, authentication required for all endpoints.
-  - **Endpoints**: POST/GET/PUT/DELETE `/api/dvr/dispositivos`, POST/GET `/api/dvr/logs`, POST/GET/DELETE `/api/dvr/arquivos`, GET `/api/dvr/arquivos/:id/download`.
-  - **Frontend**: Three-tab interface (Dispositivos, Logs, Arquivos) with filters, pagination, and file upload/download capabilities.
+  - **Endpoints**: POST/GET/PUT/DELETE `/api/dvr/dispositivos`, POST/GET `/api/dvr/logs`, POST/GET/DELETE `/api/dvr/arquivos`, GET `/api/dvr/arquivos/:id/download` (server.js linhas 1901-2162).
+  - **Frontend**: Three-tab interface (Dispositivos, Logs, Arquivos) with filters, pagination, and file upload/download capabilities (views/dvr-monitor.html, public/js/pages/dvr-monitor.js).
+  - **Route**: `/dvr-monitor` - accessible via menu "DVR/NVR" after login.
+  - **Sample Data**: 3 devices (2 online, 1 offline), 6 event logs, 4 file records created for demonstration.
+  - **Note**: This module does NOT include live video streaming, only log management and file storage/download.
 
 ### System Design Choices
 - **Project Structure**: Clear separation of concerns with `server.js` as the main entry point, dedicated folders for views, static assets, and data.

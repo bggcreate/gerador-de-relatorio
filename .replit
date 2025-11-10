@@ -1,4 +1,4 @@
-modules = ["c-clang14", "cpp-clang14", "nodejs-20", "web"]
+modules = ["c-clang14", "cpp-clang14", "nodejs-20", "web", "postgresql-16"]
 [agent]
 expertMode = true
 
