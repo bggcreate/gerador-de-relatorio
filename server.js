@@ -19,6 +19,7 @@ const { body, validationResult } = require('express-validator');
 const { requireAuth, requireAuthPage, getLojaFilter, getPermissions } = require('./middleware/roleAuth');
 const jwt = require('jsonwebtoken');
 const DVRService = require('./services/dvrService');
+const IntelbrasDvrService = require('./services/intelbrasDvrService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -2178,6 +2179,285 @@ app.delete('/api/dvr/arquivos/:id', requirePageLogin, async (req, res) => {
     } catch (error) {
         console.error('Erro ao excluir arquivo DVR:', error);
         res.status(500).json({ error: 'Erro ao excluir arquivo DVR' });
+    }
+});
+
+// =================================================================
+// NOVAS APIS INTELBRAS - PTZ, GRAVAÇÕES, RTSP
+// =================================================================
+
+// Instância do serviço Intelbras (para funcionalidades avançadas)
+let intelbrasDvrService = null;
+if (db) {
+    intelbrasDvrService = new IntelbrasDvrService(DB_PATH);
+}
+
+// POST /api/dvr/ptz/control - Controlar PTZ (movimentação)
+app.post('/api/dvr/ptz/control', requirePageLogin, [
+    body('dvrId').isInt().withMessage('ID do DVR é obrigatório'),
+    body('channel').isInt().withMessage('Canal é obrigatório'),
+    body('direction').isIn(['Up', 'Down', 'Left', 'Right', 'LeftUp', 'RightUp', 'LeftDown', 'RightDown']).withMessage('Direção inválida'),
+    body('action').optional().isIn(['start', 'stop']).withMessage('Ação inválida'),
+    body('speed').optional().isInt({ min: 1, max: 8 }).withMessage('Velocidade deve ser entre 1 e 8')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { dvrId, channel, direction, action, speed, password } = req.body;
+        
+        const dispositivo = await dvrService.obterDispositivo(dvrId);
+        if (!dispositivo) {
+            return res.status(404).json({ error: 'Dispositivo não encontrado' });
+        }
+
+        const result = await intelbrasDvrService.ptzControl(
+            dispositivo.ip_address,
+            dispositivo.porta || 80,
+            dispositivo.usuario || 'admin',
+            password,
+            channel,
+            direction,
+            action || 'start',
+            speed || 4
+        );
+
+        if (result) {
+            res.json({ success: true, message: `PTZ ${action || 'start'} ${direction} executado` });
+        } else {
+            res.status(500).json({ error: 'Falha ao controlar PTZ' });
+        }
+    } catch (error) {
+        console.error('Erro ao controlar PTZ:', error);
+        res.status(500).json({ error: 'Erro ao controlar PTZ' });
+    }
+});
+
+// POST /api/dvr/ptz/preset/goto - Ir para preset PTZ
+app.post('/api/dvr/ptz/preset/goto', requirePageLogin, [
+    body('dvrId').isInt().withMessage('ID do DVR é obrigatório'),
+    body('channel').isInt().withMessage('Canal é obrigatório'),
+    body('presetNumber').isInt({ min: 1, max: 255 }).withMessage('Preset deve ser entre 1 e 255')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { dvrId, channel, presetNumber, password } = req.body;
+        
+        const dispositivo = await dvrService.obterDispositivo(dvrId);
+        if (!dispositivo) {
+            return res.status(404).json({ error: 'Dispositivo não encontrado' });
+        }
+
+        const result = await intelbrasDvrService.gotoPreset(
+            dispositivo.ip_address,
+            dispositivo.porta || 80,
+            dispositivo.usuario || 'admin',
+            password,
+            channel,
+            presetNumber
+        );
+
+        if (result) {
+            res.json({ success: true, message: `Movido para preset ${presetNumber}` });
+        } else {
+            res.status(500).json({ error: 'Falha ao ir para preset' });
+        }
+    } catch (error) {
+        console.error('Erro ao ir para preset PTZ:', error);
+        res.status(500).json({ error: 'Erro ao ir para preset PTZ' });
+    }
+});
+
+// POST /api/dvr/ptz/preset/set - Salvar preset PTZ
+app.post('/api/dvr/ptz/preset/set', requirePageLogin, [
+    body('dvrId').isInt().withMessage('ID do DVR é obrigatório'),
+    body('channel').isInt().withMessage('Canal é obrigatório'),
+    body('presetNumber').isInt({ min: 1, max: 255 }).withMessage('Preset deve ser entre 1 e 255')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { dvrId, channel, presetNumber, password } = req.body;
+        
+        const dispositivo = await dvrService.obterDispositivo(dvrId);
+        if (!dispositivo) {
+            return res.status(404).json({ error: 'Dispositivo não encontrado' });
+        }
+
+        const result = await intelbrasDvrService.setPreset(
+            dispositivo.ip_address,
+            dispositivo.porta || 80,
+            dispositivo.usuario || 'admin',
+            password,
+            channel,
+            presetNumber
+        );
+
+        if (result) {
+            res.json({ success: true, message: `Preset ${presetNumber} salvo` });
+        } else {
+            res.status(500).json({ error: 'Falha ao salvar preset' });
+        }
+    } catch (error) {
+        console.error('Erro ao salvar preset PTZ:', error);
+        res.status(500).json({ error: 'Erro ao salvar preset PTZ' });
+    }
+});
+
+// POST /api/dvr/snapshot - Capturar snapshot de câmera (senha no body, não em query string)
+app.post('/api/dvr/snapshot', requirePageLogin, [
+    body('dvrId').isInt().withMessage('ID do DVR é obrigatório'),
+    body('channel').isInt().withMessage('Canal é obrigatório'),
+    body('password').notEmpty().withMessage('Senha é obrigatória')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { dvrId, channel, password } = req.body;
+        
+        const dispositivo = await dvrService.obterDispositivo(dvrId);
+        if (!dispositivo) {
+            return res.status(404).json({ error: 'Dispositivo não encontrado' });
+        }
+
+        const imageBuffer = await intelbrasDvrService.getSnapshot(
+            dispositivo.ip_address,
+            dispositivo.porta || 80,
+            dispositivo.usuario || 'admin',
+            password,
+            parseInt(channel)
+        );
+
+        if (imageBuffer) {
+            res.setHeader('Content-Type', 'image/jpeg');
+            res.send(imageBuffer);
+        } else {
+            res.status(500).json({ error: 'Falha ao capturar snapshot' });
+        }
+    } catch (error) {
+        console.error('Erro ao capturar snapshot:', error);
+        res.status(500).json({ error: 'Erro ao capturar snapshot' });
+    }
+});
+
+// POST /api/dvr/recordings/find - Buscar gravações
+app.post('/api/dvr/recordings/find', requirePageLogin, [
+    body('dvrId').isInt().withMessage('ID do DVR é obrigatório'),
+    body('channel').isInt().withMessage('Canal é obrigatório'),
+    body('startTime').notEmpty().withMessage('Data inicial é obrigatória'),
+    body('endTime').notEmpty().withMessage('Data final é obrigatória')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { dvrId, channel, startTime, endTime, password } = req.body;
+        
+        const dispositivo = await dvrService.obterDispositivo(dvrId);
+        if (!dispositivo) {
+            return res.status(404).json({ error: 'Dispositivo não encontrado' });
+        }
+
+        const recordings = await intelbrasDvrService.findRecordings(
+            dispositivo.ip_address,
+            dispositivo.porta || 80,
+            dispositivo.usuario || 'admin',
+            password,
+            channel,
+            new Date(startTime),
+            new Date(endTime)
+        );
+
+        res.json({ success: true, recordings });
+    } catch (error) {
+        console.error('Erro ao buscar gravações:', error);
+        res.status(500).json({ error: 'Erro ao buscar gravações' });
+    }
+});
+
+// POST /api/dvr/rtsp-url - Obter URL RTSP para streaming (senha no body)
+app.post('/api/dvr/rtsp-url', requirePageLogin, [
+    body('dvrId').isInt().withMessage('ID do DVR é obrigatório'),
+    body('channel').isInt().withMessage('Canal é obrigatório'),
+    body('password').notEmpty().withMessage('Senha é obrigatória'),
+    body('subtype').optional().isInt({ min: 0, max: 1 }).withMessage('Subtype deve ser 0 ou 1')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { dvrId, channel, password, subtype } = req.body;
+        
+        const dispositivo = await dvrService.obterDispositivo(dvrId);
+        if (!dispositivo) {
+            return res.status(404).json({ error: 'Dispositivo não encontrado' });
+        }
+
+        const rtspUrl = intelbrasDvrService.getRtspUrl(
+            dispositivo.ip_address,
+            dispositivo.porta_rtsp || 554,
+            dispositivo.usuario || 'admin',
+            password,
+            parseInt(channel),
+            parseInt(subtype) || 0
+        );
+
+        res.json({ success: true, rtspUrl });
+    } catch (error) {
+        console.error('Erro ao gerar URL RTSP:', error);
+        res.status(500).json({ error: 'Erro ao gerar URL RTSP' });
+    }
+});
+
+// POST /api/dvr/channels - Obter informações dos canais (senha no body)
+app.post('/api/dvr/channels', requirePageLogin, [
+    body('dvrId').isInt().withMessage('ID do DVR é obrigatório'),
+    body('password').notEmpty().withMessage('Senha é obrigatória')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { dvrId, password } = req.body;
+        
+        const dispositivo = await dvrService.obterDispositivo(dvrId);
+        if (!dispositivo) {
+            return res.status(404).json({ error: 'Dispositivo não encontrado' });
+        }
+
+        const channelInfo = await intelbrasDvrService.getChannelInfo(
+            dispositivo.ip_address,
+            dispositivo.porta || 80,
+            dispositivo.usuario || 'admin',
+            password
+        );
+
+        if (channelInfo) {
+            res.json({ success: true, channels: channelInfo });
+        } else {
+            res.status(500).json({ error: 'Falha ao obter informações dos canais' });
+        }
+    } catch (error) {
+        console.error('Erro ao obter informações dos canais:', error);
+        res.status(500).json({ error: 'Erro ao obter informações dos canais' });
     }
 });
 

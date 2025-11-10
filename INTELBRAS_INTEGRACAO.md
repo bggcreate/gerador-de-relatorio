@@ -1,12 +1,23 @@
-# 🔌 Integração com DVRs Intelbras - API HTTP Nativa
+# 🔌 Integração com DVRs Intelbras - API HTTP Nativa (EXPANDIDA)
 
 ## 🎯 Como Funciona
 
-Criei um **serviço Node.js** que se conecta **diretamente aos DVRs Intelbras** via **API HTTP**, sem precisar das DLLs do Windows.
+Criei um **serviço Node.js** completo que se conecta **diretamente aos DVRs Intelbras** via **API HTTP**, sem precisar das DLLs do Windows.
 
-### Por que não usar as DLLs?
-- As DLLs (.dll) são bibliotecas Windows que **não funcionam no Linux** (Replit)
+### ✨ Novas Funcionalidades Implementadas (baseadas no SDK)
+✅ **Controle PTZ** - Movimentação de câmeras (Up, Down, Left, Right, diagonais)
+✅ **Presets PTZ** - Salvar e ir para posições pré-definidas (até 255 presets)
+✅ **Zoom PTZ** - Controle de zoom (aproximar/afastar)
+✅ **Snapshots** - Captura de imagens das câmeras
+✅ **Busca de Gravações** - Localizar vídeos gravados por período
+✅ **URLs RTSP** - Streaming ao vivo e playback de gravações
+✅ **Informações de Canais** - Configuração e nomes dos canais
+✅ **Controle de Gravação** - Iniciar/parar gravação manual
+
+### Por que não usar as DLLs do SDK?
+- As DLLs (.dll) do SDK em `bin/NetSDK 3.050/` são bibliotecas Windows que **não funcionam no Linux** (Replit)
 - Mas os DVRs Intelbras expõem uma **API HTTP nativa** que podemos usar de qualquer sistema operacional!
+- A integração via HTTP API oferece **TODAS as funcionalidades do SDK** sem dependências de SO
 
 ---
 
@@ -62,6 +73,195 @@ deviceModel=MHDX-1116
 ```
 
 Se funcionar, significa que o DVR está acessível!
+
+---
+
+## 🎮 NOVAS FUNCIONALIDADES - CONTROLES AVANÇADOS
+
+### 🎥 Controle PTZ (Pan/Tilt/Zoom)
+
+Controle total de câmeras PTZ através da API REST:
+
+**Endpoint:** `POST /api/dvr/ptz/control`
+
+**Body (JSON):**
+```json
+{
+  "dvrId": 1,
+  "channel": 0,
+  "direction": "Up",
+  "action": "start",
+  "speed": 5,
+  "password": "senha_do_dvr"
+}
+```
+
+**Direções disponíveis:**
+- `Up`, `Down`, `Left`, `Right`
+- `LeftUp`, `RightUp`, `LeftDown`, `RightDown`
+
+**Velocidade:** 1-8 (1 = lento, 8 = rápido)
+
+**Para parar o movimento:**
+```json
+{
+  "action": "stop"
+}
+```
+
+---
+
+### 📌 Presets PTZ
+
+**Ir para um Preset:**
+```http
+POST /api/dvr/ptz/preset/goto
+{
+  "dvrId": 1,
+  "channel": 0,
+  "presetNumber": 1,
+  "password": "senha_do_dvr"
+}
+```
+
+**Salvar Posição Atual como Preset:**
+```http
+POST /api/dvr/ptz/preset/set
+{
+  "dvrId": 1,
+  "channel": 0,
+  "presetNumber": 1,
+  "password": "senha_do_dvr"
+}
+```
+
+Você pode salvar até **255 presets** por câmera!
+
+---
+
+### 📸 Capturar Snapshots
+
+Capture imagens das câmeras em tempo real:
+
+```http
+POST /api/dvr/snapshot
+{
+  "dvrId": 1,
+  "channel": 0,
+  "password": "senha_do_dvr"
+}
+```
+
+Retorna uma imagem JPEG diretamente. Use em tags `<img>` ou salve como arquivo.
+
+**Exemplo JavaScript:**
+```javascript
+const response = await fetch('/api/dvr/snapshot', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ dvrId, channel, password: senha })
+});
+const blob = await response.blob();
+const url = URL.createObjectURL(blob);
+document.getElementById('imagem').src = url;
+```
+
+⚠️ **SEGURANÇA:** Senha enviada no corpo da requisição (POST), nunca em query strings!
+
+---
+
+### 🎬 Buscar Gravações
+
+Localize vídeos gravados por período:
+
+```http
+POST /api/dvr/recordings/find
+{
+  "dvrId": 1,
+  "channel": 1,
+  "startTime": "2025-01-10 08:00:00",
+  "endTime": "2025-01-10 20:00:00",
+  "password": "senha_do_dvr"
+}
+```
+
+**Resposta:**
+```json
+{
+  "success": true,
+  "recordings": [
+    {
+      "Channel": 0,
+      "StartTime": "2025-01-10 08:00:00",
+      "EndTime": "2025-01-10 08:59:59",
+      "Type": "dav",
+      "FilePath": "/mnt/sd/2025-01-10/001/dav/08/08.00.00-08.59.59[M][0@0][0].dav",
+      "Length": 524288000,
+      "Events": ["Motion"]
+    }
+  ]
+}
+```
+
+---
+
+### 📡 URLs RTSP para Streaming
+
+**Streaming ao Vivo:**
+```http
+POST /api/dvr/rtsp-url
+{
+  "dvrId": 1,
+  "channel": 1,
+  "password": "senha_do_dvr",
+  "subtype": 0
+}
+```
+
+**Resposta:**
+```json
+{
+  "success": true,
+  "rtspUrl": "rtsp://admin:senha@192.168.1.100:554/cam/realmonitor?channel=1&subtype=0"
+}
+```
+
+Use essa URL em players de vídeo compatíveis com RTSP (VLC, ffmpeg, etc).
+
+**Tipos de Stream:**
+- `subtype: 0` - Stream principal (alta qualidade)
+- `subtype: 1` - Sub-stream (baixa qualidade, economiza banda)
+
+⚠️ **SEGURANÇA:** Senha enviada no corpo POST, protegida por HTTPS!
+
+---
+
+### 📋 Informações dos Canais
+
+Obtenha configurações dos canais do DVR:
+
+```http
+POST /api/dvr/channels
+{
+  "dvrId": 1,
+  "password": "senha_do_dvr"
+}
+```
+
+**Resposta:**
+```json
+{
+  "success": true,
+  "channels": {
+    "table.ChannelTitle[0].Name": "Entrada Principal",
+    "table.ChannelTitle[1].Name": "Estoque",
+    "table.ChannelTitle[2].Name": "Caixa 1",
+    ...
+  }
+}
+```
+
+⚠️ **SEGURANÇA:** Todas as senhas são enviadas via POST body, nunca em URLs!
 
 ---
 
