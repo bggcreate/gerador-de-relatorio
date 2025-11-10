@@ -8,6 +8,7 @@ import { initDemandasPage } from './pages/demandas.js';
 import { initNovoRelatorioPage } from './pages/novo-relatorio.js';
 import { initGerenciarUsuariosPage } from './pages/gerenciar-usuarios.js';
 import { initLogsPage } from './pages/logs.js';
+import { initDVRMonitorPage } from './pages/dvr-monitor.js';
 import { initPageAnimations, initScrollAnimations } from './utils.js';
 
 const pageInitializers = {
@@ -17,7 +18,8 @@ const pageInitializers = {
     'demandas': initDemandasPage,
     'novo-relatorio': initNovoRelatorioPage,
     'gerenciar-usuarios': initGerenciarUsuariosPage,
-    'logs': initLogsPage
+    'logs': initLogsPage,
+    'dvr-monitor': initDVRMonitorPage
 };
 
 let currentUser = null;
@@ -88,7 +90,7 @@ async function setupSessionAndUI() {
         currentUser = await response.json();
         window.currentUser = currentUser; // Expor para outras páginas
         // Todos os menus estão visíveis para todos os usuários
-        const menuIds = ['nav-dashboard', 'nav-consulta', 'nav-novo-relatorio', 'nav-lojas', 'nav-demandas', 'nav-configuracoes', 'nav-logs'];
+        const menuIds = ['nav-dashboard', 'nav-consulta', 'nav-novo-relatorio', 'nav-lojas', 'nav-demandas', 'nav-dvr', 'nav-configuracoes', 'nav-logs'];
         menuIds.forEach(menuId => {
             document.querySelectorAll(`#${menuId}`).forEach(el => {
                 el?.classList.remove('d-none');

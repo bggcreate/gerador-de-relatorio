@@ -18,6 +18,7 @@ const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const { requireAuth, requireAuthPage, getLojaFilter, getPermissions } = require('./middleware/roleAuth');
 const jwt = require('jsonwebtoken');
+const DVRService = require('./services/dvrService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -249,6 +250,59 @@ let db = new sqlite3.Database(DB_PATH, err => {
             uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
         
+        // Tabelas para Módulo DVR/NVR Intelbras
+        db.run(`CREATE TABLE IF NOT EXISTS dvr_dispositivos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            loja_id INTEGER,
+            loja_nome TEXT,
+            ip_address TEXT NOT NULL,
+            porta INTEGER DEFAULT 37777,
+            usuario TEXT,
+            modelo TEXT,
+            canais_total INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'offline',
+            ultima_conexao DATETIME,
+            observacoes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (loja_id) REFERENCES lojas(id) ON DELETE SET NULL
+        )`);
+        
+        db.run(`CREATE TABLE IF NOT EXISTS dvr_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            dvr_id INTEGER NOT NULL,
+            dvr_nome TEXT,
+            loja_nome TEXT,
+            tipo_evento TEXT NOT NULL,
+            descricao TEXT,
+            canal INTEGER,
+            severidade TEXT DEFAULT 'info',
+            data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+            detalhes_json TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (dvr_id) REFERENCES dvr_dispositivos(id) ON DELETE CASCADE
+        )`);
+        
+        db.run(`CREATE TABLE IF NOT EXISTS dvr_arquivos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            dvr_id INTEGER NOT NULL,
+            dvr_nome TEXT,
+            loja_nome TEXT,
+            tipo_arquivo TEXT NOT NULL,
+            nome_arquivo TEXT NOT NULL,
+            caminho_arquivo TEXT NOT NULL,
+            tamanho_bytes INTEGER,
+            data_geracao DATETIME,
+            canal INTEGER,
+            inicio_gravacao DATETIME,
+            fim_gravacao DATETIME,
+            descricao TEXT,
+            uploaded_by TEXT,
+            uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (dvr_id) REFERENCES dvr_dispositivos(id) ON DELETE CASCADE
+        )`);
+        
         // Adicionar colunas caso não existam (migração)
         db.run(`ALTER TABLE usuarios ADD COLUMN loja_gerente TEXT`, (err) => {
             if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar loja_gerente:', err.message);
@@ -315,6 +369,12 @@ let db = new sqlite3.Database(DB_PATH, err => {
         });
     });
 });
+
+// Inicializar serviço DVR após conexão do banco
+let dvrService;
+if (db) {
+    dvrService = new DVRService(db);
+}
 
 // =================================================================
 // SISTEMA DE TOKENS JWT TEMPORÁRIOS PARA DESENVOLVIMENTO
@@ -476,6 +536,11 @@ app.get('/logs', requirePageLogin, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
+// DVR/NVR Monitor - todos podem acessar
+app.get('/dvr-monitor', requirePageLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
 // Backup - apenas admin e dev
 app.get('/backup', requirePageLogin, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
@@ -487,7 +552,7 @@ app.get('/dev/system', requirePageLogin, (req, res) => {
 });
 
 app.get('/content/:page', requirePageLogin, (req, res) => {
-    const allowedPages = ['admin', 'consulta', 'demandas', 'gerenciar-lojas', 'assistencia', 'alertas-tecnico', 'novo-relatorio', 'gerenciar-usuarios', 'logs'];
+    const allowedPages = ['admin', 'consulta', 'demandas', 'gerenciar-lojas', 'assistencia', 'alertas-tecnico', 'novo-relatorio', 'gerenciar-usuarios', 'logs', 'dvr-monitor'];
     if (allowedPages.includes(req.params.page)) {
         res.sendFile(path.join(__dirname, 'views', `${req.params.page}.html`));
     } else {
@@ -1794,6 +1859,330 @@ app.get('/api/pdf/rankings/:id/download', requirePageLogin, (req, res) => {
 
 // =================================================================
 // FIM DAS ROTAS DE PROCESSAMENTO DE PDF
+// =================================================================
+
+// =================================================================
+// APIS DE DVR/NVR INTELBRAS
+// =================================================================
+
+// Configurar multer para upload de arquivos DVR
+const dvrStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dvrId = req.body.dvr_id || 'temp';
+        const dvrDir = path.join(dataDir, 'dvr_files', dvrId.toString());
+        if (!fs.existsSync(dvrDir)) {
+            fs.mkdirSync(dvrDir, { recursive: true });
+        }
+        cb(null, dvrDir);
+    },
+    filename: (req, file, cb) => {
+        const timestamp = Date.now();
+        const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+        cb(null, `${timestamp}_${safeName}`);
+    }
+});
+
+const dvrUpload = multer({
+    storage: dvrStorage,
+    limits: {
+        fileSize: 500 * 1024 * 1024
+    },
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = ['.mp4', '.avi', '.mkv', '.jpg', '.jpeg', '.png', '.pdf', '.xml', '.json', '.txt'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowedTypes.includes(ext)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Tipo de arquivo não permitido. Permitidos: vídeos, imagens, PDF, XML, JSON, TXT'));
+        }
+    }
+});
+
+// GET /api/dvr/dispositivos - Listar dispositivos DVR/NVR
+app.get('/api/dvr/dispositivos', requirePageLogin, async (req, res) => {
+    try {
+        const filtros = {
+            loja_id: req.query.loja_id,
+            loja_nome: req.query.loja_nome,
+            status: req.query.status
+        };
+        
+        const dispositivos = await dvrService.listarDispositivos(filtros);
+        res.json({ success: true, data: dispositivos });
+    } catch (error) {
+        console.error('Erro ao listar dispositivos DVR:', error);
+        res.status(500).json({ error: 'Erro ao listar dispositivos DVR' });
+    }
+});
+
+// GET /api/dvr/dispositivos/:id - Obter dispositivo específico
+app.get('/api/dvr/dispositivos/:id', requirePageLogin, async (req, res) => {
+    try {
+        const dispositivo = await dvrService.obterDispositivo(req.params.id);
+        if (!dispositivo) {
+            return res.status(404).json({ error: 'Dispositivo não encontrado' });
+        }
+        res.json({ success: true, data: dispositivo });
+    } catch (error) {
+        console.error('Erro ao obter dispositivo DVR:', error);
+        res.status(500).json({ error: 'Erro ao obter dispositivo DVR' });
+    }
+});
+
+// POST /api/dvr/dispositivos - Criar novo dispositivo DVR/NVR
+app.post('/api/dvr/dispositivos', requirePageLogin, [
+    body('nome').notEmpty().withMessage('Nome é obrigatório'),
+    body('ip_address').notEmpty().withMessage('IP é obrigatório'),
+    body('ip_address').matches(/^(\d{1,3}\.){3}\d{1,3}$/).withMessage('IP inválido')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    
+    try {
+        const resultado = await dvrService.criarDispositivo(req.body);
+        logEvent('admin', req.session.username, 'dvr_created', `Dispositivo DVR ${req.body.nome} criado`, req);
+        res.status(201).json({ success: true, data: resultado });
+    } catch (error) {
+        console.error('Erro ao criar dispositivo DVR:', error);
+        res.status(500).json({ error: 'Erro ao criar dispositivo DVR' });
+    }
+});
+
+// PUT /api/dvr/dispositivos/:id - Atualizar dispositivo DVR/NVR
+app.put('/api/dvr/dispositivos/:id', requirePageLogin, async (req, res) => {
+    try {
+        await dvrService.atualizarDispositivo(req.params.id, req.body);
+        logEvent('admin', req.session.username, 'dvr_updated', `Dispositivo DVR ${req.params.id} atualizado`, req);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao atualizar dispositivo DVR:', error);
+        if (error.message === 'Dispositivo não encontrado') {
+            return res.status(404).json({ error: error.message });
+        }
+        res.status(500).json({ error: 'Erro ao atualizar dispositivo DVR' });
+    }
+});
+
+// DELETE /api/dvr/dispositivos/:id - Excluir dispositivo DVR/NVR
+app.delete('/api/dvr/dispositivos/:id', requirePageLogin, async (req, res) => {
+    try {
+        await dvrService.excluirDispositivo(req.params.id);
+        logEvent('admin', req.session.username, 'dvr_deleted', `Dispositivo DVR ${req.params.id} excluído`, req);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao excluir dispositivo DVR:', error);
+        if (error.message === 'Dispositivo não encontrado') {
+            return res.status(404).json({ error: error.message });
+        }
+        res.status(500).json({ error: 'Erro ao excluir dispositivo DVR' });
+    }
+});
+
+// PATCH /api/dvr/dispositivos/:id/status - Atualizar status do dispositivo
+app.patch('/api/dvr/dispositivos/:id/status', requirePageLogin, async (req, res) => {
+    try {
+        const { status } = req.body;
+        if (!['online', 'offline'].includes(status)) {
+            return res.status(400).json({ error: 'Status inválido. Use: online ou offline' });
+        }
+        await dvrService.atualizarStatus(req.params.id, status);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao atualizar status:', error);
+        res.status(500).json({ error: 'Erro ao atualizar status' });
+    }
+});
+
+// GET /api/dvr/logs - Listar logs de DVR
+app.get('/api/dvr/logs', requirePageLogin, async (req, res) => {
+    try {
+        const filtros = {
+            dvr_id: req.query.dvr_id,
+            loja_nome: req.query.loja_nome,
+            tipo_evento: req.query.tipo_evento,
+            severidade: req.query.severidade,
+            data_inicio: req.query.data_inicio,
+            data_fim: req.query.data_fim
+        };
+        
+        const paginacao = {
+            limit: parseInt(req.query.limit) || 100,
+            offset: parseInt(req.query.offset) || 0
+        };
+        
+        const logs = await dvrService.listarLogs(filtros, paginacao);
+        res.json({ success: true, data: logs });
+    } catch (error) {
+        console.error('Erro ao listar logs DVR:', error);
+        res.status(500).json({ error: 'Erro ao listar logs DVR' });
+    }
+});
+
+// POST /api/dvr/logs - Registrar novo log de DVR
+app.post('/api/dvr/logs', requirePageLogin, [
+    body('dvr_id').notEmpty().withMessage('ID do DVR é obrigatório'),
+    body('tipo_evento').notEmpty().withMessage('Tipo de evento é obrigatório')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    
+    try {
+        const resultado = await dvrService.registrarLog(req.body);
+        res.status(201).json({ success: true, data: resultado });
+    } catch (error) {
+        console.error('Erro ao registrar log DVR:', error);
+        res.status(500).json({ error: 'Erro ao registrar log DVR' });
+    }
+});
+
+// DELETE /api/dvr/logs/:id - Excluir log
+app.delete('/api/dvr/logs/:id', requirePageLogin, async (req, res) => {
+    try {
+        await dvrService.excluirLog(req.params.id);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao excluir log:', error);
+        res.status(500).json({ error: 'Erro ao excluir log' });
+    }
+});
+
+// GET /api/dvr/arquivos - Listar arquivos de DVR
+app.get('/api/dvr/arquivos', requirePageLogin, async (req, res) => {
+    try {
+        const filtros = {
+            dvr_id: req.query.dvr_id,
+            loja_nome: req.query.loja_nome,
+            tipo_arquivo: req.query.tipo_arquivo,
+            data_inicio: req.query.data_inicio,
+            data_fim: req.query.data_fim
+        };
+        
+        const paginacao = {
+            limit: parseInt(req.query.limit) || 50,
+            offset: parseInt(req.query.offset) || 0
+        };
+        
+        const arquivos = await dvrService.listarArquivos(filtros, paginacao);
+        res.json({ success: true, data: arquivos });
+    } catch (error) {
+        console.error('Erro ao listar arquivos DVR:', error);
+        res.status(500).json({ error: 'Erro ao listar arquivos DVR' });
+    }
+});
+
+// POST /api/dvr/arquivos - Upload de arquivo DVR
+app.post('/api/dvr/arquivos', requirePageLogin, dvrUpload.single('arquivo'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo foi enviado' });
+        }
+        
+        const dadosArquivo = {
+            dvr_id: req.body.dvr_id,
+            dvr_nome: req.body.dvr_nome,
+            loja_nome: req.body.loja_nome,
+            tipo_arquivo: req.body.tipo_arquivo || path.extname(req.file.originalname).substring(1),
+            nome_arquivo: req.file.originalname,
+            caminho_arquivo: req.file.path,
+            tamanho_bytes: req.file.size,
+            data_geracao: req.body.data_geracao || new Date().toISOString(),
+            canal: req.body.canal,
+            inicio_gravacao: req.body.inicio_gravacao,
+            fim_gravacao: req.body.fim_gravacao,
+            descricao: req.body.descricao,
+            uploaded_by: req.session.username
+        };
+        
+        const resultado = await dvrService.registrarArquivo(dadosArquivo);
+        logEvent('admin', req.session.username, 'dvr_file_uploaded', `Arquivo ${req.file.originalname} enviado para DVR ${req.body.dvr_id}`, req);
+        res.status(201).json({ 
+            success: true, 
+            data: resultado,
+            file: {
+                id: resultado.id,
+                nome: req.file.originalname,
+                tamanho: req.file.size
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao fazer upload de arquivo DVR:', error);
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+        res.status(500).json({ error: 'Erro ao fazer upload de arquivo DVR' });
+    }
+});
+
+// GET /api/dvr/arquivos/:id/download - Download de arquivo DVR
+app.get('/api/dvr/arquivos/:id/download', requirePageLogin, async (req, res) => {
+    try {
+        const arquivo = await dvrService.obterArquivo(req.params.id);
+        
+        if (!arquivo) {
+            return res.status(404).json({ error: 'Arquivo não encontrado' });
+        }
+        
+        if (!fs.existsSync(arquivo.caminho_arquivo)) {
+            return res.status(404).json({ error: 'Arquivo físico não encontrado no servidor' });
+        }
+        
+        const ext = path.extname(arquivo.nome_arquivo).toLowerCase();
+        let contentType = 'application/octet-stream';
+        
+        if (['.mp4', '.avi', '.mkv'].includes(ext)) {
+            contentType = 'video/' + ext.substring(1);
+        } else if (['.jpg', '.jpeg'].includes(ext)) {
+            contentType = 'image/jpeg';
+        } else if (ext === '.png') {
+            contentType = 'image/png';
+        } else if (ext === '.pdf') {
+            contentType = 'application/pdf';
+        } else if (ext === '.xml') {
+            contentType = 'application/xml';
+        } else if (ext === '.json') {
+            contentType = 'application/json';
+        }
+        
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', `attachment; filename="${arquivo.nome_arquivo}"`);
+        res.setHeader('Content-Length', arquivo.tamanho_bytes);
+        
+        fs.createReadStream(arquivo.caminho_arquivo).pipe(res);
+    } catch (error) {
+        console.error('Erro ao fazer download de arquivo DVR:', error);
+        res.status(500).json({ error: 'Erro ao fazer download de arquivo DVR' });
+    }
+});
+
+// DELETE /api/dvr/arquivos/:id - Excluir arquivo DVR
+app.delete('/api/dvr/arquivos/:id', requirePageLogin, async (req, res) => {
+    try {
+        const arquivo = await dvrService.obterArquivo(req.params.id);
+        
+        if (!arquivo) {
+            return res.status(404).json({ error: 'Arquivo não encontrado' });
+        }
+        
+        await dvrService.excluirArquivo(req.params.id);
+        
+        if (fs.existsSync(arquivo.caminho_arquivo)) {
+            fs.unlinkSync(arquivo.caminho_arquivo);
+        }
+        
+        logEvent('admin', req.session.username, 'dvr_file_deleted', `Arquivo ${arquivo.nome_arquivo} excluído`, req);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao excluir arquivo DVR:', error);
+        res.status(500).json({ error: 'Erro ao excluir arquivo DVR' });
+    }
+});
+
+// =================================================================
+// FIM DAS APIS DE DVR/NVR
 // =================================================================
 
 // ROTA DE EXPORTAÇÃO PARA EXCEL 
