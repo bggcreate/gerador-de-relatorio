@@ -1,0 +1,517 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文(中华人民共和国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\PlayDemo.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.chs\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\PlayDemo.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG  0, 0, 239, 63
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 9, "宋体"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,182,42,50,14,WS_GROUP
+    LTEXT           "PlaySDK Version:",IDC_STATIC,20,19,69,9
+    LTEXT           "",IDC_STATIC_VERSION,93,20,106,11
+END
+
+IDD_PLAYDEMO_DIALOG DIALOGEX 0, 0, 411, 348
+STYLE DS_SETFONT | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_ACCEPTFILES | WS_EX_APPWINDOW
+CAPTION "PlayDemo"
+MENU IDR_MENU
+FONT 9, "宋体", 0, 0, 0x1
+BEGIN
+    CONTROL         "Slider1",IDC_SLIDER_PROC,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,0,294,410,15
+    CONTROL         "",IDC_STATIC_MSG,"Static",SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,0,330,410,17
+    LTEXT           "",IDC_STATIC_PLAY,0,0,410,290
+    CONTROL         "",IDC_BUTTON_PLAY,"Button",BS_OWNERDRAW | WS_TABSTOP,8,309,16,16
+    CONTROL         "",IDC_BUTTON_PAUSE,"Button",BS_OWNERDRAW | WS_TABSTOP,24,309,16,16
+    CONTROL         "",IDC_BUTTON_STOP,"Button",BS_OWNERDRAW | WS_TABSTOP,40,309,16,16
+    CONTROL         "",IDC_BUTTON_TOBEGIN,"Button",BS_OWNERDRAW | WS_TABSTOP,56,309,16,16
+    CONTROL         "",IDC_BUTTON_TOEND,"Button",BS_OWNERDRAW | WS_TABSTOP,72,309,16,16
+    CONTROL         "",IDC_BUTTON_BACKONCE,"Button",BS_OWNERDRAW | WS_TABSTOP,88,309,16,16
+    CONTROL         "",IDC_BUTTON_ONEBYONE,"Button",BS_OWNERDRAW | WS_TABSTOP,104,309,16,16
+    CONTROL         "",IDC_BUTTON_SLOW,"Button",BS_OWNERDRAW | WS_TABSTOP,120,309,16,16
+    CONTROL         "",IDC_BUTTON_FAST,"Button",BS_OWNERDRAW | WS_TABSTOP,136,309,16,16
+    CONTROL         "",IDC_BUTTON_PICTURE,"Button",BS_OWNERDRAW | WS_TABSTOP,218,309,16,16
+    CONTROL         "",IDC_BUTTON_SETCOLOR,"Button",BS_OWNERDRAW | WS_TABSTOP,235,309,16,16
+    CONTROL         "Slider2",IDC_SLIDER_AUDIO,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,337,309,63,9
+    CONTROL         "Slider2",IDC_SLIDER_WAVE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,337,317,63,9
+    CONTROL         "",IDC_BUTTON_AUDIO,"Button",BS_OWNERDRAW | WS_TABSTOP,321,309,16,17
+    CONTROL         "",IDC_BUTTON_BACKWORD,"Button",BS_OWNERDRAW | WS_TABSTOP,165,309,16,16
+    CONTROL         "",IDC_BUTTON_FORWORD,"Button",BS_OWNERDRAW | WS_TABSTOP,181,309,16,16
+END
+
+IDD_OPENFILE DIALOG  0, 0, 244, 46
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "OpenFile"
+FONT 9, "宋体"
+BEGIN
+    PUSHBUTTON      "open file",IDC_BUTTON_FILE,187,7,50,14
+    EDITTEXT        IDC_EDIT_FILE,7,7,176,13,ES_AUTOHSCROLL
+    CONTROL         "file",IDC_RADIO_FILE,"Button",BS_AUTORADIOBUTTON,51,25,60,10
+    CONTROL         "file stream",IDC_RADIO_FILESTREAM,"Button",BS_AUTORADIOBUTTON,123,25,60,10
+    PUSHBUTTON      "OK",IDC_BUTTON_OK,187,25,50,14
+    LTEXT           "play type:",IDC_STATIC,7,25,41,8
+END
+
+IDD_DIALOG_DISPLAY DIALOG  0, 0, 188, 94
+STYLE DS_SETFONT | WS_CHILD | WS_BORDER
+FONT 9, "宋体"
+BEGIN
+END
+
+IDD_DIALOG_SETCOLOR DIALOGEX 0, 0, 136, 84
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 9, "宋体", 0, 0, 0x1
+BEGIN
+    CONTROL         "Slider1",IDC_SLIDER_SATURATION,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,56,7,68,12
+    CONTROL         "Slider1",IDC_SLIDER_BRIGHTNESS,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,56,25,68,12
+    CONTROL         "Slider1",IDC_SLIDER_CONTRAST,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,56,43,68,12
+    CONTROL         "Slider1",IDC_SLIDER_HUE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,56,61,68,12
+    LTEXT           "Saturation",IDC_STATIC,7,7,42,12
+    LTEXT           "Brightness",IDC_STATIC,7,25,42,12
+    LTEXT           "Contrast",IDC_STATIC,7,43,42,12
+    LTEXT           "Hue",IDC_STATIC,7,60,42,12
+END
+
+IDD_DIALOG_PICTURE DIALOGEX 0, 0, 184, 83
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 9, "宋体", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,127,62,50,14
+    GROUPBOX        "Type",IDC_STATIC,7,7,170,25
+    CONTROL         "BMP",IDC_RADIO_BMP,"Button",BS_AUTORADIOBUTTON,32,17,28,10
+    CONTROL         "JPG",IDC_RADIO_JPG,"Button",BS_AUTORADIOBUTTON,102,17,28,10
+    EDITTEXT        IDC_EDIT_PICPATH,7,41,121,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Path",IDC_BUTTON_PATH,127,41,50,14
+END
+
+IDD_DIALOG_MULTPLAY DIALOGEX 0, 0, 157, 157
+STYLE DS_SETFONT | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 10, "System", 0, 0, 0x1
+BEGIN
+END
+
+IDD_DIALOG_LOCATE DIALOGEX 0, 0, 144, 139
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 9, "宋体", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Locate",IDC_BUTTON_LOCATE,105,116,32,15
+    GROUPBOX        "Type",IDC_STATIC,7,5,130,25
+    CONTROL         "Frame Num",IDC_RADIO_FRAME,"Button",BS_AUTORADIOBUTTON | WS_GROUP,16,14,47,13
+    CONTROL         "Time",IDC_RADIO_TIME,"Button",BS_AUTORADIOBUTTON,74,14,28,13
+    GROUPBOX        "Range",IDC_STATIC,7,30,130,39
+    LTEXT           "",IDC_STATIC_RANGE,13,41,113,24
+    GROUPBOX        "",IDC_STATIC,7,72,130,31
+    LTEXT           "Frame Num or Time:",IDC_STATIC,9,84,73,8
+    EDITTEXT        IDC_EDIT_RANGEVALUE,85,80,43,17,ES_AUTOHSCROLL | ES_WANTRETURN | ES_NUMBER
+END
+
+IDD_DIALOG_CUTFILE DIALOGEX 0, 0, 146, 138
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 9, "宋体", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Type",IDC_STATIC,3,3,139,39
+    GROUPBOX        "Range",IDC_STATIC,3,43,139,43
+    PUSHBUTTON      "Save",IDC_BUTTON_SAVE,102,119,40,15
+    LTEXT           "",IDC_RANGEVALUE,20,56,116,24
+    LTEXT           "Begin pos:",IDC_STATIC,3,91,41,10
+    LTEXT           "End Pos:",IDC_STATIC,3,106,39,10
+    EDITTEXT        IDC_EDIT_STARTPOS,49,89,47,12,ES_AUTOHSCROLL | ES_WANTRETURN | ES_NUMBER
+    EDITTEXT        IDC_EDIT_ENDPOS,49,104,48,12,ES_AUTOHSCROLL | ES_WANTRETURN | ES_NUMBER
+    CONTROL         "Frame Num",IDC_RADIO_FRAME,"Button",BS_AUTORADIOBUTTON | WS_GROUP,19,16,48,16
+    CONTROL         "Time",IDC_RADIO_TIME,"Button",BS_AUTORADIOBUTTON,81,16,36,16
+    EDITTEXT        IDC_EDIT_REALSTART,99,89,43,12,ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_EDIT_REALEND,99,104,43,12,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "(support .dav files)",IDC_STATIC,3,120,81,10
+END
+
+IDD_DIALOG_MEDIAINFO DIALOG  0, 0, 147, 95
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+FONT 9, "宋体"
+BEGIN
+    LTEXT           "Static",IDC_STATIC_MEDIAINFO,21,16,119,72
+END
+
+IDD_DIALOG_DECODER_ENGINE DIALOGEX 0, 0, 174, 112
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Decode Engine"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,14,86,50,14
+    PUSHBUTTON      "取消",IDCANCEL,110,86,50,14
+    CONTROL         "Soft Decoder",IDC_RADIO_DECODE_0,"Button",BS_AUTORADIOBUTTON,37,24,58,10
+    CONTROL         "Hardware Decoder",IDC_RADIO_DECODE_1,"Button",BS_AUTORADIOBUTTON,37,51,76,10
+END
+
+IDD_DIALOG_CONSOLE DIALOGEX 0, 0, 186, 61
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "执行",IDOK,65,34,50,14
+    EDITTEXT        IDC_EDIT_COMMAND,22,12,136,15,ES_AUTOHSCROLL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 3,40,0,0
+ PRODUCTVERSION 3,40,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "FileDescription", "PlayDemo Microsoft 基础类应用程序"
+            VALUE "FileVersion", "3, 40, 0, 0"
+            VALUE "InternalName", "PlayDemo"
+            VALUE "LegalCopyright", "版权所有 (C) 2018"
+            VALUE "OriginalFilename", "PlayDemo.EXE"
+            VALUE "ProductName", "PlayDemo 应用程序"
+            VALUE "ProductVersion", "3, 40, 0, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 232
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 56
+    END
+
+    IDD_PLAYDEMO_DIALOG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 410
+        HORZGUIDE, 284
+        HORZGUIDE, 305
+        HORZGUIDE, 306
+        HORZGUIDE, 309
+        HORZGUIDE, 326
+        HORZGUIDE, 330
+    END
+
+    IDD_OPENFILE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 237
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 39
+        HORZGUIDE, 25
+    END
+
+    IDD_DIALOG_DISPLAY, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 184
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 90
+    END
+
+    IDD_DIALOG_SETCOLOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 129
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 77
+    END
+
+    IDD_DIALOG_PICTURE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 177
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 76
+    END
+
+    IDD_DIALOG_LOCATE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 137
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 131
+    END
+
+    IDD_DIALOG_CUTFILE, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 142
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 134
+    END
+
+    IDD_DIALOG_MEDIAINFO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 140
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
+    END
+
+    IDD_DIALOG_DECODER_ENGINE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 160
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 105
+    END
+
+    IDD_DIALOG_CONSOLE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 54
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP_STEPBACK     BITMAP                  "res\\step backward.bmp"
+IDB_BITMAP_STEP         BITMAP                  "res\\step forward.bmp"
+IDB_BITMAP_STOP         BITMAP                  "res\\stop.bmp"
+IDB_BITMAP_CAMERA       BITMAP                  "res\\camera.bmp"
+IDB_BITMAP_FAST         BITMAP                  "res\\fast.bmp"
+IDB_BITMAP_FULLSCREEN   BITMAP                  "res\\FullScreen.bmp"
+IDB_BITMAP_PAUSE        BITMAP                  "res\\pause.bmp"
+IDB_BITMAP_PLAY         BITMAP                  "res\\play.bmp"
+IDB_BITMAP_TOEND        BITMAP                  "res\\seektoend.bmp"
+IDB_BITMAP_TOBEGIN      BITMAP                  "res\\seektostart.bmp"
+IDB_BITMAP_SETCOLOR     BITMAP                  "res\\setcolor.bmp"
+IDB_BITMAP_SLOW         BITMAP                  "res\\slow.bmp"
+IDB_BITMAP_SOUND        BITMAP                  "res\\sound.bmp"
+IDB_OVERLAYBMP          BITMAP                  "res\\bitmap1.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU MENU 
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "Open",                        IDM_FILE_OPEN
+        MENUITEM "Close",                       IDM_FILE_CLOSE
+    END
+    POPUP "Setting"
+    BEGIN
+        MENUITEM "Snap Picture",                IDM_SETTING_SNAPPIC
+        MENUITEM "Locate",                      IDM_SETTING_LOCATE
+        MENUITEM "Cut file",                    IDM_SETTING_CUTFILE
+        MENUITEM "Overlay mode",                IDM_SETTING_OVERLAY
+        MENUITEM "MediaInfo",                   IDM_SETTING_MEDIAINFO
+        MENUITEM "Vertical Sync",               IDM_SETTING_VERTICALSYNC
+        MENUITEM "Start Fisheye",               ID_SETTING_START_FISHEYE
+        POPUP "Fisheye View"
+        BEGIN
+            MENUITEM "Ceil_1p+1",                   ID_FISHEYEVIEW_CEIL_1PPLUS1
+            MENUITEM "Ceil_1+3",                    ID_FISHEYEVIEW_CEIL_1PLUS3
+            MENUITEM "Floor_1+2",                   ID_FISHEYEVIEW_FLOOR_1PLUS2
+            MENUITEM "Floor_1p+6",                  ID_FISHEYEVIEW_FLOOR_1PPLUS6
+            MENUITEM "Floor_2p",                    ID_FISHEYEVIEW_FLOOR_2P
+            MENUITEM "Wall_1p+8",                   ID_FISHEYEVIEW_WALL_1PPLUS8
+            POPUP "SEMI_SHPERE"
+            BEGIN
+                MENUITEM "Ceil",                        ID_SEMI_CEIL
+                MENUITEM "Floor",                       ID_SEMI_FLOOR
+                MENUITEM "Wall",                        ID_SEMI_WALL
+            END
+            POPUP "CYLINDER"
+            BEGIN
+                MENUITEM "Ceil",                        ID_CYLINDER_CEIL
+                MENUITEM "Floor",                       ID_CYLINDER_FLOOR
+                MENUITEM "Wall",                        ID_CYLINDER_WALL
+            END
+            POPUP "LITTLE_PLANET"
+            BEGIN
+                MENUITEM "Ceil",                        ID_LITTLE_CEIL
+                MENUITEM "Floor",                       ID_LITTLE_FLOOR
+                MENUITEM "Wall",                        ID_LITTLE_WALL
+            END
+            MENUITEM "360_SHPERE",                  ID_FISHEYEVIEW_360_SHPERE
+            MENUITEM "360_CYLINDER",                ID_FISHEYEVIEW_360_CYLINDER
+        END
+        MENUITEM "Decode Engine",               ID_SETTING_DECODEENGINE
+        POPUP "Set RotateAngle"
+        BEGIN
+            MENUITEM "0°",                          ID_ROTATEANGLE_0
+            MENUITEM "90°",                         ID_ROTATEANGLE_90
+            MENUITEM "180°",                        ID_ROTATEANGLE_180
+            MENUITEM "270°",                        ID_ROTATEANGLE_270
+            MENUITEM "Left",                        ID_ROTATEANGLE_ROTATELEFT
+            MENUITEM "Right",                       ID_ROTATEANGLE_ROTATERIGHT
+        END
+        POPUP "Throw Frame"
+        BEGIN
+            MENUITEM "No Throw",                    ID_THROW_NO
+            MENUITEM "Default Throw",               ID_THROW_DEFAULT
+            MENUITEM "Adaption Throw",              ID_THROW_ADAPTION
+        END
+        MENUITEM "Anti-Aliasing",               ID_SETTING_ANTI
+    END
+    POPUP "Help"
+    BEGIN
+        MENUITEM "About",                       IDM_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_ACCELERATOR1 ACCELERATORS 
+BEGIN
+    VK_F7,          ID_ACCELERATOR_F7,      VIRTKEY, NOINVERT
+    VK_F8,          ID_ACCELERATOR_F8,      VIRTKEY, NOINVERT
+    VK_F9,          ID_ACCELERATOR_F9,      VIRTKEY, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "About"
+END
+
+#endif    // 中文(中华人民共和国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE 4, 2
+#pragma code_page(936)
+#endif //_WIN32
+#include "res\PlayDemo.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.chs\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

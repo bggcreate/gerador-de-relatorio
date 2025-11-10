@@ -1,0 +1,208 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+// Generated Help ID header file
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.hm"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文(中华人民共和国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\DecCB_demo.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.chs\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\DecCB_demo.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DECCB_DEMO_DIALOG DIALOGEX 0, 0, 301, 166
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "DecCB_demo"
+FONT 9, "宋体", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "DecCBType",IDC_STATIC,7,7,142,65
+    CONTROL         "Video",IDC_RADIO_VIDEO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,15,19,46,18
+    CONTROL         "Audio",IDC_RADIO_AUDIO,"Button",BS_AUTORADIOBUTTON,15,34,42,18
+    CONTROL         "Complex Stream",IDC_RADIO_COMPLEX,"Button",BS_AUTORADIOBUTTON,15,49,71,17
+    RTEXT           "File:",IDC_STATIC,11,79,76,11
+    EDITTEXT        IDC_EDIT_FILEPATH,88,78,175,16,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON_FILEPATH,271,78,23,15
+    PUSHBUTTON      "Decode",IDC_BUTTON_DECODE,118,143,86,16
+    PUSHBUTTON      "Stop",IDC_BUTTON_STOP,208,143,86,16
+    PUSHBUTTON      "...",IDC_BUTTON_AUDIOFILE,271,100,23,15
+    PUSHBUTTON      "...",IDC_BUTTON_VIDEOFILE,271,122,23,15
+    EDITTEXT        IDC_EDIT_AUDIOFILEPATH,88,99,175,16,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_VIDEOFILEPATH,88,122,175,16,ES_AUTOHSCROLL
+    RTEXT           "Output Audio File:",IDC_STATIC,10,102,76,11
+    RTEXT           "Output YUV File:",IDC_STATIC,10,123,76,11
+    GROUPBOX        "Interface",IDC_STATIC,152,7,142,65
+    CONTROL         "PLAY_SetDecCallBackEx",IDC_INTERFACE_NEW,"Button",BS_AUTORADIOBUTTON | WS_GROUP,159,21,127,10
+    CONTROL         "PLAY_SetDecodeCallBack",IDC_INTERFACE_OLD,"Button",BS_AUTORADIOBUTTON,159,32,127,10,0,HIDC_INTERFACE_OLD
+    CONTROL         "PLAY_SetVisibleDecCallBack",IDC_INTERFACE_OLD2,"Button",BS_AUTORADIOBUTTON,159,54,127,10,0,HIDC_INTERFACE_OLD2
+    CONTROL         "PLAY_SetVisibleDecodeCallBack",IDC_INTERFACE_NEW2,
+                    "Button",BS_AUTORADIOBUTTON,159,43,127,10,0,HIDC_INTERFACE_NEW2
+END
+
+IDD_DIALOG_DISPLAY DIALOGEX 0, 0, 201, 143
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_THICKFRAME
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 9, "宋体", 0, 0, 0x1
+BEGIN
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 3,40,0,0
+ PRODUCTVERSION 3,40,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "FileDescription", "DecCB_demo Microsoft 基础类应用程序"
+            VALUE "FileVersion", "3, 40, 0, 0"
+            VALUE "InternalName", "DecCB_demo"
+            VALUE "LegalCopyright", "版权所有 (C) 2018"
+            VALUE "OriginalFilename", "DecCB_demo.EXE"
+            VALUE "ProductName", "DecCB_demo 应用程序"
+            VALUE "ProductVersion", "3, 40, 0, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_DECCB_DEMO_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 294
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 159
+    END
+
+    IDD_DIALOG_DISPLAY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 194
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // 中文(中华人民共和国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE 4, 2
+#pragma code_page(936)
+#endif //_WIN32
+#include "res\DecCB_demo.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.chs\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

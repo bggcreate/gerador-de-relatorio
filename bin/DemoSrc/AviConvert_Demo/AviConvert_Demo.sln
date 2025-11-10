@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AviConvert_Demo", "AviConvert_Demo.vcproj", "{FA9FF5F8-31B2-42E7-B3B4-E492AF006054}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release PDB|Win32 = Release PDB|Win32
+		Release PDB|x64 = Release PDB|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FA9FF5F8-31B2-42E7-B3B4-E492AF006054}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FA9FF5F8-31B2-42E7-B3B4-E492AF006054}.Debug|x64.ActiveCfg = Debug|x64
+		{FA9FF5F8-31B2-42E7-B3B4-E492AF006054}.Debug|x64.Build.0 = Debug|x64
+		{FA9FF5F8-31B2-42E7-B3B4-E492AF006054}.Release PDB|Win32.ActiveCfg = Release PDB|Win32
+		{FA9FF5F8-31B2-42E7-B3B4-E492AF006054}.Release PDB|Win32.Build.0 = Release PDB|Win32
+		{FA9FF5F8-31B2-42E7-B3B4-E492AF006054}.Release PDB|x64.ActiveCfg = Release PDB|x64
+		{FA9FF5F8-31B2-42E7-B3B4-E492AF006054}.Release PDB|x64.Build.0 = Release PDB|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

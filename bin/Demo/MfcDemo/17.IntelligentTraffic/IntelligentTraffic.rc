@@ -1,0 +1,354 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文(中华人民共和国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#include ""res\\IntelligentTraffic.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""     // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\IntelligentTraffic.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 235, 55
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About IntelligentTraffic"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "IntelligentTraffic Version 1.0",IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2018",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,16,WS_GROUP
+END
+
+IDD_TRAFFIC_DEMO_DIALOG DIALOGEX 0, 0, 488, 317
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "IntelligentTraffic"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Dev Login",IDC_STATIC,2,0,486,38
+    EDITTEXT        IDC_EDIT_PORT,172,14,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "User",IDC_STATIC,233,17,16,8
+    EDITTEXT        IDC_EDIT_USER,260,14,40,14,ES_AUTOHSCROLL
+    LTEXT           "Password",IDC_STATIC,317,17,32,8
+    EDITTEXT        IDC_EDIT_PWD,357,14,40,14,ES_PASSWORD | ES_AUTOHSCROLL
+    PUSHBUTTON      "Login",IDC_BTN_LOGIN_AND_LOGOUT,420,13,50,14
+    CONTROL         "",IDC_TAB1,"SysTabControl32",0x0,2,42,485,275
+    LTEXT           "IP",IDC_STATIC,18,18,8,8
+    CONTROL         "",IDC_IPADDRESS1,"SysIPAddress32",WS_TABSTOP,32,15,100,15
+    LTEXT           "Port",IDC_STATIC,146,17,25,8
+END
+
+IDD_INTELLIGENT_EVENT_DIALOG DIALOGEX 0, 0, 474, 249
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_STATIC_REAL_PLAY,"Static",SS_BLACKRECT,0,17,205,108
+    CONTROL         "",IDC_LIST_EVENT,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,0,174,473,75
+    PUSHBUTTON      "Start Play",IDC_BTN_START_PLAY_AND_STOP_PLAY,109,0,72,14
+    PUSHBUTTON      "Subscribe",IDC_BTN_SUBSCIRBE_AND_UNSUBSICRIBE,195,0,70,14
+    LTEXT           "Channel",IDC_STATIC,4,3,27,8
+    COMBOBOX        IDC_COMBO_CHANNEL,45,0,48,49,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_STATIC_EVENT_PICTURE,"Static",SS_BLACKRECT | SS_SUNKEN,210,17,263,155
+    CONTROL         "",IDC_STATIC_PLATE_PICTURE,"Static",SS_BLACKRECT | SS_SUNKEN,0,129,205,43
+END
+
+IDD_BW_LITS_DIALOG DIALOGEX 0, 0, 477, 241
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Query",IDC_BTTN_QUERY,1,104,43,14
+    PUSHBUTTON      "Modify",IDC_BTN_MODIFY,67,104,43,14
+    PUSHBUTTON      "Delete",IDC_BTN_DELETE,67,126,43,14
+    EDITTEXT        IDC_EDIT_PLATE_NUMBER,52,41,66,14,ES_AUTOHSCROLL
+    LTEXT           "Plate Number",IDC_STATIC,3,44,44,8
+    PUSHBUTTON      "Add",IDC_BTN_ADD,1,126,43,14
+    CONTROL         "",IDC_LIST_BW,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | WS_BORDER | WS_GROUP | WS_TABSTOP,133,0,344,241
+    PUSHBUTTON      "Previous Page",IDC_BTN_PREVIOUS_PAGE,71,187,56,14
+    PUSHBUTTON      "Next Page",IDC_BTN_NEXT_PAGE,71,209,56,14
+    LTEXT           "Channel",IDC_STATIC,3,3,27,8
+    COMBOBOX        IDC_COMBO_CHANNEL,45,0,48,61,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Type",IDC_STATIC,3,23,17,8
+    COMBOBOX        IDC_COMBO_CHANNEL2,52,20,64,61,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_RECORD_COUNT,52,61,66,14,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Total Count",IDC_STATIC,3,65,38,8
+    EDITTEXT        IDC_EDIT_RECORD_CURRENT_PAGE,52,82,66,14,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Current Page",IDC_STATIC,3,84,44,8
+END
+
+IDD_TRAFIC_FLOW_DIALOG DIALOGEX 0, 0, 465, 240
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Subscribe",IDC_BTN_SUNSCIRBE_AND_UNSUBSCRIBE,232,0,50,14
+    CONTROL         "",IDC_LIST_TRAFFIC_FLOW,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,0,17,464,97
+    PUSHBUTTON      "Query",IDC_BTN_QUERY,343,123,50,14
+    CONTROL         "",IDC_LIST_QUERY_TRAFFIC_FLOW,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,0,142,465,76
+    CONTROL         "",IDC_DATETIMEPICKER_START_DATE,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,41,122,58,15
+    CONTROL         "",IDC_DATETIMEPICKER_START_TIME,"SysDateTimePick32",DTS_RIGHTALIGN | DTS_UPDOWN | WS_TABSTOP | 0x8,103,122,58,15
+    LTEXT           "Start Time",IDC_STATIC,0,125,34,8
+    CONTROL         "",IDC_DATETIMEPICKER_END_DATE,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,213,122,58,15
+    CONTROL         "",IDC_DATETIMEPICKER_END_TIME,"SysDateTimePick32",DTS_RIGHTALIGN | DTS_UPDOWN | WS_TABSTOP | 0x8,275,122,58,15
+    LTEXT           "End Time",IDC_STATIC,171,125,30,8
+    PUSHBUTTON      "Previous Page",IDC_BTN_PREVIOUS_PAGE,318,223,52,14
+    PUSHBUTTON      "Next Page",IDC_BTN_NEXT_PAGE,390,223,52,14
+    LTEXT           "Channel",IDC_STATIC,4,3,27,8
+    COMBOBOX        IDC_CMB_CHANNEL,45,0,48,73,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Lane",IDC_STATIC,115,2,16,8
+    COMBOBOX        IDC_CMB_LANE,141,0,48,73,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_RECORD_COUNT,132,223,40,14,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Current Page",IDC_STATIC,196,226,44,8
+    LTEXT           "Total Count",IDC_STATIC,80,226,38,8
+    EDITTEXT        IDC_EDIT_RECORD_CURRENT_PAGE,244,223,40,14,ES_AUTOHSCROLL | WS_DISABLED
+END
+
+IDD_QUERY_TRAFFIC_PICTURE_DIALOG DIALOGEX 0, 0, 469, 239
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_DATETIMEPICKER_START_DATE,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,45,18,58,15
+    LTEXT           "Start Time",IDC_STATIC,4,22,34,8
+    CONTROL         "",IDC_DATETIMEPICKER_START_TIME,"SysDateTimePick32",DTS_RIGHTALIGN | DTS_UPDOWN | WS_TABSTOP | 0x8,109,18,58,15
+    CONTROL         "",IDC_DATETIMEPICKER_END_DATE,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,45,38,58,15
+    LTEXT           "End Time",IDC_STATIC,4,42,39,8
+    CONTROL         "",IDC_DATETIMEPICKER_END_TIME,"SysDateTimePick32",DTS_RIGHTALIGN | DTS_UPDOWN | WS_TABSTOP | 0x8,109,38,58,15
+    COMBOBOX        IDC_CMB_EVENT_TYPE,239,17,68,88,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Plate Number",IDC_STATIC,187,42,44,8
+    EDITTEXT        IDC_EDIT_PLATE_NUMBER,239,39,70,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Query",IDC_BTN_QUERY,327,38,50,14
+    CONTROL         "",IDC_LIST_PICTURE,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,0,63,469,151
+    PUSHBUTTON      "Previous Page",IDC_BTN_PTRVIOUS_PAGE,341,221,50,14
+    PUSHBUTTON      "Next page",IDC_BTN_NEXT_PAGE,412,221,50,14
+    LTEXT           "Event Type",IDC_STATIC,187,20,38,8
+    COMBOBOX        IDC_CMB_CHANNEL,45,0,48,60,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Channel",IDC_STATIC,4,3,27,8
+    EDITTEXT        IDC_EDIT_RECORD_COUNT,157,221,40,14,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Current Page",IDC_STATIC,221,224,44,8
+    LTEXT           "Total Count",IDC_STATIC,105,224,38,8
+    EDITTEXT        IDC_EDIT_RECORD_CURRENT_PAGE,269,221,40,14,ES_AUTOHSCROLL | WS_DISABLED
+    PUSHBUTTON      "Download",IDC_BTN_DOWNLOAD,393,39,50,14
+END
+
+IDD_ADD_AND_MODIFY_BW_DIALOG DIALOGEX 0, 0, 232, 140
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Add"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_EDIT_PLATE_NUMBER,71,12,134,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Ok",IDC_BTN_OK,72,113,50,14
+    PUSHBUTTON      "Cancle",IDC_BTN_CANCLE,157,113,50,14
+    LTEXT           "Plate Number",IDC_STATIC,9,15,44,8
+    CONTROL         "",IDC_DATETIMEPICKER_START_DATE,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,71,60,67,14
+    EDITTEXT        IDC_EDIT_OWNER,71,36,134,14,ES_AUTOHSCROLL
+    LTEXT           "Master of Car",IDC_STATIC,9,38,45,8
+    CONTROL         "",IDC_DATETIMEPICKER_START_TIME,"SysDateTimePick32",DTS_RIGHTALIGN | DTS_UPDOWN | WS_TABSTOP | 0x8,144,60,67,15
+    CONTROL         "",IDC_DATETIMEPICKER_END_DATE,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,71,84,67,14
+    CONTROL         "",IDC_DATETIMEPICKER_END_TIME,"SysDateTimePick32",DTS_RIGHTALIGN | DTS_UPDOWN | WS_TABSTOP | 0x8,144,84,67,15
+    LTEXT           "Start Time",IDC_STATIC,9,63,51,8
+    LTEXT           "End Time",IDC_STATIC,9,87,51,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", ""
+            VALUE "FileDescription", "IntelligentTraffic Microsoft Application"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "IntelligentTraffic"
+            VALUE "LegalCopyright", "Copyright (C) 2018"
+            VALUE "OriginalFilename", "IntelligentTraffic.exe"
+            VALUE "ProductName", "IntelligentTraffic Application"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_TRAFFIC_DEMO_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 246
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 256
+    END
+
+    IDD_INTELLIGENT_EVENT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 467
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 242
+    END
+
+    IDD_BW_LITS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 470
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 234
+    END
+
+    IDD_TRAFIC_FLOW_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 458
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 233
+    END
+
+    IDD_QUERY_TRAFFIC_PICTURE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 462
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 232
+    END
+
+    IDD_ADD_AND_MODIFY_BW_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 225
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 133
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "&About IntelligentTraffic..."
+END
+
+#endif    // 中文(中华人民共和国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE 4, 2
+#pragma code_page(936)
+#include "res\IntelligentTraffic.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"     // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
