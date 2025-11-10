@@ -1,0 +1,54 @@
+﻿<Window x:Class="ThermalCamera.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mainwnd="clr-namespace:ThermalCamera.ViewModel"
+        xmlns:winform="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        xmlns:trigger="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:pwdctrl="clr-namespace:ThermalCamera"
+        Title="{Binding WndTitle}" Height="500" Width="800"
+        WindowStartupLocation="CenterScreen" IsEnabled="{Binding WndEnable,Mode=TwoWay}" IsEnabledChanged="Window_IsEnabledChanged" ResizeMode="CanMinimize">
+    <Grid>
+        <StackPanel>
+            <GroupBox Header="Device Login(设备登陆)">
+                <StackPanel Margin="5,0" Orientation="Horizontal" Height="50" VerticalAlignment="Top">
+                    <TextBlock Text="IP(设备IP):" Margin="5" VerticalAlignment="Center"/>
+                    <TextBox Width="100" VerticalAlignment="Center" Text="{Binding IP}"/>
+                    <TextBlock Text="Port(端口):" Margin="5" VerticalAlignment="Center"/>
+                    <TextBox Width="50" VerticalAlignment="Center" Text="{Binding Port}" PreviewTextInput="TextBox_PreviewTextInput"/>
+                    <TextBlock Text="Name(用户):" Margin="5" VerticalAlignment="Center"/>
+                    <TextBox Width="80" VerticalAlignment="Center" Text="{Binding User}"/>
+                    <TextBlock Text="Pwd(密码):" Margin="5" VerticalAlignment="Center"/>
+                    <PasswordBox pwdctrl:PasswordHelper.Attach="True" pwdctrl:PasswordHelper.Password="{Binding Pwd,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="80"/>
+                    <Button Width="100" Height="30" Margin="20,5" VerticalAlignment="Center" Command="{Binding LoginCmd}" Content="{Binding LoginState}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Operate(操作)">
+                <StackPanel Margin="5,0" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="TemperPoint(测温点信息)" Width="150" Height="30" Margin="10,5" Command="{Binding TemperPointCmd}" IsEnabled="{Binding TemperPointEn}"/>
+                    <Button Content="TemperItem(测温项信息)" Width="150" Height="30" Margin="10,5" Command="{Binding TemperItemCmd}" IsEnabled="{Binding TemperItemEn}"/>
+                    <Button Content="TemperQuery(温度查询)" Width="150" Height="30" Margin="10,5" Command="{Binding TemperQueryCmd}" IsEnabled="{Binding TemperQueryEn}"/>
+                    <Button Content="Subscription(订阅)" Width="150" Height="30" Margin="10,5" Command="{Binding SubscriptionCmd}" IsEnabled="{Binding SubscribeEn}"/>
+                </StackPanel>
+            </GroupBox>
+            <StackPanel Orientation="Horizontal" Margin="10,5">
+                <WrapPanel Orientation="Vertical" Margin="10,5">
+                    <ComboBox x:Name="ChnCmb" Width="80" Height="25" Margin="0,10" ItemsSource="{Binding Channels}" SelectedItem="{Binding PlayChannel}" IsEnabled="{Binding CmbEn}">
+                        <trigger:Interaction.Triggers>
+                            <trigger:EventTrigger EventName="SelectionChanged">
+                                <trigger:InvokeCommandAction Command="{Binding Path=DataContext.PlayChannelSelectionChangedCmd,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=WrapPanel}}" 
+                                                             CommandParameter="{Binding ElementName=ChnCmb, Path=SelectedIndex}"/>
+                            </trigger:EventTrigger>
+                        </trigger:Interaction.Triggers>
+                    </ComboBox>
+
+                    <Button Width="80" Height="30" Margin="0,20" Command="{Binding PlayCmd}" CommandParameter="{Binding Handle, ElementName=playwnd}" IsEnabled="{Binding PlayEn}" Content="{Binding PlayBtnText}"/>
+                </WrapPanel>
+                <WrapPanel Margin="5,0">
+                    <WindowsFormsHost Width="550" Height="310" Margin="5">
+                        <winform:PictureBox x:Name="playwnd" BackColor="LightGray" />
+                    </WindowsFormsHost>
+                </WrapPanel>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

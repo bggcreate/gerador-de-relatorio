@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8E883D6D-3519-42A4-8DCC-DF85DB12945F}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FaceRecognitionDemo</RootNamespace>
+    <AssemblyName>FaceRecognitionDemo</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\x86Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\x86Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\FaceRecognitionDemo.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\FaceRecognitionDemo.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AddDBWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddDBWindow.Designer.cs">
+      <DependentUpon>AddDBWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AddPersonWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddPersonWindow.Designer.cs">
+      <DependentUpon>AddPersonWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FaceRecognitionDemo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FaceRecognitionDemo.Designer.cs">
+      <DependentUpon>FaceRecognitionDemo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModifyDBWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModifyDBWindow.Designer.cs">
+      <DependentUpon>ModifyDBWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModifyPersonWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModifyPersonWindow.Designer.cs">
+      <DependentUpon>ModifyPersonWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OperateDBWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OperateDBWindow.Designer.cs">
+      <DependentUpon>OperateDBWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OperatePersonWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OperatePersonWindow.Designer.cs">
+      <DependentUpon>OperatePersonWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimilarityOperateWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SimilarityOperateWindow.Designer.cs">
+      <DependentUpon>SimilarityOperateWindow.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="AddDBWindow.resx">
+      <DependentUpon>AddDBWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddPersonWindow.resx">
+      <DependentUpon>AddPersonWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FaceRecognitionDemo.resx">
+      <DependentUpon>FaceRecognitionDemo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModifyDBWindow.resx">
+      <DependentUpon>ModifyDBWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModifyPersonWindow.resx">
+      <DependentUpon>ModifyPersonWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OperateDBWindow.resx">
+      <DependentUpon>OperateDBWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OperatePersonWindow.resx">
+      <DependentUpon>OperatePersonWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SimilarityOperateWindow.resx">
+      <DependentUpon>SimilarityOperateWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NetSDKCS\NetSDKCS.csproj">
+      <Project>{60CFBA25-F7CE-4140-A7E3-5355A25198E5}</Project>
+      <Name>NetSDKCS</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
