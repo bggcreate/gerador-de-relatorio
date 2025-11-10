@@ -63,6 +63,13 @@ The system features a modern, Apple-inspired design aesthetic with premium visua
   - **Route**: `/dvr-monitor` - accessible via menu "DVR/NVR" after login.
   - **Sample Data**: 3 devices (2 online, 1 offline), 6 event logs, 4 file records created for demonstration.
   - **Note**: This module does NOT include live video streaming, only log management and file storage/download.
+  - **Integração Intelbras** (✅ Implementada):
+    - Serviço Node.js que conecta diretamente aos DVRs via API HTTP nativa
+    - Não requer DLLs do Windows (funciona no Linux/Replit)
+    - Coleta logs e eventos automaticamente dos dispositivos
+    - Script: `scripts/collect-dvr-logs.js`
+    - Serviço: `services/intelbrasDvrService.js`
+    - Documentação completa: `INTELBRAS_INTEGRACAO.md`
 
 ### System Design Choices
 - **Project Structure**: Clear separation of concerns with `server.js` as the main entry point, dedicated folders for views, static assets, and data.

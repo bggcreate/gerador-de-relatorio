@@ -33,6 +33,20 @@
 ✅ Sistema DVR/NVR totalmente funcional e pronto para uso!
 ✅ Acesso via menu "DVR/NVR" após fazer login com admin/admin
 
+[x] 4. Criar integração com API HTTP dos DVRs Intelbras - Completed:
+    - Serviço completo em Node.js: services/intelbrasDvrService.js
+    - Conecta diretamente aos DVRs via API HTTP nativa (sem DLLs)
+    - Funcionalidades:
+      * Testar conexão e verificar status
+      * Obter informações do sistema (modelo, serial, versão)
+      * Coletar eventos e logs (últimas 24h ou período customizado)
+      * Capturar snapshots de câmeras
+      * Monitorar todos os dispositivos automaticamente
+    - Script de coleta: scripts/collect-dvr-logs.js
+    - Documentação completa: INTELBRAS_INTEGRACAO.md
+    - Biblioteca axios instalada
+    - Pronto para uso com qualquer DVR Intelbras via IP local ou DDNS
+
 ## Sistema de Anexos PDF na Aba Consulta (November 6, 2025, 12:10)
 [x] 68. Investigar problema de anexos não aparecendo - Completed:
      - Identificado: Tabelas pdf_tickets e pdf_rankings existem mas estavam vazias
