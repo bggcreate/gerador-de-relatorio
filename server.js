@@ -1375,11 +1375,11 @@ app.get('/api/drive/relatorios', requirePageLogin, async (req, res) => {
 // Fazer backup manual
 app.post('/api/drive/backup', requirePageLogin, validateCsrf, async (req, res) => {
     try {
-        const emailDestino = req.body.email || process.env.EMAIL_BACKUP;
+        const emailDestino = req.body.email || process.env.BACKUP_EMAIL || process.env.EMAIL_BACKUP;
         
         if (!emailDestino) {
             return res.status(400).json({ 
-                error: 'Email de destino não fornecido. Configure EMAIL_BACKUP no .env ou envie no corpo da requisição.' 
+                error: 'Email de destino não fornecido. Configure BACKUP_EMAIL nas Secrets do Replit ou envie no corpo da requisição.' 
             });
         }
         
