@@ -4,7 +4,24 @@
   "description": "Sistema para geração e consulta de relatórios de lojas.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "sync": "node scripts/sync-database.js",
+    "build": "npm run build:win && npm run build:mac && npm run build:linux",
+    "build:win": "pkg . --targets node20-win-x64 --output dist/SistemaRelatorios-Windows.exe",
+    "build:mac": "pkg . --targets node20-macos-x64 --output dist/SistemaRelatorios-Mac",
+    "build:linux": "pkg . --targets node20-linux-x64 --output dist/SistemaRelatorios-Linux"
+  },
+  "bin": "server.js",
+  "pkg": {
+    "assets": [
+      "views/**/*",
+      "public/**/*",
+      "middleware/**/*",
+      "services/**/*",
+      "scripts/**/*",
+      ".env.example"
+    ],
+    "outputPath": "dist"
   },
   "author": "",
   "license": "ISC",
@@ -27,5 +44,8 @@
     "pdf-parse": "^1.1.1",
     "pdfkit": "^0.15.0",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
   }
 }
