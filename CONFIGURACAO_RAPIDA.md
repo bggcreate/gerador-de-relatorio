@@ -1,10 +1,10 @@
 # 🚀 CONFIGURAÇÃO RÁPIDA - Sistema na Web
 
-## ✅ O que você já tem:
-- ✅ GOOGLE_CLIENT_ID: `598831000105-36cal24gsg9j7ck4pn4fr40olk2j4f5u.apps.googleusercontent.com`
-- ✅ GOOGLE_CLIENT_SECRET: `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`
-- ✅ NGROK_AUTHTOKEN: `35LOifgN4EHgRI75fIv1RQOgKeH_5QEiUWEQzZTNmocUHAa4s`
-- ✅ BACKUP_EMAIL: `alexcoelho.loft@gmail.com`
+## ✅ O que você precisa configurar:
+- 📝 GOOGLE_CLIENT_ID: (fornecido em attached_assets/client_secret_*.json)
+- 📝 GOOGLE_CLIENT_SECRET: (fornecido em attached_assets/client_secret_*.json)
+- 📝 NGROK_AUTHTOKEN: (token do ngrok fornecido anteriormente)
+- 📝 BACKUP_EMAIL: (email para receber os backups)
 
 ---
 
@@ -13,10 +13,10 @@
 No painel lateral do Replit, clique em **"Secrets"** (ícone de cadeado) e adicione:
 
 ```
-NGROK_AUTHTOKEN = 35LOifgN4EHgRI75fIv1RQOgKeH_5QEiUWEQzZTNmocUHAa4s
-GOOGLE_CLIENT_ID = 598831000105-36cal24gsg9j7ck4pn4fr40olk2j4f5u.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET = 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
-BACKUP_EMAIL = alexcoelho.loft@gmail.com
+NGROK_AUTHTOKEN = [seu token do ngrok]
+GOOGLE_CLIENT_ID = [copie do arquivo client_secret JSON - campo "client_id"]
+GOOGLE_CLIENT_SECRET = [copie do arquivo client_secret JSON - campo "client_secret"]
+BACKUP_EMAIL = [seu email para receber backups]
 ```
 
 ---
@@ -30,7 +30,7 @@ node scripts/google-auth-setup.js
 
 ### 2.2 O terminal mostrará um link, copie e cole no navegador
 
-### 2.3 Faça login com a conta: **alexcoelho.loft@gmail.com**
+### 2.3 Faça login com sua conta Google
 
 ### 2.4 Autorize o aplicativo (clique em "Permitir")
 
@@ -50,7 +50,7 @@ GOOGLE_REFRESH_TOKEN = [o token que você copiou]
 Após adicionar todas as secrets, o sistema automaticamente:
 - ✅ Conectará ao Google Drive
 - ✅ Salvará relatórios automaticamente
-- ✅ Enviará backup para alexcoelho.loft@gmail.com quando atingir 13GB
+- ✅ Enviará backup para o email configurado quando atingir 13GB
 - ✅ Estará acessível na web via ngrok
 
 ---
@@ -66,7 +66,7 @@ Após adicionar todas as secrets, o sistema automaticamente:
 1. Sistema monitora o espaço usado
 2. Quando chegar em **13GB de 15GB**:
    - Cria arquivo ZIP com todos os relatórios
-   - Envia para **alexcoelho.loft@gmail.com**
+   - Envia para o email configurado em BACKUP_EMAIL
    - Limpa relatórios com mais de 90 dias
    - Libera espaço no Drive
 
