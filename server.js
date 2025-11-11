@@ -20,6 +20,7 @@ const { requireAuth, requireAuthPage, getLojaFilter, getPermissions } = require(
 const jwt = require('jsonwebtoken');
 const DVRService = require('./services/dvrService');
 const IntelbrasDvrService = require('./services/intelbrasDvrService');
+const googleDriveService = require('./services/googleDriveService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -1302,6 +1303,126 @@ app.post('/api/relatorios', requirePageLogin, validateCsrf, (req, res) => { cons
 app.get('/api/relatorios/:id', requirePageLogin, (req, res) => { db.get("SELECT * FROM relatorios WHERE id = ?", [req.params.id], (err, relatorio) => { if (err) return res.status(500).json({ error: err.message }); if (!relatorio) return res.status(404).json({ error: "Relatório não encontrado" }); res.json({ relatorio }); }); });
 app.put('/api/relatorios/:id', requirePageLogin, validateCsrf, (req, res) => { const { id } = req.params; const d = req.body; const sql = `UPDATE relatorios SET loja=?, data=?, hora_abertura=?, hora_fechamento=?, gerente_entrada=?, gerente_saida=?, clientes_monitoramento=?, vendas_monitoramento=?, clientes_loja=?, vendas_loja=?, total_vendas_dinheiro=?, ticket_medio=?, pa=?, quantidade_trocas=?, quantidade_omni=?, quantidade_funcao_especial=?, vendedores=?, vendas_cartao=?, vendas_pix=?, vendas_dinheiro=? WHERE id=?`; const params = [ d.loja, d.data, d.hora_abertura, d.hora_fechamento, d.gerente_entrada, d.gerente_saida, parseInt(d.clientes_monitoramento, 10) || 0, parseInt(d.vendas_monitoramento, 10) || 0, parseInt(d.clientes_loja, 10) || 0, parseInt(d.vendas_loja, 10) || 0, parseFloat(String(d.total_vendas_dinheiro).replace(/[R$\s.]/g, '').replace(',', '.')) || 0, d.ticket_medio || 'R$ 0,00', d.pa || '0.00', parseInt(d.quantidade_trocas, 10) || 0, parseInt(d.quantidade_omni, 10) || 0, parseInt(d.quantidade_funcao_especial, 10) || 0, d.vendedores || '[]', parseInt(d.vendas_cartao, 10) || 0, parseInt(d.vendas_pix, 10) || 0, parseInt(d.vendas_dinheiro, 10) || 0, id ]; db.run(sql, params, function (err) { if (err) { console.error("Erro ao atualizar relatório:", err.message); return res.status(500).json({ error: 'Falha ao atualizar o relatório.' }); } if (this.changes === 0) return res.status(404).json({ error: "Relatório não encontrado." }); res.json({ success: true, id: id }); }); });
 app.delete('/api/relatorios/:id', requirePageLogin, validateCsrf, (req, res) => { db.run("DELETE FROM relatorios WHERE id = ?", [req.params.id], function (err) { if (err) return res.status(500).json({ error: err.message }); if (this.changes === 0) return res.status(404).json({ error: "Relatório não encontrado" }); res.json({ success: true, message: "Relatório excluído." }); }); });
+
+// =================================================================
+// ENDPOINTS GOOGLE DRIVE - Armazenamento em Nuvem Gratuito
+// =================================================================
+
+// Verificar quota do Google Drive
+app.get('/api/drive/quota', requirePageLogin, async (req, res) => {
+    try {
+        const quota = await googleDriveService.verificarQuota();
+        if (!quota) {
+            return res.status(503).json({ error: 'Google Drive não configurado' });
+        }
+        res.json(quota);
+    } catch (error) {
+        console.error('Erro ao verificar quota:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Salvar relatório no Google Drive
+app.post('/api/drive/relatorios', requirePageLogin, validateCsrf, async (req, res) => {
+    try {
+        const relatorio = {
+            ...req.body,
+            enviado_por_usuario: req.session.username,
+            data_criacao: new Date().toISOString()
+        };
+        
+        const resultado = await googleDriveService.salvarRelatorio(relatorio);
+        
+        // Verificar se precisa de backup automático
+        const quota = await googleDriveService.verificarQuota();
+        if (quota && quota.precisaBackup) {
+            const emailBackup = process.env.EMAIL_BACKUP;
+            if (emailBackup) {
+                console.log('⚠️  Limite do Drive atingido! Iniciando backup automático...');
+                googleDriveService.fazerBackup(emailBackup).catch(err => {
+                    console.error('Erro no backup automático:', err.message);
+                });
+            }
+        }
+        
+        res.status(201).json({ 
+            success: true, 
+            arquivo: resultado,
+            quota: quota 
+        });
+    } catch (error) {
+        console.error('Erro ao salvar relatório no Drive:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Listar relatórios do Google Drive
+app.get('/api/drive/relatorios', requirePageLogin, async (req, res) => {
+    try {
+        const filtros = {};
+        if (req.query.ano) {
+            filtros.ano = req.query.ano;
+        }
+        
+        const relatorios = await googleDriveService.listarRelatorios(filtros);
+        res.json({ relatorios, total: relatorios.length });
+    } catch (error) {
+        console.error('Erro ao listar relatórios do Drive:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Fazer backup manual
+app.post('/api/drive/backup', requirePageLogin, validateCsrf, async (req, res) => {
+    try {
+        const emailDestino = req.body.email || process.env.EMAIL_BACKUP;
+        
+        if (!emailDestino) {
+            return res.status(400).json({ 
+                error: 'Email de destino não fornecido. Configure EMAIL_BACKUP no .env ou envie no corpo da requisição.' 
+            });
+        }
+        
+        const resultado = await googleDriveService.fazerBackup(emailDestino);
+        res.json({ 
+            success: true, 
+            ...resultado,
+            email: emailDestino,
+            mensagem: `Backup enviado para ${emailDestino}` 
+        });
+    } catch (error) {
+        console.error('Erro ao fazer backup:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Limpar relatórios antigos
+app.post('/api/drive/limpar', requirePageLogin, validateCsrf, async (req, res) => {
+    try {
+        const diasManter = parseInt(req.body.dias) || 90;
+        const removidos = await googleDriveService.limparRelatoriosAntigos(diasManter);
+        res.json({ 
+            success: true, 
+            removidos,
+            mensagem: `${removidos} relatórios antigos removidos` 
+        });
+    } catch (error) {
+        console.error('Erro ao limpar relatórios:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obter URL de autorização (para primeira configuração)
+app.get('/api/drive/auth-url', requirePageLogin, (req, res) => {
+    try {
+        const url = googleDriveService.gerarURLAutorizacao();
+        res.json({ authUrl: url });
+    } catch (error) {
+        console.error('Erro ao gerar URL de autorização:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 const formatCurrency = (value) => { const numberValue = Number(value) || 0; return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numberValue); };
 
 // Função para desenhar um gráfico de rosquinha (donut chart)
@@ -3499,8 +3620,27 @@ app.get('/api/assistencias/tickets', requirePageLogin, (req, res) => {
 const startTime = new Date();
 console.log(`Iniciando servidor em ${startTime.toLocaleString('pt-BR')}...`);
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', async () => {
     console.log(`Servidor rodando em http://0.0.0.0:${PORT}`);
     logEvent('info', 'system', 'server_start', `Servidor iniciado em http://0.0.0.0:${PORT}`);
+    
+    // Inicializar Google Drive se configurado
+    try {
+        const driveAutenticado = await googleDriveService.autenticar();
+        if (driveAutenticado) {
+            const quota = await googleDriveService.verificarQuota();
+            if (quota) {
+                console.log(`📊 Google Drive: ${quota.usadoGB}GB de ${quota.limiteGB}GB usados (${quota.percentual}%)`);
+                
+                // Verificar se precisa de backup automático
+                if (quota.precisaBackup) {
+                    console.log('⚠️  ATENÇÃO: Drive próximo do limite! Configure EMAIL_BACKUP no .env para backup automático.');
+                }
+            }
+        }
+    } catch (error) {
+        console.log('ℹ️  Google Drive não configurado. Sistema funcionará com SQLite local.');
+        console.log('📖 Para usar Google Drive, veja: GOOGLE_DRIVE_SETUP.md');
+    }
 });
 
