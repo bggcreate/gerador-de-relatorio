@@ -89,17 +89,30 @@ Use as credenciais padrão:
 O sistema foi construído com tecnologias modernas e confiáveis:
 
 - **Backend**: Node.js + Express
-- **Banco de Dados**: SQLite (leve e eficiente)
+- **Banco de Dados**: SQLite (local) ou PostgreSQL (nuvem - Tembo.io)
 - **Frontend**: HTML5, CSS3, JavaScript + Bootstrap 5
 - **Segurança**: bcrypt, JWT, helmet
 - **PDFs**: PDFKit
 - **Excel**: ExcelJS
 - **Upload**: Multer
 
+## ☁️ Banco de Dados na Nuvem (NOVO!)
+
+O sistema agora suporta **PostgreSQL na nuvem** com Tembo.io (10GB grátis):
+
+- ✅ Acesse de qualquer lugar
+- ✅ Múltiplos computadores sincronizados
+- ✅ Backup automático
+- ✅ 10GB gratuito
+
+**👉 [Guia de Integração Rápida](COMO_INTEGRAR_TEMBO.md)** - Setup em 10 minutos
+
 ## 📚 Documentação Completa
 
 Acesse a pasta `docs/` para guias detalhados:
 
+- **[Integração Tembo.io](docs/INTEGRACAO_TEMBO_FREE.md)**: Banco de dados gratuito na nuvem (10GB)
+- **[Guia Rápido PostgreSQL](docs/GUIA_RAPIDO_POSTGRESQL.md)**: Setup em 5 minutos
 - **Instalação Local**: Guia completo para instalar em qualquer máquina
 - **Acesso Remoto**: Configuração de DDNS para acesso externo
 - **Google Drive**: Integração com armazenamento na nuvem
