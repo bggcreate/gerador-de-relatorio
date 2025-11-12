@@ -1,0 +1,65 @@
+PROMPT – Incrementar Sistema de Monitoramento Intelbras (versão integrada com abas e recursos avançados)
+
+Já tenho uma versão beta de um sistema próprio quase pronto (em C# / .NET com Visual Studio) que gerencia funções diversas de monitoramento e relatórios.
+
+Quero agora incrementar esse sistema com as funcionalidades do projeto base de integração com o SDK/API Intelbras, que conecta DVRs/NVRs das lojas, coleta status e envia dados à matriz.
+
+Desejo que o sistema fique organizado por abas (tabs), com as seguintes seções:
+
+1. Monitoramento Local (SDK)
+
+Conexão direta com os DVRs/NVRs via SDK Intelbras (NetSDK.dll / ConfigSDK.dll).
+
+Exibir lista de lojas e status (online/offline, canais, disco, eventos).
+
+Opção de capturar snapshot de câmeras específicas.
+
+2. Comunicação com a Matriz (API)
+
+Envio automático dos status via HTTP (JSON).
+
+Exibir histórico dos últimos envios e respostas da API.
+
+Configuração do endpoint e chave de autenticação.
+
+3. Banco de Dados / Relatórios
+
+Integração com banco local (SQLite ou PostgreSQL) para guardar logs e eventos.
+
+Geração de relatórios diários/semanal em PDF.
+
+Possibilidade de exportar CSV ou enviar por e-mail.
+
+4. Dashboard Geral (Centralização)
+
+Painel visual com status de todas as lojas (verde = online, vermelho = offline).
+
+Gráficos de câmeras ativas, falhas, e uptime médio.
+
+Atualização automática a cada X minutos.
+
+5. Configurações e Log
+
+Aba para ajustar parâmetros (intervalos, IPs, senhas, API key, diretórios).
+
+Visualizar logs de erros e histórico de conexão.
+
+⚙️ Quero que o código seja modular, com:
+
+Classes separadas por função (SDK, API, Banco, Interface).
+
+Uso de async/await e tratamento de exceções.
+
+Interface compacta, limpa e intuitiva (Windows Forms ou WPF, você escolhe).
+
+Comentários explicando cada etapa.
+
+💡 No final, gere também um guia passo a passo com:
+
+Como configurar o SDK Intelbras no projeto.
+
+Como compilar, conectar DVRs e testar.
+
+Como rodar a API e integrar o banco.
+
+Pode usar o código base anterior que conecta o SDK e envia dados à matriz como ponto de partida.

@@ -129,17 +129,26 @@ Para conectar câmeras Intelbras, veja o guia em `docs/INTELBRAS_INTEGRACAO.md`.
 ## 📊 Estrutura do Projeto
 
 ```
-├── server.js           # Servidor principal
-├── package.json        # Dependências
-├── data/              # Banco de dados e arquivos
-├── public/            # Arquivos estáticos
-│   ├── css/          # Estilos
-│   └── js/           # Scripts frontend
-├── views/             # Páginas HTML
-├── services/          # Serviços de integração
-├── scripts/           # Scripts auxiliares
-├── middleware/        # Middlewares personalizados
-└── docs/             # Documentação técnica
+├── server.js               # Servidor principal
+├── package.json            # Dependências do projeto
+├── .env.example            # Exemplo de variáveis de ambiente
+├── src/                    # Código fonte organizado
+│   ├── config/             # Configurações (database, security, etc.)
+│   ├── middleware/         # Middlewares customizados (auth, audit, roles)
+│   ├── services/           # Serviços (logs, Google Drive, etc.)
+│   └── utils/              # Funções utilitárias
+├── data/                   # Dados e arquivos gerados
+│   ├── database.db         # Banco de dados SQLite
+│   ├── reports/            # Relatórios gerados
+│   ├── pdfs/               # PDFs anexados
+│   ├── backups/            # Backups do banco
+│   └── dvr_files/          # Arquivos do DVR
+├── public/                 # Arquivos públicos (frontend)
+│   ├── css/                # Estilos
+│   └── js/                 # JavaScript do frontend
+├── views/                  # Templates HTML
+├── scripts/                # Scripts auxiliares (build, sync, etc.)
+└── docs/                   # Documentação técnica completa
 ```
 
 ## 🤝 Contribuindo

@@ -1,0 +1,79 @@
+Prompt para implementação da leitura de PDF e novos botões no relatório
+
+Contexto:
+Na aba "Novo Relatório", será adicionada uma funcionalidade de leitura de PDF, além de dois novos botões relacionados à análise diária de dados.
+
+Requisitos de Interface (Frontend)
+
+Novo botão "PDF"
+
+Localização: abaixo do card "Métricas do Dia".
+
+Função: permitir o upload de um arquivo PDF (input de arquivo).
+
+Design: seguir o mesmo padrão visual do site (mesmo estilo de botão, cores e tipografia).
+
+Texto do botão: "PDF" ou "Carregar PDF", conforme padrão visual do sistema.
+
+Adicionar dois novos botões:
+
+"Ranking Dia"
+
+"Ticket Dia"
+
+Localização: abaixo do botão PDF, mantendo o alinhamento visual com o restante da página.
+
+Função:
+
+Ranking Dia: aciona a função que faz a leitura e extração de dados do PDF.
+
+Ticket Dia: armazena e permite acesso rápido a relatórios já prontos (PDFs previamente carregados).
+
+Requisitos Funcionais (Backend / Lógica)
+📂 Leitura do PDF (função do botão "Ranking Dia")
+
+Ao carregar um arquivo PDF, o sistema deve:
+
+Verificar se o nome da loja e a data contidos no PDF correspondem à loja e data selecionadas no relatório atual.
+
+Caso não correspondam, retornar uma mensagem de erro amigável:
+"O PDF selecionado não corresponde à loja ou data atual."
+
+Localizar no PDF os valores:
+
+"Peça por Atendimentos"
+
+"Preço Médio"
+
+"Média Diária"
+
+Os valores normalmente aparecem próximos do rodapé, na linha de totais (abaixo de uma linha horizontal).
+→ O sistema deve buscar especificamente essa linha de totais para extrair os números corretos.
+
+Exibir ou preencher automaticamente esses dados no relatório final (na aba “Novo Relatório”).
+
+🧾 PDF "Ticket Dia"
+
+A função do botão Ticket Dia é apenas armazenar o PDF no sistema.
+
+Os PDFs carregados devem ser listados ou acessíveis posteriormente, para consulta rápida.
+
+O nome do arquivo pode variar, mas o sistema deve identificar o padrão interno do relatório para associá-lo corretamente à loja e data correspondentes.
+
+Comportamento esperado
+
+Usuário clica em PDF → faz upload → o sistema carrega o arquivo.
+
+Em seguida, pode clicar em:
+
+Ranking Dia → o sistema lê o PDF, valida loja/data, extrai os três indicadores e os adiciona ao relatório.
+
+Ticket Dia → o sistema apenas armazena o PDF para consulta futura.
+
+O design dos novos botões e elementos deve seguir o padrão visual existente do site, com posicionamento logo abaixo do card “Métricas do Dia”.
+
+Restrições
+
+Os nomes dos arquivos podem variar, portanto a identificação deve ser feita pelo conteúdo interno do PDF, e não pelo nome do arquivo.
+
+PDFs fora do padrão esperado devem gerar uma notificação clara para o usuário.
