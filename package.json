@@ -60,11 +60,15 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.png",
@@ -83,12 +87,18 @@
       "artifactName": "${productName}-Portable-${version}.${ext}"
     },
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "icon": "build/icon.png",
       "category": "public.app-category.business"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "icon": "build/icon.png",
       "category": "Office"
     }
@@ -113,10 +123,13 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "ngrok": "^5.0.0-beta.2",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.10",
     "pdf-parse": "^1.1.1",
     "pdfkit": "^0.15.0",
-    "sqlite3": "^5.1.7"
+    "pg": "^8.16.3",
+    "sqlite3": "^5.1.7",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "pkg": "^5.8.1"
