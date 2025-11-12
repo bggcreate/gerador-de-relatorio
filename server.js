@@ -3,7 +3,6 @@
 // =================================================================
 require('dotenv').config();
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const session = require('express-session');
 const fs = require('fs');
@@ -19,6 +18,9 @@ const { body, validationResult } = require('express-validator');
 const { requireAuth, requireAuthPage, getLojaFilter, getPermissions } = require('./middleware/roleAuth');
 const jwt = require('jsonwebtoken');
 const googleDriveService = require('./services/googleDriveService');
+
+// Database adapter - usa PostgreSQL se configurado, senão SQLite
+const dbAdapter = require('./src/config/db-adapter');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -50,10 +52,6 @@ const dataDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
 }
-// Caminho configurável do banco de dados (pode ser sobrescrito por variável de ambiente)
-const DB_FILENAME = process.env.DB_PATH || 'database.db';
-const DB_PATH = path.join(dataDir, DB_FILENAME);
-console.log(`📁 Usando banco de dados: ${DB_PATH}`);
 
 app.use(helmet({
     contentSecurityPolicy: {
@@ -132,189 +130,18 @@ const requirePageLogin = (req, res, next) => {
 };
 
 // --- BANCO DE DADOS ---
-let db = new sqlite3.Database(DB_PATH, err => {
+let db;
+const DB_PATH = dbAdapter.DB_PATH;
+
+dbAdapter.initDatabase((err) => {
     if (err) {
-        return console.error("Erro fatal ao conectar ao DB:", err.message);
+        console.error("Erro fatal ao conectar ao DB:", err.message);
+        process.exit(1);
     }
-    console.log("Conectado ao banco de dados SQLite.");
-    db.serialize(() => {
-        db.run(`CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            username TEXT UNIQUE NOT NULL, 
-            password TEXT NOT NULL, 
-            role TEXT NOT NULL,
-            loja_gerente TEXT,
-            lojas_consultor TEXT
-        )`);
-        db.run(`CREATE TABLE IF NOT EXISTS lojas (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT UNIQUE NOT NULL, status TEXT, funcao_especial TEXT, observacoes TEXT)`);
-        db.run(`CREATE TABLE IF NOT EXISTS relatorios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, loja TEXT, data TEXT, hora_abertura TEXT, hora_fechamento TEXT,
-            gerente_entrada TEXT, gerente_saida TEXT, clientes_monitoramento INTEGER, vendas_monitoramento INTEGER,
-            clientes_loja INTEGER, vendas_loja INTEGER, total_vendas_dinheiro REAL, ticket_medio TEXT, pa TEXT,
-            quantidade_trocas INTEGER, nome_funcao_especial TEXT, quantidade_funcao_especial INTEGER,
-            quantidade_omni INTEGER, vendedores TEXT, nome_arquivo TEXT, enviado_por_usuario TEXT,
-            enviado_em DATETIME DEFAULT CURRENT_TIMESTAMP, vendas_cartao INTEGER, vendas_pix INTEGER, vendas_dinheiro INTEGER
-        )`);
-        db.run(`CREATE TABLE IF NOT EXISTS demandas (id INTEGER PRIMARY KEY AUTOINCREMENT, loja_nome TEXT NOT NULL, descricao TEXT NOT NULL, tag TEXT DEFAULT 'Normal', status TEXT DEFAULT 'pendente', criado_por_usuario TEXT, concluido_por_usuario TEXT, criado_em DATETIME DEFAULT CURRENT_TIMESTAMP, concluido_em DATETIME)`);
-        db.run(`CREATE TABLE IF NOT EXISTS vendedores (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            loja_id INTEGER NOT NULL,
-            nome TEXT NOT NULL,
-            telefone TEXT NOT NULL,
-            data_entrada TEXT NOT NULL,
-            data_demissao TEXT,
-            previsao_entrada TEXT,
-            previsao_saida TEXT,
-            ativo INTEGER DEFAULT 1,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (loja_id) REFERENCES lojas(id) ON DELETE CASCADE
-        )`);
-        db.run(`CREATE TABLE IF NOT EXISTS logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            type TEXT NOT NULL,
-            username TEXT,
-            action TEXT,
-            details TEXT
-        )`);
-        
-        db.run(`CREATE TABLE IF NOT EXISTS temp_tokens (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            token_hash TEXT UNIQUE NOT NULL,
-            role TEXT DEFAULT 'dev',
-            expira_em DATETIME NOT NULL,
-            ip_origem TEXT,
-            ip_restrito TEXT,
-            revogado INTEGER DEFAULT 0,
-            criado_por TEXT,
-            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
-            usado_em DATETIME,
-            revogado_em DATETIME,
-            revogado_por TEXT
-        )`);
-        
-        // Tabelas de Assistência Técnica
-        db.run(`CREATE TABLE IF NOT EXISTS estoque_tecnico (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome_peca TEXT NOT NULL,
-            codigo_interno TEXT UNIQUE NOT NULL,
-            quantidade INTEGER DEFAULT 0,
-            valor_custo REAL DEFAULT 0,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-        
-        db.run(`CREATE TABLE IF NOT EXISTS assistencias (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            cliente_nome TEXT NOT NULL,
-            cliente_cpf TEXT NOT NULL,
-            numero_pedido TEXT,
-            data_entrada TEXT NOT NULL,
-            data_conclusao TEXT,
-            valor_peca_loja REAL DEFAULT 0,
-            valor_servico_cliente REAL DEFAULT 0,
-            aparelho TEXT NOT NULL,
-            peca_id INTEGER,
-            peca_nome TEXT,
-            observacoes TEXT,
-            status TEXT DEFAULT 'Em andamento',
-            tecnico_responsavel TEXT,
-            loja TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (peca_id) REFERENCES estoque_tecnico(id)
-        )`);
-        
-        // Tabela para armazenar PDFs de Ticket Dia
-        db.run(`CREATE TABLE IF NOT EXISTS pdf_tickets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            loja TEXT NOT NULL,
-            data TEXT NOT NULL,
-            filename TEXT NOT NULL,
-            filepath TEXT NOT NULL,
-            uploaded_by TEXT NOT NULL,
-            uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-        
-        // Tabela para armazenar PDFs de Ranking
-        db.run(`CREATE TABLE IF NOT EXISTS pdf_rankings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            loja TEXT NOT NULL,
-            data TEXT NOT NULL,
-            filename TEXT NOT NULL,
-            filepath TEXT NOT NULL,
-            pa TEXT,
-            preco_medio TEXT,
-            atendimento_medio TEXT,
-            uploaded_by TEXT,
-            uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-        
-        // Adicionar colunas caso não existam (migração)
-        db.run(`ALTER TABLE usuarios ADD COLUMN loja_gerente TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar loja_gerente:', err.message);
-        });
-        db.run(`ALTER TABLE usuarios ADD COLUMN lojas_consultor TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar lojas_consultor:', err.message);
-        });
-        db.run(`ALTER TABLE usuarios ADD COLUMN loja_tecnico TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar loja_tecnico:', err.message);
-        });
-        db.run(`ALTER TABLE lojas ADD COLUMN tecnico_username TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar tecnico_username:', err.message);
-        });
-        db.run(`ALTER TABLE lojas ADD COLUMN cargo TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar cargo:', err.message);
-        });
-        db.run(`ALTER TABLE lojas ADD COLUMN cep TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar cep:', err.message);
-        });
-        db.run(`ALTER TABLE lojas ADD COLUMN numero_contato TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar numero_contato:', err.message);
-        });
-        db.run(`ALTER TABLE lojas ADD COLUMN gerente TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar gerente:', err.message);
-        });
-        db.run(`ALTER TABLE estoque_tecnico ADD COLUMN loja TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar loja em estoque_tecnico:', err.message);
-        });
-        
-        db.run(`ALTER TABLE usuarios ADD COLUMN password_hashed INTEGER DEFAULT 0`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar password_hashed:', err.message);
-        });
-        
-        db.run(`ALTER TABLE logs ADD COLUMN ip_address TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar ip_address em logs:', err.message);
-        });
-        db.run(`ALTER TABLE logs ADD COLUMN user_agent TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar user_agent em logs:', err.message);
-        });
-        db.run(`ALTER TABLE logs ADD COLUMN event_type TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar event_type em logs:', err.message);
-        });
-        db.run(`ALTER TABLE logs ADD COLUMN route TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar route em logs:', err.message);
-        });
-        db.run(`ALTER TABLE logs ADD COLUMN payload_hash TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar payload_hash em logs:', err.message);
-        });
-        
-        // Adicionar coluna de permissões customizadas
-        db.run(`ALTER TABLE usuarios ADD COLUMN custom_permissions TEXT`, (err) => {
-            if (err && !err.message.includes('duplicate column')) console.error('Erro ao adicionar custom_permissions:', err.message);
-        });
-        
-        const adminUsername = 'admin';
-        const correctPassword = 'admin';
-        db.get('SELECT * FROM usuarios WHERE username = ?', [adminUsername], (err, row) => {
-            if (err) return;
-            if (!row) {
-                db.run('INSERT INTO usuarios (username, password, role) VALUES (?, ?, ?)', [adminUsername, correctPassword, 'admin']);
-            } else if (row.password !== correctPassword) {
-                db.run('UPDATE usuarios SET password = ? WHERE username = ?', [correctPassword, adminUsername]);
-            }
-        });
-    });
+    db = dbAdapter.getDatabase();
+    console.log("Banco de dados inicializado com sucesso");
+    
+    iniciarServidor();
 });
 
 // =================================================================
@@ -2949,30 +2776,32 @@ app.get('/api/assistencias/tickets', requirePageLogin, (req, res) => {
 // =================================================================
 // INICIALIZAÇÃO DO SERVIDOR
 // =================================================================
-const startTime = new Date();
-console.log(`Iniciando servidor em ${startTime.toLocaleString('pt-BR')}...`);
+function iniciarServidor() {
+    const startTime = new Date();
+    console.log(`Iniciando servidor em ${startTime.toLocaleString('pt-BR')}...`);
 
-app.listen(PORT, '0.0.0.0', async () => {
-    console.log(`Servidor rodando em http://0.0.0.0:${PORT}`);
-    logEvent('info', 'system', 'server_start', `Servidor iniciado em http://0.0.0.0:${PORT}`);
-    
-    // Inicializar Google Drive se configurado
-    try {
-        const driveAutenticado = await googleDriveService.autenticar();
-        if (driveAutenticado) {
-            const quota = await googleDriveService.verificarQuota();
-            if (quota) {
-                console.log(`📊 Google Drive: ${quota.usadoGB}GB de ${quota.limiteGB}GB usados (${quota.percentual}%)`);
-                
-                // Verificar se precisa de backup automático
-                if (quota.precisaBackup) {
-                    console.log('⚠️  ATENÇÃO: Drive próximo do limite! Configure EMAIL_BACKUP no .env para backup automático.');
+    app.listen(PORT, '0.0.0.0', async () => {
+        console.log(`Servidor rodando em http://0.0.0.0:${PORT}`);
+        logEvent('info', 'system', 'server_start', `Servidor iniciado em http://0.0.0.0:${PORT}`);
+        
+        // Inicializar Google Drive se configurado
+        try {
+            const driveAutenticado = await googleDriveService.autenticar();
+            if (driveAutenticado) {
+                const quota = await googleDriveService.verificarQuota();
+                if (quota) {
+                    console.log(`📊 Google Drive: ${quota.usadoGB}GB de ${quota.limiteGB}GB usados (${quota.percentual}%)`);
+                    
+                    // Verificar se precisa de backup automático
+                    if (quota.precisaBackup) {
+                        console.log('⚠️  ATENÇÃO: Drive próximo do limite! Configure EMAIL_BACKUP no .env para backup automático.');
+                    }
                 }
             }
+        } catch (error) {
+            console.log('ℹ️  Google Drive não configurado. Sistema funcionará com SQLite local.');
+            console.log('📖 Para usar Google Drive, veja: GOOGLE_DRIVE_SETUP.md');
         }
-    } catch (error) {
-        console.log('ℹ️  Google Drive não configurado. Sistema funcionará com SQLite local.');
-        console.log('📖 Para usar Google Drive, veja: GOOGLE_DRIVE_SETUP.md');
-    }
-});
+    });
+}
 
