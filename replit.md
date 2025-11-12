@@ -28,7 +28,9 @@ O sistema apresenta um design moderno e premium inspirado em interfaces Apple. P
 
 ### Implementações Técnicas
 - **Backend**: Node.js com framework Express.js
-- **Banco de Dados**: SQLite com criação automática de tabelas e caminho configurável (`DB_PATH`)
+- **Banco de Dados**: 
+  - **SQLite** (local): Banco padrão com criação automática de tabelas (`DB_PATH`)
+  - **PostgreSQL** (nuvem): Suporte completo para Tembo.io e outros provedores com pool de conexões, monitoramento automático e backup
 - **Autenticação**: Sistema de login com diferentes níveis de acesso, gerenciamento de sessões e tokens JWT temporários para desenvolvimento. Credenciais padrão: `admin`/`admin`
 - **Upload de Arquivos**: Multer para `multipart/form-data`
 - **Processamento de PDFs**: pdf-parse para leitura e pdfkit para geração
@@ -38,6 +40,14 @@ O sistema apresenta um design moderno e premium inspirado em interfaces Apple. P
 - **Backup/Restore**: Funcionalidade de backup e restauração do banco
 - **Módulo de Assistência Técnica**: Gerencia chamados técnicos, controle de estoque de peças e registro de eventos
 - **Módulo DVR/NVR**: Gerencia dispositivos Intelbras com coleta de logs e gestão de arquivos (gravações, capturas, relatórios XML/JSON). Armazena arquivos em `data/dvr_files/<dvrId>/`
+- **PostgreSQL Multi-Instância** (NOVO):
+  - Conexão com PostgreSQL via Tembo.io (10GB gratuito)
+  - Pool de conexões otimizado para múltiplos acessos simultâneos
+  - Monitoramento automático do tamanho do banco (verificação a cada 6 horas)
+  - Backup automático ao atingir 4GB com envio por email
+  - Sistema de rastreamento de origem (source_instance UUID)
+  - Script de migração SQLite → PostgreSQL com preservação de foreign keys
+  - Script de unificação de múltiplos bancos para análise consolidada
 
 ### Especificações de Funcionalidades
 - Autenticação e controle de acesso
@@ -83,7 +93,10 @@ O sistema apresenta um design moderno e premium inspirado em interfaces Apple. P
 
 ## Dependências Externas
 - **express**: Framework do servidor web
-- **sqlite3**: Driver do banco SQLite
+- **sqlite3**: Driver do banco SQLite (local)
+- **pg**: Driver PostgreSQL para bancos em nuvem (Tembo.io)
+- **node-cron**: Agendamento de tarefas (monitoramento de banco)
+- **uuid**: Geração de UUIDs para rastreamento de instâncias
 - **express-session**: Middleware para gerenciamento de sessões
 - **multer**: Middleware para `multipart/form-data`
 - **pdf-parse**: Biblioteca para análise de PDFs
@@ -93,6 +106,7 @@ O sistema apresenta um design moderno e premium inspirado em interfaces Apple. P
 - **bcrypt**: Hash de senhas
 - **axios**: Cliente HTTP para integrações
 - **googleapis**: Integração com Google Drive e Gmail
+- **nodemailer**: Envio de emails (backups automáticos)
 - **ngrok**: Acesso remoto durante desenvolvimento
 
 ## Integrações Implementadas
@@ -139,9 +153,27 @@ O sistema apresenta um design moderno e premium inspirado em interfaces Apple. P
 
 > Altere após o primeiro acesso para garantir segurança.
 
+## ✅ Melhorias Recentes (12/11/2025)
+
+### Sistema de PostgreSQL Multi-Instância
+- ✅ **Migração para a Nuvem**: Suporte completo para PostgreSQL (Tembo.io - 10GB gratuito)
+- ✅ **Múltiplos Computadores**: Vários computadores podem acessar o mesmo banco simultaneamente
+- ✅ **Monitoramento Automático**: Verificação periódica do tamanho do banco a cada 6 horas
+- ✅ **Backup Inteligente**: Ao atingir 4GB, backup automático com envio por email
+- ✅ **Rastreamento de Origem**: Todas as tabelas incluem `source_instance` UUID
+- ✅ **Unificação de Dados**: Script para consolidar dados de múltiplas instâncias
+- ✅ **Documentação Completa**: Guias passo-a-passo em português
+
+### Como Usar PostgreSQL
+1. **Criar conta**: https://cloud.tembo.io (grátis, 10GB)
+2. **Configurar .env**: Adicionar credenciais PostgreSQL
+3. **Migrar dados**: `node scripts/migrate-to-postgres.js`
+4. **Pronto!**: Sistema monitora e faz backup automaticamente
+
+📚 **Documentação Completa**: `docs/POSTGRESQL_MIGRATION.md` e `docs/GUIA_RAPIDO_POSTGRESQL.md`
+
 ## Próximas Melhorias Planejadas
 - Relatórios com gráficos avançados
-- Notificações por email
 - App mobile para consulta
-- Dashboard em tempo real
-- Analytics de vendas
+- Dashboard em tempo real com WebSockets
+- Analytics de vendas com BI
