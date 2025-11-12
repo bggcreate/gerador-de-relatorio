@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVR/NVR - Monitoramento Intelbras</title>
+</head>
+<body>
+    <div class="page-content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="bi bi-camera-video"></i> Monitoramento DVR/NVR Intelbras
+                </h2>
+                <button class="btn btn-primary" id="btn-add-dispositivo">
+                    <i class="bi bi-plus-circle"></i> Adicionar Dispositivo
+                </button>
+            </div>
+
+            <ul class="nav nav-tabs mb-4" id="dvrTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="dispositivos-tab" data-bs-toggle="tab" data-bs-target="#dispositivos" type="button" role="tab">
+                        <i class="bi bi-hdd-network"></i> Dispositivos
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button" role="tab">
+                        <i class="bi bi-list-ul"></i> Logs de Eventos
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="arquivos-tab" data-bs-toggle="tab" data-bs-target="#arquivos" type="button" role="tab">
+                        <i class="bi bi-file-earmark-arrow-down"></i> Arquivos
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="dvrTabContent">
+                <div class="tab-pane fade show active" id="dispositivos" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" id="filtro-loja-dispositivos" placeholder="Filtrar por loja...">
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="filtro-status-dispositivos">
+                                        <option value="">Todos os status</option>
+                                        <option value="online">Online</option>
+                                        <option value="offline">Offline</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-outline-secondary" id="btn-filtrar-dispositivos">
+                                        <i class="bi bi-search"></i> Filtrar
+                                    </button>
+                                    <button class="btn btn-outline-secondary" id="btn-limpar-filtros-dispositivos">
+                                        <i class="bi bi-x-circle"></i> Limpar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Loja</th>
+                                            <th>IP:Porta</th>
+                                            <th>Modelo</th>
+                                            <th>Canais</th>
+                                            <th>Status</th>
+                                            <th>Última Conexão</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-dispositivos">
+                                        <tr>
+                                            <td colspan="8" class="text-center">
+                                                <div class="spinner-border" role="status">
+                                                    <span class="visually-hidden">Carregando...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="logs" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <select class="form-select" id="filtro-dvr-logs">
+                                        <option value="">Todos os dispositivos</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="filtro-tipo-evento">
+                                        <option value="">Todos os eventos</option>
+                                        <option value="conexao">Conexão</option>
+                                        <option value="desconexao">Desconexão</option>
+                                        <option value="movimento">Movimento Detectado</option>
+                                        <option value="gravacao">Gravação</option>
+                                        <option value="alarme">Alarme</option>
+                                        <option value="erro">Erro</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="filtro-severidade">
+                                        <option value="">Todas as severidades</option>
+                                        <option value="info">Info</option>
+                                        <option value="warning">Warning</option>
+                                        <option value="error">Error</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" class="form-control" id="filtro-data-inicio-logs">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" class="form-control" id="filtro-data-fim-logs">
+                                </div>
+                                <div class="col-md-1">
+                                    <button class="btn btn-outline-secondary" id="btn-filtrar-logs">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Data/Hora</th>
+                                            <th>Dispositivo</th>
+                                            <th>Loja</th>
+                                            <th>Tipo</th>
+                                            <th>Descrição</th>
+                                            <th>Canal</th>
+                                            <th>Severidade</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-logs">
+                                        <tr>
+                                            <td colspan="8" class="text-center">
+                                                <div class="spinner-border" role="status"></div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span id="info-paginacao-logs">Mostrando 0-0 de 0 logs</span>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary" id="btn-prev-logs" disabled>Anterior</button>
+                                    <button class="btn btn-sm btn-outline-secondary" id="btn-next-logs">Próximo</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="arquivos" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <select class="form-select" id="filtro-dvr-arquivos">
+                                        <option value="">Todos os dispositivos</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="filtro-tipo-arquivo">
+                                        <option value="">Todos os tipos</option>
+                                        <option value="mp4">Vídeo MP4</option>
+                                        <option value="avi">Vídeo AVI</option>
+                                        <option value="jpg">Imagem JPG</option>
+                                        <option value="png">Imagem PNG</option>
+                                        <option value="pdf">PDF</option>
+                                        <option value="xml">XML</option>
+                                        <option value="json">JSON</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" class="form-control" id="filtro-data-inicio-arquivos">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" class="form-control" id="filtro-data-fim-arquivos">
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-outline-secondary" id="btn-filtrar-arquivos">
+                                        <i class="bi bi-search"></i> Filtrar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-success" id="btn-upload-arquivo">
+                                    <i class="bi bi-cloud-upload"></i> Upload de Arquivo
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Nome do Arquivo</th>
+                                            <th>Dispositivo</th>
+                                            <th>Loja</th>
+                                            <th>Tipo</th>
+                                            <th>Tamanho</th>
+                                            <th>Data Geração</th>
+                                            <th>Upload Por</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-arquivos">
+                                        <tr>
+                                            <td colspan="8" class="text-center">
+                                                <div class="spinner-border" role="status"></div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-dispositivo" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar/Editar Dispositivo DVR/NVR</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-dispositivo">
+                        <input type="hidden" id="dispositivo-id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="dispositivo-nome" class="form-label">Nome do Dispositivo *</label>
+                                <input type="text" class="form-control" id="dispositivo-nome" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="dispositivo-loja" class="form-label">Loja</label>
+                                <select class="form-select" id="dispositivo-loja">
+                                    <option value="">Selecione uma loja</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="dispositivo-ip" class="form-label">Endereço IP *</label>
+                                <input type="text" class="form-control" id="dispositivo-ip" placeholder="192.168.1.100" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="dispositivo-porta" class="form-label">Porta</label>
+                                <input type="number" class="form-control" id="dispositivo-porta" value="37777">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="dispositivo-usuario" class="form-label">Usuário</label>
+                                <input type="text" class="form-control" id="dispositivo-usuario" placeholder="admin">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="dispositivo-modelo" class="form-label">Modelo</label>
+                                <input type="text" class="form-control" id="dispositivo-modelo" placeholder="Ex: MHDX 1108">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="dispositivo-canais" class="form-label">Total de Canais</label>
+                                <input type="number" class="form-control" id="dispositivo-canais" value="0" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="dispositivo-status" class="form-label">Status</label>
+                                <select class="form-select" id="dispositivo-status">
+                                    <option value="offline">Offline</option>
+                                    <option value="online">Online</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dispositivo-observacoes" class="form-label">Observações</label>
+                            <textarea class="form-control" id="dispositivo-observacoes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn-salvar-dispositivo">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-upload" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload de Arquivo DVR</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-upload">
+                        <div class="mb-3">
+                            <label for="upload-dvr" class="form-label">Dispositivo DVR *</label>
+                            <select class="form-select" id="upload-dvr" required>
+                                <option value="">Selecione um dispositivo</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="upload-arquivo" class="form-label">Arquivo *</label>
+                            <input type="file" class="form-control" id="upload-arquivo" required>
+                            <small class="text-muted">Permitido: vídeos, imagens, PDF, XML, JSON (máx 500MB)</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="upload-canal" class="form-label">Canal</label>
+                            <input type="number" class="form-control" id="upload-canal" min="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="upload-descricao" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="upload-descricao" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn-confirmar-upload">
+                        <i class="bi bi-cloud-upload"></i> Fazer Upload
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

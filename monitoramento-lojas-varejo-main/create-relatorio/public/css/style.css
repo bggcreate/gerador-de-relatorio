@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+
+/* ============================================================
+   VARIÁVEIS
+============================================================ */
+:root {
+    --sidebar-width: 250px;
+    --main-bg: #1A1A1D;
+    --content-bg: rgba(28, 28, 28, 0.65);
+    --hover-bg: #000000;
+    --border-color: #383838;
+    --accent-color: #ff7b00;
+    --glow-color: rgba(255, 123, 0, 0.15);
+    --color-success: #2ea043;
+    --text-light: #ffffff;
+    --text-muted: #b0b0b0;
+    --text-input-color: #e5e7eb;
+    --border-radius-large: 16px;
+    --border-radius-small: 8px;
+    --transition-speed: 0.2s;
+}
+
+/* ============================================================
+   ESTRUTURA PRINCIPAL E ESTILOS GLOBAIS
+============================================================ */
+body { background-color: var(--main-bg) !important; font-family: 'Inter', sans-serif; }
+.main-content { padding: 2.5rem; height: 100vh; overflow-y: auto; }
+#page-content { max-width: 1400px; margin: 0 auto; }
+body, body *, .card, .card *, .modal, .modal * { color: var(--text-light) !important; }
+small { color: var(--text-muted) !important; }
+
+h4.mb-3 {
+    font-weight: 700; padding-bottom: 1rem; position: relative;
+    border-bottom: 1px solid var(--border-color); margin-bottom: 2.5rem !important;
+}
+h4.mb-3::after {
+    content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 1px;
+    background-color: transparent; box-shadow: 0 0 15px -2px var(--glow-color);
+}
+
+/* ============================================================
+   SIDEBAR DESKTOP
+============================================================ */
+.sidebar-desktop {
+    position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh;
+    background-color: var(--content-bg); border-right: 1px solid var(--border-color);
+    padding: 1.5rem; z-index: 1000; display: flex; flex-direction: column;
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.sidebar-header { display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); }
+.sidebar-header i { color: var(--accent-color) !important; font-size: 1.8rem; }
+.sidebar-nav { list-style: none !important; padding: 0 !important; margin: 1.5rem 0; flex-grow: 1; }
+.sidebar-nav .nav-item { margin-bottom: 0.25rem !important; }
+.nav-link { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; border-radius: var(--border-radius-small); color: var(--text-muted) !important; text-decoration: none; transition: all var(--transition-speed); }
+.nav-link:hover { color: var(--text-light) !important; background-color: var(--hover-bg); }
+.nav-item.active .nav-link { color: var(--text-light) !important; background-color: var(--main-bg); font-weight: 600; }
+.nav-item.active .nav-link i { color: var(--accent-color) !important; }
+.sidebar-footer { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+#user-info-container { display: flex; flex-direction: column; gap: 1rem; }
+#user-info-container .user-info { font-weight: 600; }
+#user-info-container .user-actions { display: flex; gap: 0.5rem; }
+#user-info-container .btn { background-color: transparent !important; border: 1px solid var(--border-color) !important; color: var(--text-muted) !important; padding: 0.4rem 0.6rem; font-size: 1rem; }
+#user-info-container .btn:hover { background-color: var(--hover-bg) !important; color: var(--accent-color) !important; border-color: var(--accent-color) !important; }
+
+/* ============================================================
+   COMPONENTES GERAIS (Cards, Forms, Botões)
+============================================================ */
+.card, .alert, .list-group-item { background-color: var(--content-bg) !important; border-radius: var(--border-radius-large) !important; border: 1px solid var(--border-color) !important; margin-bottom: 1.5rem; }
+#page-content > .container-fluid > .card:first-of-type { box-shadow: 0 8px 32px -8px var(--glow-color); }
+.card-header { font-weight: 600; background-color: transparent !important; border-bottom: 1px solid var(--border-color) !important; padding: 1rem 1.5rem; }
+.card-body { padding: 1.5rem !important; }
+.form-control, .form-select { background-color: var(--main-bg) !important; border: 1px solid var(--border-color) !important; color: var(--text-input-color) !important; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; cursor: pointer; }
+.btn { transition: all var(--transition-speed) ease; font-weight: 600; border-radius: var(--border-radius-small); }
+.btn-primary { background-color: var(--accent-color) !important; color: var(--main-bg) !important; border: none !important; }
+
+/* ============================================================
+   LAYOUT RESPONSIVO
+============================================================ */
+@media (min-width: 992px) { .main-content { margin-left: var(--sidebar-width); } }
+@media (max-width: 991.98px) { .main-content { padding: 1.5rem; padding-top: 80px; } }
+
+/* ============================================================
+   HEADER E MENU MOBILE (MODAL)
+============================================================ */
+.mobile-header {
+    position: fixed; top: 0; left: 0; width: 100%; height: 60px; background-color: var(--content-bg);
+    border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 1rem;
+    z-index: 1030; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.mobile-header .btn { font-size: 1.5rem; color: var(--text-light) !important; }
+.mobile-header-title { display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; font-weight: 700; margin-left: 1rem; }
+.mobile-header-title i { color: var(--accent-color) !important; }
+.modal-content.mobile-menu-content { background-color: #111111; border: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.mobile-menu-content .modal-header { border-bottom-color: var(--border-color); }
+.mobile-menu-content .modal-header .modal-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.2rem; }
+.mobile-menu-content .modal-header .modal-title i { color: var(--accent-color) !important; }
+.mobile-menu-content .modal-body { padding-top: 2rem; }
+.mobile-menu-content .nav-link { font-size: 1.2rem; padding: 1rem; }
+
+/* ============================================================
+   CORREÇÕES DE COMPONENTES (Tabelas, Modais, Abas)
+============================================================ */
+.card .table-responsive, .card .table { background-color: transparent; }
+.card .table { --bs-table-bg: transparent; --bs-table-striped-bg: rgba(0, 0, 0, 0.05); }
+.modal-content { background-color: var(--content-bg) !important; border-radius: var(--border-radius-large) !important; border: 1px solid var(--border-color) !important; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.modal-header { border-bottom-color: var(--border-color) !important; }
+.modal-footer { border-top-color: var(--border-color) !important; }
+.nav-tabs { border-bottom: 2px solid var(--border-color) !important; }
+.nav-tabs .nav-link { background: transparent !important; border: none !important; border-bottom: 3px solid transparent !important; color: var(--text-muted) !important; margin-bottom: -2px; }
+.nav-tabs .nav-link:hover { border-bottom-color: var(--border-color) !important; }
+.nav-tabs .nav-link.active { color: var(--text-light) !important; font-weight: 600; border-bottom-color: var(--accent-color) !important; }
+
+/* ============================================================
+   REFORMULAÇÃO DO FORMULÁRIO DE FILTROS DO DASHBOARD
+============================================================ */
+#form-filtros-dashboard .form-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem; /* Espaçamento consistente */
+}
+
+/* Container do controle segmentado */
+#form-filtros-dashboard .btn-group {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    padding: 3px;
+    background-color: var(--main-bg);
+}
+
+/* Botões individuais dentro do controle */
+#form-filtros-dashboard .btn-group .btn {
+    background-color: transparent !important;
+    border: none !important;
+    color: var(--text-muted) !important;
+    font-weight: 500;
+    box-shadow: none !important;
+    transition: all 0.2s ease-in-out;
+    border-radius: 6px !important; /* Bordas arredondadas para todos */
+    padding-top: 0.375rem; /* Ajuste para alinhamento vertical */
+    padding-bottom: 0.375rem;
+    
+}
+
+#form-filtros-dashboard .btn-group .btn:hover {
+    color: var(--text-light) !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Botão ATIVO no controle */
+#form-filtros-dashboard .btn-group .btn.active {
+    background-color: var(--hover-bg) !important;
+    color: var(--text-light) !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+}
+
+.input-group-text {
+    background-color: var(--border-color) !important; /* Um cinza um pouco mais escuro para destaque */
+    border-color: var(--border-color) !important;
+    color: var(--text-muted) !important;
+    font-weight: 600;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
+/* Aplica o brilho laranja ao passar o mouse sobre botões primários */
+.btn-primary:hover {
+    box-shadow: 0 0 12px var(--glow-color);
+}
+
+/* Aplica um brilho verde ao passar o mouse sobre botões de sucesso */
+.btn-success:hover {
+    box-shadow: 0 0 12px rgba(46, 160, 67, 0.6);
+}
+
+/* Aplica um brilho vermelho ao passar o mouse sobre botões de perigo */
+.btn-danger:hover, .btn-outline-danger:hover {
+    box-shadow: 0 0 12px rgba(248, 113, 113, 0.6);
+}
+
+/* Aplica um brilho cinza ao passar o mouse sobre botões secundários */
+.btn-secondary:hover, .btn-outline-secondary:hover {
+    box-shadow: 0 0 12px rgba(108, 117, 125, 0.4);
+}
