@@ -1,91 +1,147 @@
 # Sistema de Monitoramento de Lojas de Varejo
 
-## Overview
-This project is a web-based retail store monitoring and reporting system built with Node.js, Express, and SQLite. Its primary purpose is to provide functionalities for managing retail stores, generating various sales reports, handling PDF uploads, exporting data, and visualizing key performance indicators through a dashboard. The system aims to streamline retail operations by offering authentication, user management, and a comprehensive view of store performance, with future integration planned for external sales platforms like Bluve/Blu.
+## Visão Geral
+Sistema web completo para gestão e monitoramento de lojas de varejo, construído com Node.js, Express e SQLite. O sistema oferece funcionalidades abrangentes para gerenciar lojas, gerar relatórios de vendas, processar uploads de PDFs, exportar dados e visualizar indicadores de desempenho através de um dashboard interativo.
 
-## User Preferences
-I prefer simple language. I want iterative development. Ask before making major changes. I prefer detailed explanations.
+## Preferências de Desenvolvimento
+- Linguagem simples e direta
+- Desenvolvimento iterativo
+- Consultar antes de mudanças significativas
+- Explicações detalhadas quando necessário
 
-## System Architecture
+## Arquitetura do Sistema
 
-### UI/UX Decisions
-The system features a modern, Apple-inspired design aesthetic with premium visual elements. Key UI/UX decisions include:
-- **Glassmorphism**: Utilizes frosted glass effects for cards, modals, and menus.
-- **Micro-animations**: Implements subtle animations for buttons, hover states, and active states.
-- **Responsive Design**: Comprehensive responsiveness across various devices.
-- **Theming**: Includes a floating dark mode toggle with smooth transitions.
-- **Login Page**: Features a hero-style login page with gradient backgrounds and sequenced fade-in animations.
-- **Component Styling**: Standardized buttons, cards with layered shadows, and forms with bold labels and enhanced focus states.
-- **Dashboard**: Enhanced with performance indicator cards, comparative bar charts, and a donut chart. Ranking visuals include medal icons.
-- **Navigation**: Sidebar navigation with sliding accent bars and animated icons, with a toggle for persistent state.
-- **Pastel Color Palette**: Soft, eye-friendly pastel colors throughout the interface to prevent visual fatigue:
-  - Buttons: #d0ebff (blue details), #e9ecef (grey edit), #ffe3e3 (red delete)
-  - Badges: #c3fae8 (green active), #ffe3e3 (red demitido), #f1f3f5 (grey inactive), #a5d8ff (blue counter)
-  - Three-state vendor status logic: Ativo (active), Demitido (dismissed with date), Inativo (inactive without dismissal date)
+### Decisões de UI/UX
+O sistema apresenta um design moderno e premium inspirado em interfaces Apple. Principais características visuais:
+- **Glassmorfismo**: Efeitos de vidro fosco em cards, modais e menus
+- **Micro-animações**: Animações sutis em botões e estados hover
+- **Design Responsivo**: Totalmente adaptável a diferentes dispositivos
+- **Tema**: Toggle de modo escuro com transições suaves
+- **Login**: Página hero com gradientes e animações sequenciais
+- **Componentes**: Botões padronizados, cards com sombras em camadas, formulários com labels destacados
+- **Dashboard**: Cards de indicadores, gráficos de barras comparativos e gráfico de rosca
+- **Navegação**: Sidebar com barras de destaque deslizantes e ícones animados
+- **Paleta de Cores Pastel**: Cores suaves para evitar fadiga visual:
+  - Botões: #d0ebff (azul detalhes), #e9ecef (cinza edição), #ffe3e3 (vermelho exclusão)
+  - Badges: #c3fae8 (verde ativo), #ffe3e3 (vermelho demitido), #f1f3f5 (cinza inativo), #a5d8ff (azul contador)
+  - Status de vendedor: Ativo, Demitido (com data), Inativo (sem data de demissão)
 
-### Technical Implementations
-- **Backend**: Node.js with Express.js framework.
-- **Database**: SQLite (`database.db`) with automatic table creation and configurable path (`DB_PATH`).
-- **Authentication**: User authentication with different access levels (admin, user, technician), supporting session management and temporary JWT tokens for development. Default admin credentials: `admin`/`admin`.
-- **File Uploads**: Utilizes `multer` for `multipart/form-data`.
-- **PDF Processing**: `pdf-parse` for reading and `pdfkit` for generating PDFs.
-- **Excel Export**: `exceljs` for generating Excel reports.
-- **Dashboard Features**: Dynamic graphs and statistics.
-- **Demand System**: Internal management of demands.
-- **Backup/Restore**: Database backup and restoration functionality.
-- **Assistência Técnica Module**: Manages technical assistance calls, stock control for repair parts, and logging assistance events. Includes "Técnico" role with restricted access.
-- **DVR/NVR Monitoring Module**: Manages Intelbras DVR/NVR devices with log collection and file management (recordings, screenshots, XML/JSON reports). Uses separate multer instance with diskStorage for persistent file storage in `data/dvr_files/<dvrId>/`. Does NOT include video streaming functionality.
+### Implementações Técnicas
+- **Backend**: Node.js com framework Express.js
+- **Banco de Dados**: SQLite com criação automática de tabelas e caminho configurável (`DB_PATH`)
+- **Autenticação**: Sistema de login com diferentes níveis de acesso, gerenciamento de sessões e tokens JWT temporários para desenvolvimento. Credenciais padrão: `admin`/`admin`
+- **Upload de Arquivos**: Multer para `multipart/form-data`
+- **Processamento de PDFs**: pdf-parse para leitura e pdfkit para geração
+- **Exportação Excel**: exceljs para relatórios em planilha
+- **Dashboard**: Gráficos e estatísticas dinâmicas
+- **Sistema de Demandas**: Gerenciamento interno de solicitações
+- **Backup/Restore**: Funcionalidade de backup e restauração do banco
+- **Módulo de Assistência Técnica**: Gerencia chamados técnicos, controle de estoque de peças e registro de eventos
+- **Módulo DVR/NVR**: Gerencia dispositivos Intelbras com coleta de logs e gestão de arquivos (gravações, capturas, relatórios XML/JSON). Armazena arquivos em `data/dvr_files/<dvrId>/`
 
-### Feature Specifications
-- User authentication and access control.
-- Store management (cadastro e gerenciamento de lojas) with fields for CEP, contact number, and manager.
-- Sales report generation and querying.
-- **PDF Processing & Import**: 
-  - **Ranking Dia PDF**: Upload and automatic extraction of PA, Preço Médio, and Atendimento Médio metrics from totals line. Validates store name and date before processing. Uses regex pattern `\d{1,3}(?:\.\d{3})*(?:,\d+)?` to correctly capture Brazilian-formatted numbers.
-  - **Ticket Dia PDF**: Upload and storage of PDF files for future consultation with filtering by store and date.
-  - **Database table**: `pdf_tickets` stores uploaded PDFs metadata and file paths.
-  - **Endpoints**: POST `/api/pdf/ranking`, POST `/api/pdf/ticket`, GET `/api/pdf/tickets`, GET `/api/pdf/tickets/:id/download`.
-- Report export in TXT, PDF, and Excel formats.
-- Interactive dashboard with graphs and statistics.
-- Internal demand management system.
-- Database backup and restoration.
-- Technical assistance module with stock management and restricted technician views.
-- Temporary JWT token system for development with configurable validity, IP restriction, and revocation.
-- **DVR/NVR Monitoring Module** (✅ Fully Implemented and Functional):
-  - **Device Management**: Register and manage Intelbras DVR/NVR devices with IP, port, credentials, and location details.
-  - **Log System**: Collect and filter device logs with timestamps, event types, and descriptions.
-  - **File Management**: Upload and download files (recordings, screenshots, XML/JSON reports) with metadata tracking.
-  - **Database tables**: `dvr_dispositivos` (devices), `dvr_logs` (event logs), `dvr_arquivos` (uploaded files with metadata).
-  - **Storage**: Dedicated multer instance with diskStorage (not memoryStorage) saving files to `data/dvr_files/`.
-  - **Security**: File size limit (500MB), MIME type filtering, authentication required for all endpoints.
-  - **Endpoints**: POST/GET/PUT/DELETE `/api/dvr/dispositivos`, POST/GET `/api/dvr/logs`, POST/GET/DELETE `/api/dvr/arquivos`, GET `/api/dvr/arquivos/:id/download` (server.js linhas 1901-2162).
-  - **Frontend**: Three-tab interface (Dispositivos, Logs, Arquivos) with filters, pagination, and file upload/download capabilities (views/dvr-monitor.html, public/js/pages/dvr-monitor.js).
-  - **Route**: `/dvr-monitor` - accessible via menu "DVR/NVR" after login.
-  - **Sample Data**: 3 devices (2 online, 1 offline), 6 event logs, 4 file records created for demonstration.
-  - **Note**: This module does NOT include live video streaming, only log management and file storage/download.
-  - **Integração Intelbras** (✅ Implementada):
+### Especificações de Funcionalidades
+- Autenticação e controle de acesso
+- Gestão de lojas com campos para CEP, telefone de contato e gerente
+- Geração e consulta de relatórios de vendas
+- **Processamento e Importação de PDFs**: 
+  - **Ranking Dia PDF**: Upload e extração automática de métricas PA, Preço Médio e Atendimento Médio. Valida nome da loja e data antes de processar
+  - **Ticket Dia PDF**: Upload e armazenamento de PDFs para consulta futura com filtros por loja e data
+  - **Tabela do banco**: `pdf_tickets` armazena metadados e caminhos dos arquivos
+  - **Endpoints**: POST `/api/pdf/ranking`, POST `/api/pdf/ticket`, GET `/api/pdf/tickets`, GET `/api/pdf/tickets/:id/download`
+- Exportação de relatórios em TXT, PDF e Excel
+- Dashboard interativo com gráficos e estatísticas
+- Sistema interno de gerenciamento de demandas
+- Backup e restauração do banco de dados
+- Módulo de assistência técnica com gestão de estoque e visualizações restritas
+- Sistema de tokens JWT temporários para desenvolvimento com validade configurável
+- **Módulo de Monitoramento DVR/NVR** (Totalmente Funcional):
+  - **Gestão de Dispositivos**: Registro e gerenciamento de DVRs/NVRs Intelbras com IP, porta, credenciais e localização
+  - **Sistema de Logs**: Coleta e filtragem de logs com timestamps, tipos de evento e descrições
+  - **Gestão de Arquivos**: Upload e download de gravações, capturas e relatórios com rastreamento de metadados
+  - **Tabelas do banco**: `dvr_dispositivos` (dispositivos), `dvr_logs` (eventos), `dvr_arquivos` (arquivos com metadados)
+  - **Armazenamento**: Instância dedicada do multer salvando arquivos em `data/dvr_files/`
+  - **Segurança**: Limite de 500MB por arquivo, filtragem de MIME types, autenticação obrigatória
+  - **Endpoints**: POST/GET/PUT/DELETE `/api/dvr/dispositivos`, POST/GET `/api/dvr/logs`, POST/GET/DELETE `/api/dvr/arquivos`
+  - **Frontend**: Interface com três abas (Dispositivos, Logs, Arquivos) com filtros, paginação e upload/download
+  - **Rota**: `/dvr-monitor` - acessível via menu "DVR/NVR" após login
+  - **Dados de Exemplo**: 3 dispositivos (2 online, 1 offline), 6 logs de eventos, 4 registros de arquivos
+  - **Nota**: Este módulo NÃO inclui streaming de vídeo ao vivo, apenas gerenciamento de logs e arquivos
+  - **Integração Intelbras** (Implementada):
     - Serviço Node.js que conecta diretamente aos DVRs via API HTTP nativa
-    - Não requer DLLs do Windows (funciona no Linux/Replit)
+    - Não requer DLLs do Windows (funciona em Linux/Replit)
     - Coleta logs e eventos automaticamente dos dispositivos
     - Script: `scripts/collect-dvr-logs.js`
     - Serviço: `services/intelbrasDvrService.js`
-    - Documentação completa: `INTELBRAS_INTEGRACAO.md`
+    - Documentação completa disponível em `docs/`
 
-### System Design Choices
-- **Project Structure**: Clear separation of concerns with `server.js` as the main entry point, dedicated folders for views, static assets, and data.
-- **Environment**: Configured for Replit, running on port 5000 and binding to `0.0.0.0`.
-- **Modularity**: New features are structured with dedicated tables and APIs.
-- **Responsiveness**: Extensive CSS for adaptive layouts.
-- **Security**: CSP updates, CSRF token handling, bcrypt hashing for passwords, and rate limiting for login attempts.
+### Decisões de Design do Sistema
+- **Estrutura do Projeto**: Separação clara de responsabilidades com `server.js` como ponto de entrada principal
+- **Ambiente**: Configurado para rodar na porta 5000, binding em `0.0.0.0`
+- **Modularidade**: Novas funcionalidades estruturadas com tabelas e APIs dedicadas
+- **Responsividade**: CSS extensivo para layouts adaptativos
+- **Segurança**: CSP, tokens CSRF, hash bcrypt para senhas e rate limiting para login
 
-## External Dependencies
-- **express**: Web server framework.
-- **sqlite3**: SQLite database driver.
-- **express-session**: Middleware for session management.
-- **multer**: Middleware for handling `multipart/form-data`.
-- **pdf-parse**: Library for parsing PDF files.
-- **pdfkit**: Library for PDF generation.
-- **exceljs**: Library for creating and reading Excel XLSX files.
-- **jsonwebtoken**: For generating and verifying JWTs.
-- **bcrypt**: For password hashing.
-- **Bluve/Blu (Planned)**: Future integration for bidirectional store synchronization, automatic report import, and utilizing Bluve's APIs (Movement of Sales, Extract, Reconciliation).
+## Dependências Externas
+- **express**: Framework do servidor web
+- **sqlite3**: Driver do banco SQLite
+- **express-session**: Middleware para gerenciamento de sessões
+- **multer**: Middleware para `multipart/form-data`
+- **pdf-parse**: Biblioteca para análise de PDFs
+- **pdfkit**: Biblioteca para geração de PDFs
+- **exceljs**: Biblioteca para criação e leitura de arquivos Excel XLSX
+- **jsonwebtoken**: Geração e verificação de JWTs
+- **bcrypt**: Hash de senhas
+- **axios**: Cliente HTTP para integrações
+- **googleapis**: Integração com Google Drive e Gmail
+- **ngrok**: Acesso remoto durante desenvolvimento
+
+## Integrações Implementadas
+
+### Google Drive
+- Armazenamento de relatórios (15GB gratuitos)
+- Backup automático ao atingir limite
+- Envio de backups por email
+- Organização automática por ano/mês
+- Limpeza de arquivos antigos (>90 dias)
+
+### DVR Intelbras
+- Conexão via API HTTP nativa
+- Coleta automática de logs
+- Captura de snapshots
+- Monitoramento de status
+- Download de gravações
+
+## Estrutura de Arquivos
+```
+├── server.js              # Servidor principal
+├── package.json           # Dependências do projeto
+├── data/                  # Dados e banco de dados
+│   ├── database.db        # Banco SQLite
+│   ├── pdfs/             # PDFs anexados
+│   └── dvr_files/        # Arquivos DVR
+├── public/                # Arquivos públicos
+│   ├── js/               # JavaScript frontend
+│   │   ├── app.js        # Aplicação principal
+│   │   ├── pages/        # Scripts por página
+│   │   ├── utils.js      # Utilitários
+│   │   └── theme.js      # Gerenciamento de tema
+│   └── css/              # Estilos
+├── views/                 # Templates HTML
+├── services/              # Serviços de integração
+├── scripts/               # Scripts auxiliares
+├── middleware/            # Middlewares personalizados
+└── docs/                 # Documentação técnica
+```
+
+## Credenciais Padrão
+- **Usuário**: admin
+- **Senha**: admin
+
+> Altere após o primeiro acesso para garantir segurança.
+
+## Próximas Melhorias Planejadas
+- Relatórios com gráficos avançados
+- Notificações por email
+- App mobile para consulta
+- Dashboard em tempo real
+- Analytics de vendas
