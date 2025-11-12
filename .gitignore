@@ -1,18 +1,49 @@
-# Ignorar a pasta de dados que contém o banco de dados
-data/
+# Banco de dados e arquivos de dados
+data/database.db
+data/*.db
+data/*.db-journal
+data/pdfs/**/*
+data/dvr_files/**/*
 
-# Environment variables
+# Arquivos gerados
+public/relatorios_gerados/**/*
+dist/
+
+# Variáveis de ambiente
 .env
-
-# Pasta com relatórios de Excel gerados
-relatorios-gerados/
+.env.local
+.env.*.local
 
 # Node.js
 node_modules/
-npm-debug.log
-yarn-error.log
-.pnpm-debug.log
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# OS files
+# Arquivos temporários
+*.tmp
+*.bak
+*.backup
+*~
+
+# Sistema operacional
 .DS_Store
 Thumbs.db
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Cache e estado local
+.cache/
+.local/share/
+.local/state/
+
+# Replit (manter configuração)
+.config/
