@@ -49,10 +49,19 @@ function initGerenciarLojas() {
     }
 
     async function carregarLojas() {
+        console.log('🔄 carregarLojas() chamada');
         tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Carregando...</td></tr>';
         try {
+            console.log('📡 Fazendo fetch em /api/lojas...');
             const response = await fetch('/api/lojas');
+            console.log('📊 Response status:', response.status, response.ok);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const lojas = await response.json();
+            console.log('📦 Lojas recebidas:', lojas);
             // Normalizar IDs para números
             lojasCache = lojas.map(loja => ({
                 ...loja,
