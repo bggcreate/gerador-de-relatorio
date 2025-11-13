@@ -52,21 +52,20 @@ async function loadPage(path) {
 
         pageContent.innerHTML = await response.text();
         
+        // Aguarda o próximo frame de renderização para garantir que o DOM está pronto
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        
         // Inicializar animações de scroll para os novos elementos
         setTimeout(() => initScrollAnimations(), 50);
         
-        // Garante que a função de inicialização da página seja chamada
+        // Garante que a função de inicialização da página seja chamada após o DOM estar pronto
         const initFunc = pageInitializers[activePage];
         if (typeof initFunc === 'function') {
-           
-            setTimeout(() => {
-                try {
-                    
-                    initFunc(currentUser);
-                } catch (err) {
-                    console.error(`Erro ao inicializar a página '${activePage}':`, err);
-                }
-            }, 0);
+            try {
+                initFunc(currentUser);
+            } catch (err) {
+                console.error(`Erro ao inicializar a página '${activePage}':`, err);
+            }
         }
     } catch (error) {
         console.error("Erro ao carregar página:", error);

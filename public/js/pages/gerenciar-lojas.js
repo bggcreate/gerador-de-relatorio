@@ -17,7 +17,16 @@ function initGerenciarLojas() {
     const btnAdicionar = document.getElementById('btn-adicionar-loja');
     const modalEl = document.getElementById('modal-loja');
     
-    if (!tableBody || !btnAdicionar || !modalEl) return;
+    if (!tableBody || !btnAdicionar || !modalEl) {
+        console.error('❌ Elementos necessários não encontrados:', {
+            tableBody: !!tableBody,
+            btnAdicionar: !!btnAdicionar,
+            modalEl: !!modalEl
+        });
+        return;
+    }
+    
+    console.log('✅ Elementos encontrados, inicializando gerenciamento de lojas...');
     
     const modal = new bootstrap.Modal(modalEl);
     const modalForm = document.getElementById('form-loja');
