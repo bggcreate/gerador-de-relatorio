@@ -44,20 +44,14 @@ export function initDemandasPage() {
                 return;
             }
 
-            const userRole = window.currentUser?.role;
-            const podeExcluir = ['admin', 'dev', 'monitoramento', 'consultor'].includes(userRole);
-            
             container.innerHTML = demandas.map(d => {
                 const tagCores = { 'Urgente': 'bg-danger', 'Alta': 'bg-warning text-dark', 'Normal': 'bg-info text-dark', 'Baixa': 'bg-secondary' };
                 let acoesHtml = '';
                 
                 if (tipo === 'pendentes') {
-                    const btnExcluir = podeExcluir ? `<button class="btn btn-sm btn-danger" data-action="excluir" data-id="${d.id}" title="Excluir"><i class="bi bi-trash"></i></button>` : '';
-                    acoesHtml = `<div class="d-flex justify-content-end mt-2"><button class="btn btn-sm btn-success me-2" data-action="concluir" data-id="${d.id}" title="Concluir"><i class="bi bi-check-lg"></i></button>${btnExcluir}</div>`;
+                    acoesHtml = `<div class="d-flex justify-content-end mt-2"><button class="btn btn-sm btn-success me-2" data-action="concluir" data-id="${d.id}" title="Concluir"><i class="bi bi-check-lg"></i></button><button class="btn btn-sm btn-danger" data-action="excluir" data-id="${d.id}" title="Excluir"><i class="bi bi-trash"></i></button></div>`;
                 } else if (tipo === 'historico') {
-                    if (podeExcluir) {
-                        acoesHtml = `<div class="d-flex justify-content-end mt-2"><button class="btn btn-sm btn-danger" data-action="excluir" data-id="${d.id}" title="Excluir do Histórico"><i class="bi bi-trash"></i></button></div>`;
-                    }
+                    acoesHtml = `<div class="d-flex justify-content-end mt-2"><button class="btn btn-sm btn-danger" data-action="excluir" data-id="${d.id}" title="Excluir do Histórico"><i class="bi bi-trash"></i></button></div>`;
                 }
                 const footerHtml = tipo === 'pendentes' ? `Criado por <strong>${d.criado_por_usuario}</strong> em ${new Date(d.criado_em).toLocaleDateString('pt-BR')}` : `Concluído por <strong>${d.concluido_por_usuario || 'N/A'}</strong> em ${new Date(d.concluido_em).toLocaleDateString('pt-BR')}`;
 
