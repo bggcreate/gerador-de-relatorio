@@ -107,14 +107,14 @@ function initGerenciarLojas() {
                     <td class="text-center align-middle">${statusBadge}</td>
                     <td class="align-middle">${funcaoEspecial}</td>
                     <td class="text-end align-middle pe-3">
-                        <button class="btn btn-sm" style="background-color: #d0ebff; color: #1971c2; border: 1px solid #a5d8ff;" data-action="detalhes" data-id="${loja.id}" title="Ver Detalhes e Vendedores">
-                            <i class="bi bi-eye me-1"></i>Detalhes
+                        <button class="btn btn-sm btn-outline-info" data-action="detalhes" data-id="${loja.id}" title="Ver Detalhes e Vendedores">
+                            <i class="bi bi-eye"></i>
                         </button>
-                        <button class="btn btn-sm" style="background-color: #e9ecef; color: #495057; border: 1px solid #ced4da;" data-action="editar" data-id="${loja.id}" title="Editar Loja">
-                            <i class="bi bi-pencil me-1"></i>Editar
+                        <button class="btn btn-sm btn-outline-secondary" data-action="editar" data-id="${loja.id}" title="Editar Loja">
+                            <i class="bi bi-pencil"></i>
                         </button>
-                        <button class="btn btn-sm" style="background-color: #ffe3e3; color: #c92a2a; border: 1px solid #ffc9c9;" data-action="excluir" data-id="${loja.id}" title="Excluir Loja">
-                            <i class="bi bi-trash me-1"></i>Excluir
+                        <button class="btn btn-sm btn-outline-danger" data-action="excluir" data-id="${loja.id}" title="Excluir Loja">
+                            <i class="bi bi-trash"></i>
                         </button>
                     </td>
                 </tr>`;

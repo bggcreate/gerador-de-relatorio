@@ -658,6 +658,7 @@ function initMetricsCards() {
     // Popular dropdowns
     populateStoreDropdowns();
     populateOmniStoresDropdown();
+    populateAssistenciasStoresDropdown();
     
     // Carregar métricas gerais inicialmente para ambos os cards
     updateMonitoramentoCard();
@@ -682,7 +683,14 @@ function initMetricsCards() {
     
     if (filtroOmni) {
         filtroOmni.addEventListener('change', () => {
-            updatePerformanceCards();
+            updateOmniCard();
+        });
+    }
+    
+    const filtroAssistencias = document.getElementById('filtro-loja-assistencias');
+    if (filtroAssistencias) {
+        filtroAssistencias.addEventListener('change', () => {
+            updateAssistenciasCard();
         });
     }
 }
@@ -711,36 +719,91 @@ async function populateOmniStoresDropdown() {
     }
 }
 
-// Atualizar cards de indicadores de performance
-async function updatePerformanceCards(dataInicio = null, dataFim = null) {
+// Popular dropdown de lojas com função Assistência Técnica
+async function populateAssistenciasStoresDropdown() {
     try {
+        const response = await fetch('/api/lojas');
+        const lojas = await response.json();
+        
+        const filtroAssistencias = document.getElementById('filtro-loja-assistencias');
+        
+        if (filtroAssistencias) {
+            filtroAssistencias.innerHTML = '<option value="">Geral</option>';
+            
+            lojas.filter(loja => loja.funcao_especial && loja.funcao_especial.toLowerCase().includes('assist'))
+                .forEach(loja => {
+                    const option = document.createElement('option');
+                    option.value = loja.nome;
+                    option.textContent = loja.nome;
+                    filtroAssistencias.appendChild(option);
+                });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar lojas de Assistências:', error);
+    }
+}
+
+// Atualizar card de Assistências de forma independente (sempre mostra dados de HOJE)
+async function updateAssistenciasCard() {
+    try {
+        const hoje = toISODateString(new Date());
         const params = new URLSearchParams();
-        if (dataInicio) params.append('data_inicio', dataInicio);
-        if (dataFim) params.append('data_fim', dataFim);
+        params.append('data_inicio', hoje);
+        params.append('data_fim', hoje);
+        
+        const lojaAssistencias = document.getElementById('filtro-loja-assistencias')?.value;
+        if (lojaAssistencias) params.append('loja', lojaAssistencias);
+        
+        const response = await fetch(`/api/assistencias?${params.toString()}`);
+        
+        let assistenciasTotal = 0;
+        if (response.ok) {
+            const assistencias = await response.json();
+            assistenciasTotal = Array.isArray(assistencias) ? assistencias.length : 0;
+        }
+        
+        document.getElementById('card-assistencias-total').textContent = assistenciasTotal.toLocaleString('pt-BR');
+    } catch (error) {
+        console.error('Erro ao carregar card de Assistências:', error);
+        document.getElementById('card-assistencias-total').textContent = '0';
+    }
+}
+
+// Atualizar card de Omni de forma independente (sempre mostra dados de HOJE)
+async function updateOmniCard() {
+    try {
+        const hoje = toISODateString(new Date());
+        const params = new URLSearchParams();
+        params.append('data_inicio', hoje);
+        params.append('data_fim', hoje);
         
         const lojaOmni = document.getElementById('filtro-loja-omni')?.value;
         if (lojaOmni) params.append('loja', lojaOmni);
         
+        const response = await fetch(`/api/dashboard-data?${params.toString()}`);
+        
+        let omniTotal = 0;
+        if (response.ok) {
+            const omniData = await response.json();
+            omniTotal = omniData.total_omni || 0;
+        }
+        
+        document.getElementById('card-omni-total').textContent = omniTotal.toLocaleString('pt-BR');
+    } catch (error) {
+        console.error('Erro ao carregar card de Omni:', error);
+        document.getElementById('card-omni-total').textContent = '0';
+    }
+}
+
+// Atualizar cards estáticos (Relatórios Hoje e Última Loja)
+async function updateStaticCards() {
+    try {
         const hoje = toISODateString(new Date());
         
-        const [assistenciasResp, omniResp, ultimaLojaResp, relatoriosHojeResp] = await Promise.all([
-            fetch(`/api/assistencias?${params.toString()}`),
-            fetch(`/api/dashboard-data?${params.toString()}`),
+        const [ultimaLojaResp, relatoriosHojeResp] = await Promise.all([
             fetch('/api/relatorios/ultima-loja'),
             fetch(`/api/relatorios?data_inicio=${hoje}&data_fim=${hoje}`)
         ]);
-        
-        let assistenciasTotal = 0;
-        if (assistenciasResp.ok) {
-            const assistencias = await assistenciasResp.json();
-            assistenciasTotal = Array.isArray(assistencias) ? assistencias.length : 0;
-        }
-        
-        let omniTotal = 0;
-        if (omniResp.ok) {
-            const omniData = await omniResp.json();
-            omniTotal = omniData.total_omni || 0;
-        }
         
         if (ultimaLojaResp.ok) {
             const ultimaLoja = await ultimaLojaResp.json();
@@ -764,18 +827,22 @@ async function updatePerformanceCards(dataInicio = null, dataFim = null) {
             relatoriosHojeTotal = relatoriosHoje.total || 0;
         }
         
-        document.getElementById('card-assistencias-total').textContent = assistenciasTotal.toLocaleString('pt-BR');
-        document.getElementById('card-omni-total').textContent = omniTotal.toLocaleString('pt-BR');
         document.getElementById('card-relatorios-hoje').textContent = relatoriosHojeTotal.toLocaleString('pt-BR');
-        
     } catch (error) {
-        console.error('Erro ao carregar cards de performance:', error);
-        document.getElementById('card-assistencias-total').textContent = '0';
-        document.getElementById('card-omni-total').textContent = '0';
+        console.error('Erro ao carregar cards estáticos:', error);
         document.getElementById('card-ultima-loja').textContent = 'Erro';
         document.getElementById('card-ultima-loja-data').textContent = 'Erro ao carregar';
         document.getElementById('card-relatorios-hoje').textContent = '0';
     }
+}
+
+// Atualizar todos os cards de indicadores de performance
+async function updatePerformanceCards(dataInicio = null, dataFim = null) {
+    await Promise.all([
+        updateAssistenciasCard(),
+        updateOmniCard(),
+        updateStaticCards()
+    ]);
 }
 
 function updateUI(results, hideMonitData = false, dataInicio = null, dataFim = null) {
