@@ -158,7 +158,18 @@ O sistema apresenta um design moderno e premium inspirado em interfaces Apple. P
 
 > Altere após o primeiro acesso para garantir segurança.
 
-## ✅ Melhorias Recentes (12/11/2025)
+## ✅ Melhorias Recentes
+
+### Dashboard Cards com Filtros Independentes (13/11/2025)
+- ✅ **Cards de Indicadores**: Implementação de filtros independentes para Assistências e Omni
+- ✅ **Dados de Hoje**: Cards sempre mostram métricas do dia atual, independente do filtro de período
+- ✅ **Filtro Assistências**: Dropdown exclusivo para lojas com função "Busca por Assist. Tec."
+- ✅ **Filtro Omni**: Dropdown exclusivo para lojas com função "Omni"
+- ✅ **Independência Total**: Mudanças em um dropdown não afetam o outro card
+- ✅ **Botões da Página Lojas**: Cores padronizadas Bootstrap (btn-outline-*) e formato compacto (ícones apenas)
+- ✅ **Sistema de Demandas**: Botões de excluir presentes em ambas as abas (principal e histórico)
+
+### PostgreSQL Multi-Instância (12/11/2025)
 
 ### Sistema de PostgreSQL Multi-Instância
 - ✅ **Migração para a Nuvem**: Suporte completo para PostgreSQL (Tembo.io - 10GB gratuito)
