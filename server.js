@@ -1976,8 +1976,16 @@ app.get('/api/dashboard/store-performance', requirePageLogin, (req, res) => {
         SELECT 
             loja,
             SUM(vendas_loja) as total_vendas,
-            AVG(CAST(ticket_medio AS NUMERIC)) as ticket_medio_avg,
-            AVG(CAST(pa AS NUMERIC)) as pa_avg,
+            AVG(
+                CAST(
+                    REPLACE(REPLACE(ticket_medio, 'R$ ', ''), ',', '.') AS NUMERIC
+                )
+            ) as ticket_medio_avg,
+            AVG(
+                CAST(
+                    REPLACE(REPLACE(pa, 'R$ ', ''), ',', '.') AS NUMERIC
+                )
+            ) as pa_avg,
             SUM(vendas_cartao) as total_vendas_cartao,
             SUM(vendas_pix) as total_vendas_pix,
             SUM(vendas_dinheiro) as total_vendas_dinheiro,
