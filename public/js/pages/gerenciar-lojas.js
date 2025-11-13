@@ -99,13 +99,13 @@ function initGerenciarLojas() {
                 
                 const responsavel = loja.gerente || loja.numero_contato || '-';
                 
-                return `<tr>
+                const funcaoEspecial = loja.funcao_especial || '-';
+                
+                return `<tr class="loja-row" data-nome="${loja.nome.toLowerCase()}">
                     <td class="align-middle ps-3"><strong>${loja.nome}</strong></td>
                     <td class="align-middle">${responsavel}</td>
-                    <td class="text-center align-middle">
-                        <span class="badge" style="background-color: #a5d8ff; color: #1971c2;">${totalVendedores}</span>
-                    </td>
                     <td class="text-center align-middle">${statusBadge}</td>
+                    <td class="align-middle">${funcaoEspecial}</td>
                     <td class="text-end align-middle pe-3">
                         <button class="btn btn-sm" style="background-color: #d0ebff; color: #1971c2; border: 1px solid #a5d8ff;" data-action="detalhes" data-id="${loja.id}" title="Ver Detalhes e Vendedores">
                             <i class="bi bi-eye me-1"></i>Detalhes
@@ -119,9 +119,43 @@ function initGerenciarLojas() {
                     </td>
                 </tr>`;
             }).join('');
+            
+            // Atualizar estatísticas
+            atualizarEstatisticas();
         } catch (e) {
             console.error('Erro ao carregar lojas:', e);
             tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erro ao carregar lojas.</td></tr>';
+        }
+    }
+    
+    function atualizarEstatisticas() {
+        const total = lojasCache.length;
+        const ativas = lojasCache.filter(l => l.status === 'ativa').length;
+        const inativas = lojasCache.filter(l => l.status === 'inativa').length;
+        const omni = lojasCache.filter(l => l.funcao_especial && l.funcao_especial.toLowerCase() === 'omni').length;
+        
+        document.getElementById('stats-total-lojas').textContent = total;
+        document.getElementById('stats-lojas-ativas').textContent = ativas;
+        document.getElementById('stats-lojas-inativas').textContent = inativas;
+        document.getElementById('stats-lojas-omni').textContent = omni;
+    }
+    
+    function implementarBusca() {
+        const buscaInput = document.getElementById('busca-lojas');
+        if (buscaInput) {
+            buscaInput.addEventListener('input', (e) => {
+                const termo = e.target.value.toLowerCase().trim();
+                const rows = tableBody.querySelectorAll('.loja-row');
+                
+                rows.forEach(row => {
+                    const nome = row.dataset.nome;
+                    if (nome.includes(termo)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
         }
     }
 
@@ -410,6 +444,7 @@ function initGerenciarLojas() {
     
     carregarTecnicos();
     carregarLojas();
+    implementarBusca();
 }
 
 function initGerenciarVendedores() {

@@ -657,6 +657,7 @@ async function updateBluveCard(loja = '') {
 function initMetricsCards() {
     // Popular dropdowns
     populateStoreDropdowns();
+    populateOmniStoresDropdown();
     
     // Carregar métricas gerais inicialmente para ambos os cards
     updateMonitoramentoCard();
@@ -665,6 +666,7 @@ function initMetricsCards() {
     // Adicionar event listeners aos dropdowns (independentes)
     const filtroMonitoramento = document.getElementById('filtro-loja-monitoramento');
     const filtroBluve = document.getElementById('filtro-loja-bluve');
+    const filtroOmni = document.getElementById('filtro-loja-omni');
     
     if (filtroMonitoramento) {
         filtroMonitoramento.addEventListener('change', (e) => {
@@ -677,9 +679,106 @@ function initMetricsCards() {
             updateBluveCard(e.target.value);
         });
     }
+    
+    if (filtroOmni) {
+        filtroOmni.addEventListener('change', () => {
+            updatePerformanceCards();
+        });
+    }
 }
 
-function updateUI(results, hideMonitData = false) {
+// Popular dropdown de lojas com função Omni
+async function populateOmniStoresDropdown() {
+    try {
+        const response = await fetch('/api/lojas');
+        const lojas = await response.json();
+        
+        const filtroOmni = document.getElementById('filtro-loja-omni');
+        
+        if (filtroOmni) {
+            filtroOmni.innerHTML = '<option value="">Geral</option>';
+            
+            lojas.filter(loja => loja.funcao_especial && loja.funcao_especial.toLowerCase() === 'omni')
+                .forEach(loja => {
+                    const option = document.createElement('option');
+                    option.value = loja.nome;
+                    option.textContent = loja.nome;
+                    filtroOmni.appendChild(option);
+                });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar lojas Omni:', error);
+    }
+}
+
+// Atualizar cards de indicadores de performance
+async function updatePerformanceCards(dataInicio = null, dataFim = null) {
+    try {
+        const params = new URLSearchParams();
+        if (dataInicio) params.append('data_inicio', dataInicio);
+        if (dataFim) params.append('data_fim', dataFim);
+        
+        const lojaOmni = document.getElementById('filtro-loja-omni')?.value;
+        if (lojaOmni) params.append('loja', lojaOmni);
+        
+        const hoje = toISODateString(new Date());
+        
+        const [assistenciasResp, omniResp, ultimaLojaResp, relatoriosHojeResp] = await Promise.all([
+            fetch(`/api/assistencias?${params.toString()}`),
+            fetch(`/api/dashboard-data?${params.toString()}`),
+            fetch('/api/relatorios/ultima-loja'),
+            fetch(`/api/relatorios?data_inicio=${hoje}&data_fim=${hoje}`)
+        ]);
+        
+        let assistenciasTotal = 0;
+        if (assistenciasResp.ok) {
+            const assistencias = await assistenciasResp.json();
+            assistenciasTotal = Array.isArray(assistencias) ? assistencias.length : 0;
+        }
+        
+        let omniTotal = 0;
+        if (omniResp.ok) {
+            const omniData = await omniResp.json();
+            omniTotal = omniData.total_omni || 0;
+        }
+        
+        if (ultimaLojaResp.ok) {
+            const ultimaLoja = await ultimaLojaResp.json();
+            if (ultimaLoja && ultimaLoja.loja) {
+                const nomeLoja = ultimaLoja.loja.length > 20 ? ultimaLoja.loja.substring(0, 20) + '...' : ultimaLoja.loja;
+                document.getElementById('card-ultima-loja').textContent = nomeLoja;
+                const dataFormatada = new Date(ultimaLoja.enviado_em).toLocaleDateString('pt-BR');
+                document.getElementById('card-ultima-loja-data').textContent = `Enviado em ${dataFormatada}`;
+            } else {
+                document.getElementById('card-ultima-loja').textContent = '-';
+                document.getElementById('card-ultima-loja-data').textContent = 'Nenhum relatório';
+            }
+        } else {
+            document.getElementById('card-ultima-loja').textContent = '-';
+            document.getElementById('card-ultima-loja-data').textContent = 'Erro ao carregar';
+        }
+        
+        let relatoriosHojeTotal = 0;
+        if (relatoriosHojeResp.ok) {
+            const relatoriosHoje = await relatoriosHojeResp.json();
+            relatoriosHojeTotal = relatoriosHoje.total || 0;
+        }
+        
+        document.getElementById('card-assistencias-total').textContent = assistenciasTotal.toLocaleString('pt-BR');
+        document.getElementById('card-omni-total').textContent = omniTotal.toLocaleString('pt-BR');
+        document.getElementById('card-relatorios-hoje').textContent = relatoriosHojeTotal.toLocaleString('pt-BR');
+        
+    } catch (error) {
+        console.error('Erro ao carregar cards de performance:', error);
+        document.getElementById('card-assistencias-total').textContent = '0';
+        document.getElementById('card-omni-total').textContent = '0';
+        document.getElementById('card-ultima-loja').textContent = 'Erro';
+        document.getElementById('card-ultima-loja-data').textContent = 'Erro ao carregar';
+        document.getElementById('card-relatorios-hoje').textContent = '0';
+    }
+}
+
+function updateUI(results, hideMonitData = false, dataInicio = null, dataFim = null) {
     const [currentData, rankingData, currentChartData, comparisonData, comparisonChartData] = results;
 
     // Armazenar rankingData globalmente
@@ -687,6 +786,9 @@ function updateUI(results, hideMonitData = false) {
 
     // Atualizar cards de visão geral
     updateOverviewCards(rankingData, currentData);
+    
+    // Atualizar cards de indicadores de performance
+    updatePerformanceCards(dataInicio, dataFim);
 
     // Atualizar métricas principais (apenas se não for gerente e dados existirem)
     if (!hideMonitData && currentData.total_clientes_monitoramento !== undefined) {
@@ -877,7 +979,7 @@ export function initAdminPage(currentUser) {
             
             const results = await Promise.all(responses.map(res => res.json()));
 
-            updateUI(results, isNotAdmin);
+            updateUI(results, isNotAdmin, dataInicio, dataFim);
             
             // Atualizar gráficos de desempenho das lojas
             loadStorePerformance(dataInicio, dataFim);
