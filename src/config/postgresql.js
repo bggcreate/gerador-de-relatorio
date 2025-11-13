@@ -10,7 +10,9 @@ const poolConfig = {
     database: process.env.PGDATABASE,
     user: process.env.PGUSER,
     password: process.env.PGPASSWORD,
-    ssl: { rejectUnauthorized: false },
+    ssl: {
+        rejectUnauthorized: false
+    },
     max: 20, // Máximo de conexões no pool
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
