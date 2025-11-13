@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const { query } = require('../src/config/postgresql');
 const path = require('path');
 
-const SQLITE_BACKUP_PATH = path.join(__dirname, '..', 'attached_assets', 'backup_reports_2025-11-06_1763040230355.db');
+const SQLITE_BACKUP_PATH = path.join(__dirname, '..', 'attached_assets', 'database_1763065296916.db');
 
 async function importData() {
     console.log('🔄 Iniciando importação do backup SQLite para PostgreSQL...\n');
