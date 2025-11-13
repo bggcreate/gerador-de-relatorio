@@ -26,7 +26,7 @@ async function configurarAutenticacao() {
   const oauth2Client = new google.auth.OAuth2(
     clientId,
     clientSecret,
-    'urn:ietf:wg:oauth:2.0:oob'
+    'http://localhost:3000/oauth2callback'
   );
 
   const scopes = [
