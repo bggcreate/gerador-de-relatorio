@@ -828,33 +828,37 @@ export function initAdminPage(currentUser) {
 
         console.log('Dados do filtro:', { loja, dataInicio, dataFim });
 
-        if (!dataInicio || !dataFim) {
-            console.error('Datas não definidas!', { dataInicio, dataFim });
-            showToast("Atenção", "Por favor, selecione um período de datas.", "danger");
-            setLoadingState(false);
-            return;
-        }
-        
-        const baseParams = { data_inicio: dataInicio, data_fim: dataFim };
+        const baseParams = {};
+        if (dataInicio) baseParams.data_inicio = dataInicio;
+        if (dataFim) baseParams.data_fim = dataFim;
         if (loja !== 'todas') {
             baseParams.loja = loja;
         }
 
         const currentParams = new URLSearchParams(baseParams);
-
-        const startDate = new Date(dataInicio + 'T00:00:00');
-        const endDate = new Date(dataFim + 'T00:00:00');
         
-        // Sempre comparar com período anterior
-        const diff = endDate.getTime() - startDate.getTime();
-        const compEndDate = new Date(startDate.getTime() - 86400000);
-        const compStartDate = new Date(compEndDate.getTime() - diff);
-        const compBaseParams = {...baseParams, data_inicio: toISODateString(compStartDate), data_fim: toISODateString(compEndDate) };
-        const comparisonParams = new URLSearchParams(compBaseParams);
+        let comparisonParams;
+        if (dataInicio && dataFim) {
+            const startDate = new Date(dataInicio + 'T00:00:00');
+            const endDate = new Date(dataFim + 'T00:00:00');
+            
+            // Comparar com período anterior
+            const diff = endDate.getTime() - startDate.getTime();
+            const compEndDate = new Date(startDate.getTime() - 86400000);
+            const compStartDate = new Date(compEndDate.getTime() - diff);
+            const compBaseParams = {...baseParams, data_inicio: toISODateString(compStartDate), data_fim: toISODateString(compEndDate) };
+            comparisonParams = new URLSearchParams(compBaseParams);
+        } else {
+            comparisonParams = new URLSearchParams({});
+        }
+        
+        const rankingParams = new URLSearchParams();
+        if (dataInicio) rankingParams.append('data_inicio', dataInicio);
+        if (dataFim) rankingParams.append('data_fim', dataFim);
         
         const apiCalls = [
             fetch(`/api/dashboard-data?${currentParams.toString()}`),
-            fetch(`/api/ranking?${new URLSearchParams({ data_inicio: dataInicio, data_fim: dataFim })}`),
+            fetch(`/api/ranking?${rankingParams.toString()}`),
             fetch(`/api/dashboard/chart-data?${currentParams.toString()}`),
             fetch(`/api/dashboard-data?${comparisonParams.toString()}`),
             fetch(`/api/dashboard/chart-data?${comparisonParams.toString()}`)
@@ -875,7 +879,7 @@ export function initAdminPage(currentUser) {
 
             updateUI(results, isNotAdmin);
             
-            // Atualizar gráficos de desempenho das lojas com o mesmo período
+            // Atualizar gráficos de desempenho das lojas
             loadStorePerformance(dataInicio, dataFim);
         } catch (error) {
             console.error("Erro ao analisar dados:", error.message, error.stack);
@@ -915,17 +919,9 @@ export function initAdminPage(currentUser) {
         
         loadDemandas(); // Carregar demandas pendentes
         
-        // Carregar desempenho das lojas (últimos 30 dias por padrão)
-        const hoje = new Date();
-        const inicioMes = new Date(hoje);
-        inicioMes.setDate(hoje.getDate() - 30);
-        loadStorePerformance(toISODateString(inicioMes), toISODateString(hoje));
-        
-        console.log('Configurando período de 7 dias');
-        setDateRange('7d');
-        const initialActiveButton = document.querySelector('[data-period="7d"]');
-        if(initialActiveButton) initialActiveButton.classList.add('active');
-        console.log('Chamando analisarDados...');
+        // Carregar todos os dados sem filtro de data
+        console.log('Carregando todos os relatórios...');
+        loadStorePerformance();
         analisarDados();
     }
     

@@ -857,93 +857,7 @@ app.put('/api/lojas/:id', requirePageLogin, (req, res) => {
 });
 app.delete('/api/lojas/:id', requirePageLogin, (req, res) => { db.run("DELETE FROM lojas WHERE id = ?", [req.params.id], function (err) { if (err) return res.status(500).json({ error: 'Erro ao excluir loja.' }); if (this.changes === 0) return res.status(404).json({ error: "Loja não encontrada." }); res.json({ success: true }); }); });
 
-// APIs DE VENDEDORES
-app.get('/api/vendedores', requirePageLogin, (req, res) => {
-    const { loja_id } = req.query;
-    
-    if (!loja_id) {
-        return res.status(400).json({ error: 'ID da loja é obrigatório.' });
-    }
-    
-    const query = `
-        SELECT v.*, l.nome as loja_nome 
-        FROM vendedores v
-        INNER JOIN lojas l ON v.loja_id = l.id
-        WHERE v.loja_id = ?
-        ORDER BY v.ativo DESC, v.nome ASC
-    `;
-    
-    db.all(query, [loja_id], (err, vendedores) => {
-        if (err) {
-            console.error('Erro ao buscar vendedores:', err);
-            return res.status(500).json({ error: 'Erro ao buscar vendedores.' });
-        }
-        res.json(vendedores || []);
-    });
-});
-
-app.post('/api/vendedores', requirePageLogin, (req, res) => {
-    const { loja_id, nome, telefone, data_entrada, data_demissao, previsao_entrada, previsao_saida } = req.body;
-    
-    if (!loja_id || !nome || !telefone || !data_entrada) {
-        return res.status(400).json({ error: 'Campos obrigatórios: loja_id, nome, telefone, data_entrada' });
-    }
-    
-    const query = `
-        INSERT INTO vendedores (loja_id, nome, telefone, data_entrada, data_demissao, previsao_entrada, previsao_saida, ativo)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 1)
-    `;
-    
-    db.run(query, [loja_id, nome, telefone, data_entrada, data_demissao || null, previsao_entrada || null, previsao_saida || null], function(err) {
-        if (err) {
-            console.error('Erro ao adicionar vendedor:', err);
-            return res.status(500).json({ error: 'Erro ao adicionar vendedor.' });
-        }
-        res.status(201).json({ success: true, id: this.lastID });
-    });
-});
-
-app.put('/api/vendedores/:id', requirePageLogin, (req, res) => {
-    const { id } = req.params;
-    const { nome, telefone, data_entrada, data_demissao, previsao_entrada, previsao_saida, ativo } = req.body;
-    
-    if (!nome || !telefone || !data_entrada) {
-        return res.status(400).json({ error: 'Campos obrigatórios: nome, telefone, data_entrada' });
-    }
-    
-    const query = `
-        UPDATE vendedores 
-        SET nome = ?, telefone = ?, data_entrada = ?, data_demissao = ?, 
-            previsao_entrada = ?, previsao_saida = ?, ativo = ?
-        WHERE id = ?
-    `;
-    
-    db.run(query, [nome, telefone, data_entrada, data_demissao || null, previsao_entrada || null, previsao_saida || null, ativo !== undefined ? ativo : 1, id], function(err) {
-        if (err) {
-            console.error('Erro ao atualizar vendedor:', err);
-            return res.status(500).json({ error: 'Erro ao atualizar vendedor.' });
-        }
-        if (this.changes === 0) {
-            return res.status(404).json({ error: 'Vendedor não encontrado.' });
-        }
-        res.json({ success: true });
-    });
-});
-
-app.delete('/api/vendedores/:id', requirePageLogin, (req, res) => {
-    const { id } = req.params;
-    
-    db.run("DELETE FROM vendedores WHERE id = ?", [id], function(err) {
-        if (err) {
-            console.error('Erro ao excluir vendedor:', err);
-            return res.status(500).json({ error: 'Erro ao excluir vendedor.' });
-        }
-        if (this.changes === 0) {
-            return res.status(404).json({ error: 'Vendedor não encontrado.' });
-        }
-        res.json({ success: true });
-    });
-});
+// APIs DE VENDEDORES - REMOVIDAS (funcionalidade descontinuada)
 
 // API de métricas agregadas para dashboard - suporta filtros independentes
 app.get('/api/dashboard/metrics', requirePageLogin, (req, res) => {
@@ -2056,8 +1970,8 @@ app.get('/api/dashboard/store-performance', requirePageLogin, (req, res) => {
         SELECT 
             loja,
             SUM(vendas_loja) as total_vendas,
-            AVG(ticket_medio) as ticket_medio_avg,
-            AVG(pa) as pa_avg,
+            AVG(CAST(ticket_medio AS NUMERIC)) as ticket_medio_avg,
+            AVG(CAST(pa AS NUMERIC)) as pa_avg,
             SUM(vendas_cartao) as total_vendas_cartao,
             SUM(vendas_pix) as total_vendas_pix,
             SUM(vendas_dinheiro) as total_vendas_dinheiro,
