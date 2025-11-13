@@ -17,10 +17,25 @@ attached_assets/*.json
 attached_assets/*.png
 attached_assets/*.jpg
 
-# Variáveis de ambiente
+# ⚠️ INFORMAÇÕES SENSÍVEIS - NUNCA ENVIAR AO GITHUB
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+
+# Credenciais e segredos
+*.pem
+*.key
+*.cert
+*.p12
+credentials.json
+token.json
+client_secret*.json
+
+# Configurações com senhas
+config/secrets.js
+config/database.production.js
 
 # Node.js
 node_modules/
@@ -53,5 +68,13 @@ logs/
 .local/share/
 .local/state/
 
-# Replit (manter configuração)
+# Replit 
 .config/
+.upm/
+.cache/
+.replit
+replit.nix
+
+# PostgreSQL e Tembo.io - não enviar URLs de conexão
+PostgreSQL@*
+*.connection-string

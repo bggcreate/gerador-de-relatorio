@@ -294,6 +294,11 @@ app.get('/demandas', requirePageLogin, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
+// Monitor do Banco de Dados - apenas admin e dev
+app.get('/monitor-db', requirePageLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
 // Gerenciar Usuários - apenas admin e dev
 app.get('/gerenciar-usuarios', requirePageLogin, (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
@@ -315,7 +320,7 @@ app.get('/dev/system', requirePageLogin, (req, res) => {
 });
 
 app.get('/content/:page', requirePageLogin, (req, res) => {
-    const allowedPages = ['admin', 'consulta', 'demandas', 'gerenciar-lojas', 'assistencia', 'alertas-tecnico', 'novo-relatorio', 'gerenciar-usuarios', 'logs', 'configuracoes'];
+    const allowedPages = ['admin', 'consulta', 'demandas', 'gerenciar-lojas', 'assistencia', 'alertas-tecnico', 'novo-relatorio', 'gerenciar-usuarios', 'logs', 'configuracoes', 'monitor-db'];
     if (allowedPages.includes(req.params.page)) {
         res.sendFile(path.join(__dirname, 'views', `${req.params.page}.html`));
     } else {
@@ -2150,6 +2155,53 @@ app.delete('/api/logs', requirePageLogin, (req, res) => {
         if (err) return res.status(500).json({ error: 'Erro ao limpar logs.' });
         res.json({ success: true, message: 'Logs limpos com sucesso.' });
     });
+});
+
+// API de Monitoramento do Banco de Dados
+app.get('/api/monitor/database', requirePageLogin, async (req, res) => {
+    const allowedRoles = ['admin', 'dev', 'monitoramento'];
+    if (!allowedRoles.includes(req.session.role)) {
+        return res.status(403).json({ error: 'Acesso negado' });
+    }
+    
+    try {
+        const dbMonitor = require('./src/services/dbMonitorService');
+        const { getDatabaseSize, formatBytes } = require('./src/config/postgresql');
+        
+        const [connectionStatus, tableStats, recentLogs, recentBackups, systemInfo, databaseSize] = await Promise.all([
+            dbMonitor.getConnectionStatus(),
+            dbMonitor.getTableStats(),
+            dbMonitor.getRecentLogs(10),
+            dbMonitor.getBackupHistory(10),
+            dbMonitor.getSystemInfo(),
+            getDatabaseSize().catch(() => 0)
+        ]);
+        
+        const totalRecords = tableStats.reduce((sum, t) => sum + t.count, 0);
+        
+        res.json({
+            connected: connectionStatus.connected,
+            provider: connectionStatus.provider,
+            host: connectionStatus.host,
+            databaseSize: databaseSize,
+            totalRecords: totalRecords,
+            tableStats: tableStats,
+            recentActivities: recentLogs,
+            recentBackups: recentBackups,
+            systemInfo: systemInfo
+        });
+        
+    } catch (error) {
+        console.error('Erro na API de monitoramento:', error);
+        res.status(503).json({
+            connected: false,
+            error: error.message,
+            tableStats: [],
+            recentActivities: [],
+            recentBackups: [],
+            systemInfo: {}
+        });
+    }
 });
 
 // Função auxiliar para obter IP real do cliente

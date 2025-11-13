@@ -10,6 +10,7 @@ import { initGerenciarUsuariosPage } from './pages/gerenciar-usuarios.js';
 import { initLogsPage } from './pages/logs.js';
 import { initConfiguracoesPage } from './pages/configuracoes.js';
 import { initPageAnimations, initScrollAnimations } from './utils.js';
+import { initMonitorDbPage } from './pages/monitor-db.js';
 
 const pageInitializers = {
     'admin': initAdminPage,
@@ -19,7 +20,8 @@ const pageInitializers = {
     'novo-relatorio': initNovoRelatorioPage,
     'gerenciar-usuarios': initGerenciarUsuariosPage,
     'logs': initLogsPage,
-    'configuracoes': initConfiguracoesPage
+    'configuracoes': initConfiguracoesPage,
+    'monitor-db': initMonitorDbPage
 };
 
 let currentUser = null;
@@ -95,6 +97,13 @@ async function setupSessionAndUI() {
                 el?.classList.remove('d-none');
             });
         });
+        
+        // Monitor DB - apenas admin, dev e monitoramento
+        if (['admin', 'dev', 'monitoramento'].includes(currentUser.role)) {
+            document.querySelectorAll('#nav-monitor-db').forEach(el => {
+                el?.classList.remove('d-none');
+            });
+        }
         
         const userInfoContainer = document.getElementById('user-info-container');
         if (userInfoContainer) {

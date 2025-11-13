@@ -308,12 +308,97 @@ async function getBackupHistory(limit = 20) {
     }
 }
 
+async function getConnectionStatus() {
+    try {
+        if (!isPostgresEnabled()) {
+            return { connected: false, provider: 'SQLite', host: 'local', error: 'PostgreSQL não configurado' };
+        }
+        
+        await query('SELECT 1');
+        const host = process.env.PGHOST || 'unknown';
+        const provider = host.includes('tembo') ? 'Tembo.io' : host.includes('neon') ? 'Neon' : 'PostgreSQL';
+        
+        return {
+            connected: true,
+            provider,
+            host: host.split('.')[0] || host
+        };
+    } catch (err) {
+        return {
+            connected: false,
+            provider: 'PostgreSQL',
+            host: process.env.PGHOST || 'unknown',
+            error: err.message
+        };
+    }
+}
+
+async function getTableStats() {
+    try {
+        if (!isPostgresEnabled()) return [];
+        
+        const tables = ['usuarios', 'lojas', 'relatorios', 'demandas', 'vendedores', 'logs', 
+                        'estoque_tecnico', 'assistencias', 'db_backups'];
+        
+        const stats = await Promise.all(
+            tables.map(async (table) => {
+                try {
+                    const result = await query(`SELECT COUNT(*) as count FROM ${table}`);
+                    return { name: table, count: parseInt(result.rows[0].count) || 0 };
+                } catch (err) {
+                    return { name: table, count: 0 };
+                }
+            })
+        );
+        
+        return stats.filter(s => s.count > 0);
+    } catch (err) {
+        console.error('❌ Erro ao obter stats das tabelas:', err);
+        return [];
+    }
+}
+
+async function getRecentLogs(limit = 10) {
+    try {
+        if (!isPostgresEnabled()) return [];
+        
+        const result = await query(
+            `SELECT type, username, action, details, timestamp 
+             FROM logs 
+             ORDER BY timestamp DESC 
+             LIMIT $1`,
+            [limit]
+        );
+        
+        return result.rows;
+    } catch (err) {
+        console.error('❌ Erro ao obter logs recentes:', err);
+        return [];
+    }
+}
+
+async function getSystemInfo() {
+    const emailConfigured = !!(process.env.SMTP_USER && process.env.SMTP_PASS && process.env.BACKUP_EMAIL_TO);
+    const googleDriveConfigured = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN);
+    
+    return {
+        database: process.env.PGDATABASE || 'N/A',
+        server: process.env.PGHOST ? process.env.PGHOST.split('.')[0] : 'local',
+        emailConfigured,
+        googleDriveConfigured
+    };
+}
+
 module.exports = {
     startMonitoring,
     stopMonitoring,
     checkDatabaseSize,
     manualBackup,
     getBackupHistory,
+    getConnectionStatus,
+    getTableStats,
+    getRecentLogs,
+    getSystemInfo,
     SIZE_THRESHOLD_GB,
     BACKUP_DIR
 };
