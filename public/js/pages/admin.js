@@ -889,6 +889,31 @@ export function initAdminPage(currentUser) {
         }
     }
     
+    // Carregar dados do Google Drive
+    async function loadDriveStats() {
+        try {
+            const response = await fetch('/api/settings/drive/usage');
+            if (!response.ok) throw new Error('Erro ao carregar Drive');
+            
+            const data = await response.json();
+            
+            document.getElementById('dash-drive-usado').textContent = data.usadoGB + ' GB';
+            document.getElementById('dash-drive-disponivel').textContent = data.disponivelGB.toFixed(2) + ' GB';
+            document.getElementById('dash-drive-percentual').textContent = data.percentual + '%';
+            
+            const statusBadge = document.getElementById('dash-drive-status');
+            if (data.precisaBackup) {
+                statusBadge.textContent = 'Atenção';
+                statusBadge.className = 'badge bg-warning';
+            } else {
+                statusBadge.textContent = 'Online';
+                statusBadge.className = 'badge bg-success';
+            }
+        } catch (error) {
+            console.error('Erro ao carregar stats do Drive:', error);
+        }
+    }
+    
     // Event Listeners
     form.addEventListener('submit', analisarDados);
     
@@ -899,6 +924,9 @@ export function initAdminPage(currentUser) {
             setDateRange(e.currentTarget.dataset.period);
         });
     });
+    
+    // Carregar dados do Drive ao iniciar
+    loadDriveStats();
 
     if (barChartMetricSelect) {
         barChartMetricSelect.addEventListener('change', () => {

@@ -8,6 +8,7 @@ import { initDemandasPage } from './pages/demandas.js';
 import { initNovoRelatorioPage } from './pages/novo-relatorio.js';
 import { initGerenciarUsuariosPage } from './pages/gerenciar-usuarios.js';
 import { initLogsPage } from './pages/logs.js';
+import { initConfiguracoesPage } from './pages/configuracoes.js';
 import { initPageAnimations, initScrollAnimations } from './utils.js';
 
 const pageInitializers = {
@@ -17,7 +18,8 @@ const pageInitializers = {
     'demandas': initDemandasPage,
     'novo-relatorio': initNovoRelatorioPage,
     'gerenciar-usuarios': initGerenciarUsuariosPage,
-    'logs': initLogsPage
+    'logs': initLogsPage,
+    'configuracoes': initConfiguracoesPage
 };
 
 let currentUser = null;

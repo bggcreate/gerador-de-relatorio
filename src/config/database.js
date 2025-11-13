@@ -174,6 +174,30 @@ function createTables(callback) {
             atendimento_medio TEXT,
             uploaded_by TEXT,
             uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        
+        db.run(`CREATE TABLE IF NOT EXISTS db_backups (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename TEXT NOT NULL,
+            filepath TEXT,
+            size_bytes INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            sent_to_email INTEGER DEFAULT 0,
+            email_sent_at DATETIME,
+            backup_type TEXT DEFAULT 'manual',
+            notes TEXT,
+            drive_file_id TEXT,
+            created_by TEXT,
+            status TEXT DEFAULT 'success',
+            error_message TEXT
+        )`);
+        
+        db.run(`CREATE TABLE IF NOT EXISTS system_settings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            setting_key TEXT UNIQUE NOT NULL,
+            setting_value TEXT,
+            updated_by TEXT,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`, (err) => {
             if (callback) callback(err);
         });

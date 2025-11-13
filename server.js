@@ -315,7 +315,7 @@ app.get('/dev/system', requirePageLogin, (req, res) => {
 });
 
 app.get('/content/:page', requirePageLogin, (req, res) => {
-    const allowedPages = ['admin', 'consulta', 'demandas', 'gerenciar-lojas', 'assistencia', 'alertas-tecnico', 'novo-relatorio', 'gerenciar-usuarios', 'logs'];
+    const allowedPages = ['admin', 'consulta', 'demandas', 'gerenciar-lojas', 'assistencia', 'alertas-tecnico', 'novo-relatorio', 'gerenciar-usuarios', 'logs', 'configuracoes'];
     if (allowedPages.includes(req.params.page)) {
         res.sendFile(path.join(__dirname, 'views', `${req.params.page}.html`));
     } else {
@@ -510,6 +510,12 @@ app.post('/api/process-pdf', requirePageLogin, upload.single('pdfFile'), async (
 // <<<          FIM DA API DE PDF                         >>>
 // <<<---------------------------------------------------->>>
 
+// =================================================================
+// ROUTERS MODULARES
+// =================================================================
+
+const settingsRouter = require('./src/routes/settings');
+app.use('/api/settings', requirePageLogin, settingsRouter);
 
 // APIs DE SESSÃO E USUÁRIOS
 app.get('/api/csrf-token', (req, res) => {

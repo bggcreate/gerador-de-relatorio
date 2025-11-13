@@ -178,18 +178,22 @@ CREATE TABLE IF NOT EXISTS pdf_rankings (
     source_instance UUID
 );
 
--- Tabela de backups (para rastreamento)
+-- Tabela de backups (estendida com novos campos)
 CREATE TABLE IF NOT EXISTS db_backups (
     id SERIAL PRIMARY KEY,
     filename TEXT NOT NULL,
     filepath TEXT,
     size_bytes BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    sent_to_email BOOLEAN DEFAULT FALSE,
+    sent_to_email INTEGER DEFAULT 0,
     email_sent_at TIMESTAMP,
     backup_type TEXT DEFAULT 'manual',
     source_instance UUID,
-    notes TEXT
+    notes TEXT,
+    drive_file_id TEXT,
+    created_by TEXT,
+    status TEXT DEFAULT 'success',
+    error_message TEXT
 );
 
 -- Tabela de configurações de instância (para identificação única)
@@ -199,6 +203,15 @@ CREATE TABLE IF NOT EXISTS instance_config (
     instance_name TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de configurações do sistema
+CREATE TABLE IF NOT EXISTS system_settings (
+    id SERIAL PRIMARY KEY,
+    setting_key TEXT UNIQUE NOT NULL,
+    setting_value TEXT,
+    updated_by TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Criar índices para performance
@@ -211,6 +224,8 @@ CREATE INDEX IF NOT EXISTS idx_logs_type ON logs(type);
 CREATE INDEX IF NOT EXISTS idx_demandas_status ON demandas(status);
 CREATE INDEX IF NOT EXISTS idx_assistencias_status ON assistencias(status);
 CREATE INDEX IF NOT EXISTS idx_backups_created ON db_backups(created_at);
+CREATE INDEX IF NOT EXISTS idx_backups_type ON db_backups(backup_type);
+CREATE INDEX IF NOT EXISTS idx_backups_status ON db_backups(status);
 
 -- Mensagem de sucesso
 DO $$

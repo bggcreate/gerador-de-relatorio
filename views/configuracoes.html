@@ -1,0 +1,206 @@
+<div class="container-fluid" style="max-width: 1400px;">
+    <div id="secao-configuracoes" style="display: none;">
+        <div class="mb-4">
+            <h1 class="h3 mb-1">Configurações do Sistema</h1>
+            <p class="text-muted">Gerencie backups, integrações e estatísticas do Google Drive</p>
+        </div>
+
+        <!-- Tabs de navegação -->
+        <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="backup-tab" data-bs-toggle="tab" data-bs-target="#backup-panel" type="button" role="tab">
+                    <i class="bi bi-cloud-arrow-down me-2"></i>Backup
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="drive-tab" data-bs-toggle="tab" data-bs-target="#drive-panel" type="button" role="tab">
+                    <i class="bi bi-google me-2"></i>Google Drive
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="integrations-tab" data-bs-toggle="tab" data-bs-target="#integrations-panel" type="button" role="tab">
+                    <i class="bi bi-plug me-2"></i>Integrações
+                </button>
+            </li>
+        </ul>
+
+        <!-- Conteúdo das Tabs -->
+        <div class="tab-content" id="configTabsContent">
+            <!-- Tab de Backup -->
+            <div class="tab-pane fade show active" id="backup-panel" role="tabpanel">
+                <div class="row">
+                    <!-- Ações de Backup -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Ações de Backup</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <h6>Criar Backup Manual</h6>
+                                    <p class="text-muted small mb-2">Gera uma cópia do banco de dados atual</p>
+                                    <button class="btn btn-primary" id="btn-criar-backup">
+                                        <i class="bi bi-download me-1"></i>Criar Backup
+                                    </button>
+                                </div>
+                                <hr>
+                                <div class="mb-3">
+                                    <h6>Enviar Backup por Email</h6>
+                                    <p class="text-muted small mb-2">Envia uma cópia do banco de dados para seu email</p>
+                                    <div class="input-group">
+                                        <input type="email" class="form-control" id="email-backup" placeholder="seu@email.com">
+                                        <button class="btn btn-success" id="btn-enviar-email">
+                                            <i class="bi bi-envelope me-1"></i>Enviar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configurações Automáticas -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Backup Automático</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="form-config-backup">
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="auto-backup-enabled">
+                                            <label class="form-check-label" for="auto-backup-enabled">
+                                                Habilitar backup automático
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Frequência</label>
+                                        <select class="form-select" id="auto-backup-frequency">
+                                            <option value="daily">Diariamente</option>
+                                            <option value="weekly">Semanalmente</option>
+                                            <option value="monthly">Mensalmente</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Email para envio</label>
+                                        <input type="email" class="form-control" id="auto-backup-email" placeholder="backup@empresa.com">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save me-1"></i>Salvar Configurações
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histórico de Backups -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Histórico de Backups</h5>
+                        <button class="btn btn-sm btn-outline-primary" id="btn-refresh-history">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Data/Hora</th>
+                                        <th>Tipo</th>
+                                        <th>Tamanho</th>
+                                        <th>Status</th>
+                                        <th>Criado por</th>
+                                        <th class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="backup-history-table">
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <span class="spinner-border spinner-border-sm me-2"></span>Carregando...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab do Google Drive -->
+            <div class="tab-pane fade" id="drive-panel" role="tabpanel">
+                <div class="row">
+                    <!-- Cards de Estatísticas -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-hdd text-primary" style="font-size: 2rem;"></i>
+                                <h6 class="mt-2 mb-1">Espaço Usado</h6>
+                                <h3 id="drive-usado-gb" class="mb-0">--</h3>
+                                <small class="text-muted">de <span id="drive-limite-gb">15</span> GB</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-percent text-success" style="font-size: 2rem;"></i>
+                                <h6 class="mt-2 mb-1">Percentual</h6>
+                                <h3 id="drive-percentual" class="mb-0">--%</h3>
+                                <small class="text-muted">utilizado</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <i class="bi bi-cloud-check text-info" style="font-size: 2rem;"></i>
+                                <h6 class="mt-2 mb-1">Disponível</h6>
+                                <h3 id="drive-disponivel-gb" class="mb-0">--</h3>
+                                <small class="text-muted">GB livres</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Timeline -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Uploads dos Últimos 30 Dias</h5>
+                        <select class="form-select form-select-sm" id="timeline-period" style="width: auto;">
+                            <option value="7">7 dias</option>
+                            <option value="30" selected>30 dias</option>
+                            <option value="90">90 dias</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="drive-timeline-chart" height="80"></canvas>
+                    </div>
+                </div>
+
+                <!-- Última Sincronização -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-arrow-repeat me-2"></i>Última Sincronização</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="last-sync-info">
+                            <span class="spinner-border spinner-border-sm me-2"></span>Verificando...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab de Integrações -->
+            <div class="tab-pane fade" id="integrations-panel" role="tabpanel">
+                <div class="row" id="integrations-container">
+                    <div class="col-12 text-center py-5">
+                        <span class="spinner-border spinner-border-sm me-2"></span>Carregando integrações...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
