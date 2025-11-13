@@ -2008,12 +2008,15 @@ app.get('/api/dashboard/store-performance', requirePageLogin, (req, res) => {
             const totalVendas = row.total_vendas || 0;
             const vendasMediaDia = totalVendas / diasRegistrados;
             
+            const ticketMedio = row.ticket_medio_avg ? parseFloat(row.ticket_medio_avg) : 0;
+            const paAvg = row.pa_avg ? parseFloat(row.pa_avg) : 0;
+            
             return {
                 loja: row.loja,
                 vendas_media_dia: parseFloat(vendasMediaDia.toFixed(2)),
                 total_vendas: totalVendas,
-                ticket_medio: parseFloat((row.ticket_medio_avg || 0).toFixed(2)),
-                pa: parseFloat((row.pa_avg || 0).toFixed(2)),
+                ticket_medio: parseFloat(ticketMedio.toFixed(2)),
+                pa: parseFloat(paAvg.toFixed(2)),
                 formas_pagamento: {
                     cartao: row.total_vendas_cartao || 0,
                     pix: row.total_vendas_pix || 0,
