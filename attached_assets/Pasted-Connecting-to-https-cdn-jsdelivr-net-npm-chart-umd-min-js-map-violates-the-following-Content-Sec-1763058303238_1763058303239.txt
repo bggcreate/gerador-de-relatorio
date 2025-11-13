@@ -1,0 +1,47 @@
+Connecting to 'https://cdn.jsdelivr.net/npm/chart.umd.min.js.map' violates the following Content Security Policy directive: "connect-src 'self'". The request has been blocked.
+
+Connecting to 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css.map' violates the following Content Security Policy directive: "connect-src 'self'". The request has been blocked.
+
+admin.js:760 Dashboard adaptado para undefined - card Monitoramento oculto (visível apenas para admin, monitoramento, dev, consultor)
+admin.js:769 ✅ Card Bluve garantido como visível - display: block
+admin.js:956 Iniciando admin page...
+admin.js:941 Inicializando dashboard...
+admin.js:782 ✅ Card Bluve RE-verificado - computedDisplay: block
+admin.js:895   GET https://d238f0bd-95a0-4334-b60e-4b1cff875598-00-3qzgvq3ppau3r.kirk.replit.dev/api/settings/drive/usage 500 (Internal Server Error)
+loadDriveStats @ admin.js:895
+initAdminPage @ admin.js:929
+loadPage @ app.js?v=5:65
+await in loadPage
+main @ app.js?v=5:199
+admin.js:913  Erro ao carregar stats do Drive: Error: Erro ao carregar Drive
+    at loadDriveStats (admin.js:896:37)
+loadDriveStats @ admin.js:913
+await in loadDriveStats
+initAdminPage @ admin.js:929
+loadPage @ app.js?v=5:65
+await in loadPage
+main @ app.js?v=5:199
+admin.js:943 Lojas carregadas
+admin.js:951 Carregando todos os relatórios...
+admin.js:822 analisarDados() chamado
+admin.js:829 Dados do filtro: {loja: 'todas', dataInicio: '', dataFim: ''}
+admin.js:652  Erro ao carregar métricas de Bluve: TypeError: Cannot set properties of null (setting 'textContent')
+    at updateBluveCard (admin.js:648:63)
+updateBluveCard @ admin.js:652
+await in updateBluveCard
+initMetricsCards @ admin.js:663
+inicializar @ admin.js:946
+await in inicializar
+initAdminPage @ admin.js:957
+loadPage @ app.js?v=5:65
+await in loadPage
+main @ app.js?v=5:199
+gerenciar-lojas.js:29 ✅ Elementos encontrados, inicializando gerenciamento de lojas...
+app.js?v=5:67  Erro ao inicializar a página 'gerenciar-lojas': TypeError: Cannot read properties of null (reading 'addEventListener')
+    at initGerenciarLojas (gerenciar-lojas.js:350:51)
+    at initGerenciarLojasPage (gerenciar-lojas.js:12:5)
+    at loadPage (app.js?v=5:65:17)
+loadPage @ app.js?v=5:67
+await in loadPage
+navigateTo @ app.js?v=5:79
+(anônimo) @ app.js?v=5:193

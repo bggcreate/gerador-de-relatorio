@@ -346,16 +346,19 @@ function initGerenciarLojas() {
         if (action === 'adicionar-vendedor') abrirModalVendedorParaLoja(id);
     });
     
-    // Event listener para botões dentro do modal de detalhes
-    document.getElementById('modal-detalhes-loja').addEventListener('click', (e) => {
-        const button = e.target.closest('button[data-action]');
-        if (!button) return;
-        const id = parseInt(button.getAttribute('data-id'), 10);
-        const lojaId = parseInt(button.getAttribute('data-loja-id'), 10);
-        const action = button.getAttribute('data-action');
-        if (action === 'editar-vendedor') editarVendedor(id, lojaId);
-        if (action === 'excluir-vendedor') excluirVendedor(id, lojaId);
-    });
+    // Event listener para botões dentro do modal de detalhes (se existir)
+    const modalDetalhesLoja = document.getElementById('modal-detalhes-loja');
+    if (modalDetalhesLoja) {
+        modalDetalhesLoja.addEventListener('click', (e) => {
+            const button = e.target.closest('button[data-action]');
+            if (!button) return;
+            const id = parseInt(button.getAttribute('data-id'), 10);
+            const lojaId = parseInt(button.getAttribute('data-loja-id'), 10);
+            const action = button.getAttribute('data-action');
+            if (action === 'editar-vendedor') editarVendedor(id, lojaId);
+            if (action === 'excluir-vendedor') excluirVendedor(id, lojaId);
+        });
+    }
     
     // Event listener para o formulário de vendedor
     const formVendedor = document.getElementById('form-vendedor');
