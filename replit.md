@@ -111,12 +111,17 @@ O sistema apresenta um design moderno e premium inspirado em interfaces Apple. P
 
 ## Integrações Implementadas
 
-### Google Drive
+### Google Drive (✅ Configurado - 13/11/2025)
+- **Status**: Autenticado e funcionando no ambiente local do usuário
+- **Configuração**: OAuth 2.0 manual usando credenciais do Google Cloud Console
+- **Credenciais**: Armazenadas como secrets (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN)
+- **Nota**: Usuário optou por não usar a integração nativa do Replit
 - Armazenamento de relatórios (15GB gratuitos)
 - Backup automático ao atingir limite
 - Envio de backups por email
 - Organização automática por ano/mês
 - Limpeza de arquivos antigos (>90 dias)
+- **Script de Configuração**: `scripts/google-auth-setup-new.js` (versão atualizada com servidor local)
 
 ### DVR Intelbras
 - Conexão via API HTTP nativa
