@@ -10,7 +10,7 @@ const poolConfig = {
     database: process.env.PGDATABASE,
     user: process.env.PGUSER,
     password: process.env.PGPASSWORD,
-    ssl: {
+    ssl: process.env.DATABASE_URL?.includes('sslmode=disable') ? false : {
         rejectUnauthorized: false
     },
     max: 20, // Máximo de conexões no pool
